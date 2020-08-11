@@ -12,16 +12,34 @@ namespace ModDiff
 {
     public static class HarmonyPatches
     {
+        private static bool ScribeMetaHeaderUtility_VersionsMatch()
+        {
+            var method = typeof(ScribeMetaHeaderUtility).GetMethod("VersionsMatch", BindingFlags.NonPublic | BindingFlags.Static);
+            return (bool)method.Invoke(null, Array.Empty<object>());
+        }
+
         private static bool MismatchDialogPrefix(Action confirmedAction, ref bool __result)
         {
-            __result = ScribeMetaHeaderUtility_Patch.TryCreateDialogsForVersionMismatchWarnings(confirmedAction);
+            if (!BackCompatibility.IsSaveCompatibleWith(ScribeMetaHeaderUtility.loadedGameVersion) && !/*ScribeMetaHeaderUtility.*/ScribeMetaHeaderUtility_VersionsMatch())
+            {
+                return true;
+            }
+
+            if (!ScribeMetaHeaderUtility_Patch.LoadedModsMatchesActiveMods())
+            {
+                ScribeMetaHeaderUtility_Patch.CreateModDiffDialog(confirmedAction);
+                __result = true;
+            } else
+            {
+                __result = false;
+            }
+
             return false;
         }
     }
 
     public static class ScribeMetaHeaderUtility_Patch
     {
-
         private static bool ScribeMetaHeaderUtility_VersionsMatch()
         {
             var method = typeof(ScribeMetaHeaderUtility).GetMethod("VersionsMatch", BindingFlags.NonPublic | BindingFlags.Static);
@@ -62,7 +80,7 @@ namespace ModDiff
             return false;
         }
 
-        private static void CreateModDiffDialog(Action confirmedAction)
+        public static void CreateModDiffDialog(Action confirmedAction)
         {
             var runningMods = LoadedModManager.RunningMods.Select(mod => new ModInfo { packageId = mod.PackageId, name = mod.Name }).ToArray();
             var saveMods = Enumerable.Zip(ScribeMetaHeaderUtility.loadedModIdsList, ScribeMetaHeaderUtility.loadedModNamesList, (modId, modMame) => new ModInfo { packageId = modId, name = modMame }).ToArray();
