@@ -1,4 +1,7 @@
-﻿using Cassowary;
+﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
+using Cassowary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +13,12 @@ namespace ModDiff.GuiMinilib
 {
     public class CElement
     {
-        private static int lastId = 0;
+        public static int nextId = 0;
 
         public int id { get; }
         public CElement()
         {
-            id = lastId++;
+            id = nextId++;
 
             string variableNameBase = $"{GetType().Name}_{id}_";
 
@@ -25,20 +28,33 @@ namespace ModDiff.GuiMinilib
             top = new ClVariable(variableNameBase + "T");
             right = new ClVariable(variableNameBase + "R");
             bottom = new ClVariable(variableNameBase + "B");
-            centerX = new ClVariable(variableNameBase + "cX");
-            centerY = new ClVariable(variableNameBase + "cY");
+
         }
 
         public virtual ClSimplexSolver solver { get { return parent?.solver; } }
 
         public virtual void UpdateLayoutConstraints(ClSimplexSolver solver)
         {
+            /*
             solver.AddConstraint(left, width, right, centerX,
                 (l, w, r, c) => l + w == r && c == (l + r) / 2
                 );
             solver.AddConstraint(top, height, bottom, centerY,
                 (t, h, b, c) => t + h == b && c == (t + b) / 2
                 );
+                */
+
+            solver.AddConstraint(new ClLinearEquation(right, Cl.Plus(left, new ClLinearExpression(width))));
+            solver.AddConstraint(new ClLinearEquation(bottom, Cl.Plus(top, new ClLinearExpression(height))));
+            if (centerX != null)
+            {
+                solver.AddConstraint(new ClLinearEquation(centerX, Cl.Divide(Cl.Plus(left, new ClLinearExpression(right)), new ClLinearExpression(2))));
+            }
+            if (centerY != null)
+            {
+                solver.AddConstraint(new ClLinearEquation(centerY, Cl.Divide(Cl.Plus(top, new ClLinearExpression(bottom)), new ClLinearExpression(2))));
+            }
+
 
             foreach (var constraint in constraints)
             {
@@ -51,6 +67,18 @@ namespace ModDiff.GuiMinilib
             }            
         }
 
+        public virtual void PostConstraintsUpdate() {
+            foreach (var element in elements)
+            {
+                element.PostConstraintsUpdate();
+            }
+        }
+        public virtual void UpdateLayout() {
+            foreach (var element in elements)
+            {
+                element.UpdateLayout();
+            }
+        }
         public virtual void PostLayoutUpdate()
         {
             bounds = new Rect((float)left.Value, (float)top.Value, (float)width.Value, (float)height.Value);
@@ -60,6 +88,7 @@ namespace ModDiff.GuiMinilib
                 element.PostLayoutUpdate();
             }
         }
+
 
         public List<CElement> elements = new List<CElement>();
         public T AddElement<T>(T element) where T: CElement
@@ -84,8 +113,33 @@ namespace ModDiff.GuiMinilib
         public ClVariable top;
         public ClVariable right;
         public ClVariable bottom;
-        public ClVariable centerX;
-        public ClVariable centerY;
+
+        // non-esential variables
+        private ClVariable centerX_;
+        private ClVariable centerY_;
+
+        public ClVariable centerX {
+            get
+            {
+                if (centerX_ == null)
+                {
+                    string variableNameBase = $"{GetType().Name}_{id}_";
+                    centerX_ = new ClVariable(variableNameBase + "cX");
+                }
+                return centerX_;
+            }
+        }
+        public ClVariable centerY
+        {
+            get {
+                if (centerY_ == null)
+                {
+                    string variableNameBase = $"{GetType().Name}_{id}_";
+                    centerY_ = new ClVariable(variableNameBase + "cY");
+                }
+                return centerY_;
+            }
+        }
 
         public Rect bounds { get; private set; }
 

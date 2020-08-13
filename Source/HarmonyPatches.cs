@@ -1,4 +1,7 @@
-﻿using RimWorld;
+﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,16 +51,10 @@ namespace ModDiff
             var runningMods = LoadedModManager.RunningMods.Select(mod => new ModInfo { packageId = mod.PackageId, name = mod.Name }).ToArray();
             var saveMods = Enumerable.Zip(ScribeMetaHeaderUtility.loadedModIdsList, ScribeMetaHeaderUtility.loadedModNamesList, (modId, modMame) => new ModInfo { packageId = modId, name = modMame }).ToArray();
 
-            //try
-            //{
-                var diffWindow = new ModsDiffWindow(saveMods, runningMods, confirmedAction);
-                Find.WindowStack.Add(diffWindow);
-            //}
-            //catch (Exception e)
-            //{
-            //    Log.Error(e.GetType().Name);
-            //    Log.Error(e.ToString());
-            //}
+
+            var diffWindow = new ModsDiffWindow(saveMods, runningMods, confirmedAction);
+            Find.WindowStack.Add(diffWindow);
+
         }
 
         public static bool LoadedModsMatchesActiveMods()

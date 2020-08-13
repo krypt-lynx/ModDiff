@@ -1,4 +1,7 @@
-﻿using System;
+﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +12,7 @@ using Diff;
 using RimWorld;
 using ModDiff.GuiMinilib;
 using Cassowary;
+using System.Diagnostics;
 
 namespace ModDiff
 {
@@ -69,7 +73,13 @@ namespace ModDiff
 
             initSize = new Vector2(Math.Max(460, cellSize.x * 2 + markerWidth + vSpace * 2 + Margin * 2), 800);
 
+            var timer = new Stopwatch();
+            timer.Start();
             ConstructGui(confirmedAction);
+            timer.Stop();
+            Log.Message($"gui init in: {timer.Elapsed}");
+
+            Log.Message($"Elements created: {CElement.nextId}");
 
         }
 
@@ -115,15 +125,11 @@ namespace ModDiff
 
             // root constraints
             // horizontal
-            gui.solver.AddConstraint(gui.left, gui.right, titleLabel.left, titleLabel.right,
-                (l, r, tl, tr) => l == tl && r == tr);
-            gui.solver.AddConstraint(gui.left, gui.right, disclaimerLabel.left, disclaimerLabel.right,
-                (l, r, dl, dr) => l == dl && r == dr);
-            gui.solver.AddConstraint(gui.left, gui.right, diffList.left, diffList.right,
-                (l, r, ll, lr) => l == ll && r == lr);
-            gui.solver.AddConstraint(gui.left, gui.right, buttonPanel.left, buttonPanel.right,
-                (l, r, bl, br) => l == bl && r == br);
-
+            gui.EmbedW(titleLabel);
+            gui.EmbedW(disclaimerLabel);
+            gui.EmbedW(diffList);
+            gui.EmbedW(buttonPanel);
+            
             // vertical 
             gui.solver.AddConstraint(gui.top, titleLabel.top, titleLabel.height, titleLabel.bottom, disclaimerLabel.top, disclaimerLabel.height,
                 (t, tt, th, tb, dt, dh) => t == tt && th == 42 && tb == dt && dh == 50);
@@ -142,12 +148,9 @@ namespace ModDiff
                 (b, r, c) => b == r && r == c);
 
             // vertical 
-            gui.solver.AddConstraint(
-                buttonPanel.top, buttonPanel.bottom,
-                backButton.top, backButton.bottom,
-                reloadButton.top, reloadButton.bottom,
-                continueButton.top, continueButton.bottom,
-                (t, b, bt, bb, rt, rb, ct, cb) => t == bt && t == rt && t == ct && b == bb && b == rb && b == cb);
+            buttonPanel.EmbedH(backButton);
+            buttonPanel.EmbedH(reloadButton);
+            buttonPanel.EmbedH(continueButton);
 
             ConstructDiffList(diffList);
 
@@ -169,7 +172,7 @@ namespace ModDiff
                     {
                         Do = bounds => Widgets.DrawAltRect(bounds)
                     });
-                    row.Embed(bg, EdgeInsets.Zero);
+                    row.Embed(bg);
                 }
 
                 // left
@@ -194,15 +197,12 @@ namespace ModDiff
                     rCell = row.AddElement(new CElement());
                 }
 
-
-                row.solver.AddConstraint(row.left, row.right, lCell.left, lCell.right, rCell.left, rCell.right,
-                    (l, r, ll, rl, lr, rr) => l == ll && rl == lr && rr == r);
+                row.EmbedW(lCell, rCell);
                 row.solver.AddConstraint(lCell.width, rCell.width, (a, b) => a == b);
-                row.EmbedH(lCell, EdgeInsets.Zero);
-                row.EmbedH(rCell, EdgeInsets.Zero);
-
-                var ch = cellSize.y;
-                row.solver.AddConstraint(row.height, h => h == ch);
+                row.EmbedH(lCell);
+                row.EmbedH(rCell);
+                
+                row.solver.AddConstraint(row.height, h => h == cellSize.y);
 
                 i++;
             }
@@ -219,11 +219,10 @@ namespace ModDiff
                 Title = title
             });
 
-            cell.solver.AddConstraint(cell.left, cell.right, icon.left, icon.right, text.left, text.right,
-                (l, r, il, ir, tl, tr) => l == il && ir == tl && r == tr);
+            cell.EmbedW(icon, text);
             cell.solver.AddConstraint(icon.width, w => w == 16);
-            cell.EmbedH(icon, EdgeInsets.Zero);
-            cell.EmbedH(text, EdgeInsets.Zero);
+            cell.EmbedH(icon);
+            cell.EmbedH(text);
 
             return cell;
         }
