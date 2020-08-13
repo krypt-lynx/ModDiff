@@ -39,6 +39,9 @@
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Cassowary">
+      <HintPath>..\..\..\..\..\..\..\..\Repo\Cassowary.net\Cassowary\bin\Release\Cassowary.dll</HintPath>
+    </Reference>
     <Reference Include="HarmonyMod">
       <HintPath>..\..\RJWEggTest\1.1\Assemblies\HarmonyMod.dll</HintPath>
       <Private>False</Private>
@@ -66,12 +69,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Diff.cs" />
-    <Compile Include="HarmonyPatchBuilder.cs" />
+    <Compile Include="GuiMinilib\CButton.cs" />
+    <Compile Include="GuiMinilib\CElement.cs" />
+    <Compile Include="GuiMinilib\CGuiRoot.cs" />
+    <Compile Include="GuiMinilib\CLabel.cs" />
+    <Compile Include="GuiMinilib\CListingStandart.cs" />
+    <Compile Include="GuiMinilib\ConstraintTools.cs" />
+    <Compile Include="GuiMinilib\CWidget.cs" />
+    <Compile Include="GuiMinilib\TextTools.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="linq.cs" />
     <Compile Include="ModDiff.cs" />
     <Compile Include="ModsDiffWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -6,22 +6,56 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using Verse;
 
 namespace ModDiff
 {
+    public class Settings : ModSettings
+    {
+       
+        public bool ignoreSelf = false;
+
+        public override void ExposeData()
+        {
+            Scribe_Values.Look(ref ignoreSelf, "ignoreSelf", true);
+
+            base.ExposeData();
+        }
+    }
+
     public class ModDiff : Mod
     {
         public static string packageIdOfMine = "name.krypt.rimworld.moddiff";
+        public static Settings settings = null;
 
         public ModDiff(ModContentPack content) : base(content)
         {
+            settings = GetSettings<Settings>();
+
             Harmony harmony = new Harmony(packageIdOfMine);
 
-            harmony.Method(AccessTools.Method(typeof(ScribeMetaHeaderUtility), "TryCreateDialogsForVersionMismatchWarnings"))
-                .Prefix(new HarmonyMethod(typeof(HarmonyPatches), "MismatchDialogPrefix"))
-                .Patch();
+            harmony.Patch(AccessTools.Method(typeof(ScribeMetaHeaderUtility), "TryCreateDialogsForVersionMismatchWarnings"),
+                prefix: new HarmonyMethod(typeof(HarmonyPatches), "TryCreateDialogsForVersionMismatchWarnings_Prefix"));               
 
+        }
+
+        public override string SettingsCategory()
+        {
+            return "Mod Diff";
+        }
+
+        public override void DoSettingsWindowContents(Rect inRect)
+        {
+            base.DoSettingsWindowContents(inRect);
+
+            var options = new Listing_Standard();
+            options.maxOneColumn = true;
+
+            options.Begin(inRect);
+            options.CheckboxLabeled("Ignore self in modlist matching check", ref settings.ignoreSelf, "What could go wrong?");
+
+            options.End();
         }
 
 

@@ -7,6 +7,8 @@ using UnityEngine;
 using Verse;
 using Diff;
 using RimWorld;
+using ModDiff.GuiMinilib;
+using Cassowary;
 
 namespace ModDiff
 {
@@ -39,18 +41,13 @@ namespace ModDiff
 
     public class ModsDiffWindow : Window
     {
-        string message;
-        string cancelBtnText;
-        string reloadBtnText;
-        string continueBtnText;
-
         List<Change<ModInfo>> info;
         Action confirmedAction;
 
         const int markerWidth = 16;
         const int vSpace = 8;
 
-        private Vector2 scrollPosition = Vector2.zero;
+        CGuiRoot gui = null;
         Vector2 initSize = new Vector2(1000, 800);
         Vector2 cellSize;
 
@@ -64,6 +61,175 @@ namespace ModDiff
 
         public ModsDiffWindow(ModInfo[] saveMods, ModInfo[] runningMods, Action confirmedAction) : base()
         {
+            CalculateDiff(saveMods, runningMods, confirmedAction);
+
+            cellSize = new Vector2(
+                info.Max(x => Text.CalcSize(x.value.name).x + markerWidth),
+                Text.LineHeight);
+
+            initSize = new Vector2(Math.Max(460, cellSize.x * 2 + markerWidth + vSpace * 2 + Margin * 2), 800);
+
+            ConstructGui(confirmedAction);
+
+        }
+
+        private void ConstructGui(Action confirmedAction)
+        {
+            gui = new CGuiRoot();
+            var titleLabel = gui.AddElement(new CLabel
+            {
+                Font = GameFont.Medium,
+                Title = "ModsMismatchWarningTitle".Translate()
+            });
+            var disclaimerLabel = gui.AddElement(new CLabel
+            {
+                Title = "ModsMismatchWarningText".Translate().RawText.Split('\n').FirstOrDefault()
+            });
+            var diffList = gui.AddElement(new CListingStandart
+            {
+            });
+            var buttonPanel = gui.AddElement(new CElement());
+            var backButton = buttonPanel.AddElement(new CButton
+            {
+                Title = "GoBack".Translate(),
+                Action = (_) => Close(true)
+            });
+            var reloadButton = buttonPanel.AddElement(new CButton
+            {
+                Title = "ChangeLoadedMods".Translate(),
+                Action = (_) =>
+                {
+                    TrySetActiveMods();
+                    Close(true);
+                }
+            });
+            var continueButton = buttonPanel.AddElement(new CButton
+            {
+                Title = "LoadAnyway".Translate(),
+                Action = (_) =>
+                {
+                    confirmedAction?.Invoke();
+                    Close(true);
+                }
+            });
+
+            // root constraints
+            // horizontal
+            gui.solver.AddConstraint(gui.left, gui.right, titleLabel.left, titleLabel.right,
+                (l, r, tl, tr) => l == tl && r == tr);
+            gui.solver.AddConstraint(gui.left, gui.right, disclaimerLabel.left, disclaimerLabel.right,
+                (l, r, dl, dr) => l == dl && r == dr);
+            gui.solver.AddConstraint(gui.left, gui.right, diffList.left, diffList.right,
+                (l, r, ll, lr) => l == ll && r == lr);
+            gui.solver.AddConstraint(gui.left, gui.right, buttonPanel.left, buttonPanel.right,
+                (l, r, bl, br) => l == bl && r == br);
+
+            // vertical 
+            gui.solver.AddConstraint(gui.top, titleLabel.top, titleLabel.height, titleLabel.bottom, disclaimerLabel.top, disclaimerLabel.height,
+                (t, tt, th, tb, dt, dh) => t == tt && th == 42 && tb == dt && dh == 50);
+            gui.solver.AddConstraint(gui.bottom, disclaimerLabel.bottom, diffList.top, diffList.bottom, buttonPanel.top, buttonPanel.height, buttonPanel.bottom,
+                (b, db, lt, lb, bt, bh, bb) => db == lt && lb + 10 == bt && bh == 40 && b == bb);
+
+            // buttons panel constraints
+            // horizontal
+            gui.solver.AddConstraint(
+                buttonPanel.left, buttonPanel.right,
+                backButton.left, backButton.right,
+                reloadButton.left, reloadButton.right,
+                continueButton.left, continueButton.right,
+                (l, r, bl, br, rl, rr, cl, cr) => l == bl && br + 10 == rl && rr + 20 == cl && cr == r);
+            gui.solver.AddConstraint(backButton.width, reloadButton.width, continueButton.width,
+                (b, r, c) => b == r && r == c);
+
+            // vertical 
+            gui.solver.AddConstraint(
+                buttonPanel.top, buttonPanel.bottom,
+                backButton.top, backButton.bottom,
+                reloadButton.top, reloadButton.bottom,
+                continueButton.top, continueButton.bottom,
+                (t, b, bt, bb, rt, rb, ct, cb) => t == bt && t == rt && t == ct && b == bb && b == rb && b == cb);
+
+            ConstructDiffList(diffList);
+
+            gui.UpdateLayoutConstraintsIfNeeded();
+            // I'm not doing math for that, at least
+        }
+
+        private void ConstructDiffList(CListingStandart diffList)
+        {
+            int i = 0;
+
+            foreach (var line in info)
+            {
+                var row = diffList.NewRow();
+                CElement bg = null;
+                if (i % 2 == 0)
+                {
+                    bg = row.AddElement(new CWidget
+                    {
+                        Do = bounds => Widgets.DrawAltRect(bounds)
+                    });
+                    row.Embed(bg, EdgeInsets.Zero);
+                }
+
+                // left
+                CElement lCell;
+                if (line.change != ChangeType.Added)
+                {
+                    lCell = ConstructDiffCell(row, "-", line.change == ChangeType.Removed, line.value.name);
+                }
+                else
+                {
+                    lCell = row.AddElement(new CElement());
+                }
+
+                // right
+                CElement rCell;
+                if (line.change != ChangeType.Removed)
+                {
+                    rCell = ConstructDiffCell(row, "+", line.change == ChangeType.Added, line.value.name);
+                }
+                else
+                {
+                    rCell = row.AddElement(new CElement());
+                }
+
+
+                row.solver.AddConstraint(row.left, row.right, lCell.left, lCell.right, rCell.left, rCell.right,
+                    (l, r, ll, rl, lr, rr) => l == ll && rl == lr && rr == r);
+                row.solver.AddConstraint(lCell.width, rCell.width, (a, b) => a == b);
+                row.EmbedH(lCell, EdgeInsets.Zero);
+                row.EmbedH(rCell, EdgeInsets.Zero);
+
+                var ch = cellSize.y;
+                row.solver.AddConstraint(row.height, h => h == ch);
+
+                i++;
+            }
+        }
+
+        private CElement ConstructDiffCell(CElement parent, string symbol, bool showSymbol, string title)
+        {
+            var cell = parent.AddElement(new CElement());
+            var icon = cell.AddElement(
+                showSymbol ? new CLabel { Title = symbol } : new CElement()
+                );
+            var text = cell.AddElement(new CLabel
+            {
+                Title = title
+            });
+
+            cell.solver.AddConstraint(cell.left, cell.right, icon.left, icon.right, text.left, text.right,
+                (l, r, il, ir, tl, tr) => l == il && ir == tl && r == tr);
+            cell.solver.AddConstraint(icon.width, w => w == 16);
+            cell.EmbedH(icon, EdgeInsets.Zero);
+            cell.EmbedH(text, EdgeInsets.Zero);
+
+            return cell;
+        }
+
+        private void CalculateDiff(ModInfo[] saveMods, ModInfo[] runningMods, Action confirmedAction)
+        {
             Log.Message($"save mods: {saveMods.Length}");
             Log.Message($"running mods: {runningMods.Length}");
 
@@ -74,43 +240,48 @@ namespace ModDiff
             Log.Message($"diff length: {diff.changeSet.Count}");
 
             info = diff.changeSet;
-
-            cellSize = new Vector2(
-                info.Max(x => Text.CalcSize(x.value.name).x + markerWidth),
-                Text.LineHeight);
-
-            initTexts();
-
-            initSize = new Vector2(Math.Max(460, cellSize.x * 2 + markerWidth + vSpace * 2 + Margin * 2), 800);
         }
 
-        private void initTexts()
+        private static void TrySetActiveMods()
         {
-            this.optionalTitle = "ModsMismatchWarningTitle".Translate();
-            message = "ModsMismatchWarningText".Translate().RawText.Split('\n').FirstOrDefault();
-            cancelBtnText = "GoBack".Translate();
-            continueBtnText = "LoadAnyway".Translate();
-            reloadBtnText = "ChangeLoadedMods".Translate();
+            if (Current.ProgramState == ProgramState.Entry)
+            {
+                ModsConfig.SetActiveToList(ScribeMetaHeaderUtility.loadedModIdsList);
+            }
+            ModsConfig.SaveFromList(ScribeMetaHeaderUtility.loadedModIdsList);
+
+            IEnumerable<string> enumerable = Enumerable
+                .Range(0, ScribeMetaHeaderUtility.loadedModIdsList.Count)
+                .Where((int id) => ModLister.GetModWithIdentifier(ScribeMetaHeaderUtility.loadedModIdsList[id], false) == null)
+                .Select((int id) => ScribeMetaHeaderUtility.loadedModNamesList[id]);
+
+
+            if (enumerable.Any<string>())
+            {
+                Messages.Message(string.Format("{0}: {1}", "MissingMods".Translate(), enumerable.ToCommaList(false)), MessageTypeDefOf.RejectInput, false);
+            }
+            else
+            {
+                ModsConfig.RestartFromChangedMods();
+            }
         }
 
-        Listing_Standard diffList = new Listing_Standard();
-        Rect innerRect;
+
         public override void DoWindowContents(Rect inRect)
         {
+            gui.InRect = inRect;
+            gui.DoElementContent();
+
+            /*
             var verticalSpacing = 2;
             var minLineWidth = cellSize.x * 2;
             var msgHeight = Text.CalcHeight(message, inRect.width);
             
             Widgets.Label(new Rect(inRect.xMin, inRect.yMin, inRect.xMax, msgHeight), message);
             var outerRect = Rect.MinMaxRect(inRect.xMin, inRect.yMin + msgHeight + 10, inRect.xMax, inRect.yMax - 40);
-            //var innerRect = new Rect(0, 0, Math.Max(inRect.width - 16, minLineWidth), Text.LineHeight * info.Count);
 
-            //Widgets.BeginScrollView(outerSize, ref scrollPosition, innerSize, true);
-
-            //var diffList = new Listing_Standard();
             diffList.verticalSpacing = verticalSpacing;
             diffList.BeginScrollView(outerRect, ref scrollPosition, ref innerRect);
-            //diffList.Begin(innerSize);
 
             var plusW = Text.CalcSize("+").x;
             var minusW = Text.CalcSize("-").x;
@@ -153,8 +324,8 @@ namespace ModDiff
 
             float slotSize = inRect.width / 3f;
             float btnWidth = slotSize - 10f;
-
-            if (Widgets.ButtonText(new Rect(slotSize * 2 + 10f, inRect.height - 35f, btnWidth, 35f), continueBtnText, true, true, true))
+            
+            if (Widgets.ButtonText(new Rect(slotSize * 2 + 10f, inRect.height - 35f, btnWidth, 35f), continueBtnText, doMouseoverSound: true))
             {
                 if (confirmedAction!= null)
                 {
@@ -163,11 +334,11 @@ namespace ModDiff
                 this.Close(true);
             }
             GUI.color = Color.white;
-            if (Widgets.ButtonText(new Rect(0f, inRect.height - 35f, btnWidth, 35f), cancelBtnText, true, true, true))
+            if (Widgets.ButtonText(new Rect(0f, inRect.height - 35f, btnWidth, 35f), cancelBtnText, doMouseoverSound: true))
             {             
                 this.Close(true);
             }
-            if (Widgets.ButtonText(new Rect(slotSize, inRect.height - 35f, btnWidth, 35f), reloadBtnText, true, true, true))
+            if (Widgets.ButtonText(new Rect(slotSize, inRect.height - 35f, btnWidth, 35f), reloadBtnText, doMouseoverSound: true))
             {
                 if (Current.ProgramState == ProgramState.Entry)
                 {
@@ -192,7 +363,9 @@ namespace ModDiff
 
                 this.Close(true);
             }
-            // Widgets.EndScrollView();
+            */
         }
+
+
     }
 }
