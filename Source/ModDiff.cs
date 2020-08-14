@@ -29,11 +29,12 @@ namespace ModDiff
 
     public class ModDiff : Mod
     {
-        public static string packageIdOfMine = "name.krypt.rimworld.moddiff";
+        public static string packageIdOfMine = null;
         public static Settings settings = null;
 
         public ModDiff(ModContentPack content) : base(content)
         {
+            packageIdOfMine = content.PackageId;
             settings = GetSettings<Settings>();
 
             Harmony harmony = new Harmony(packageIdOfMine);

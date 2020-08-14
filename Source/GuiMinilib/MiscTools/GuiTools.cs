@@ -23,13 +23,13 @@ namespace ModDiff.GuiMinilib
         {
             Text.Font = fonts.Pop();
         }
-        public static void UseFont(GameFont font, Action action)
+        public static void UsingFont(GameFont font, Action action)
         {
             FontPush(font);
             action();
             FontPop();
         }
-        public static T UseFont<T>(GameFont font, Func<T> func)
+        public static T UsingFont<T>(GameFont font, Func<T> func)
         {
             FontPush(font);
             T result = func();
@@ -39,24 +39,27 @@ namespace ModDiff.GuiMinilib
 
 
         static Stack<Color> colors = new Stack<Color>();
-        public static void ColorPush(Color color)
+        public static void ColorPush(Color? color)
         {
             colors.Push(GUI.color);
-            GUI.color = color;
+            if (color.HasValue)
+            {
+                GUI.color = color.Value;
+            }
         }
         public static void ColorPop()
         {
             GUI.color = colors.Pop();
         }
 
-        public static void UseColor(Color color, Action action)
+        public static void UsingColor(Color? color, Action action)
         {
             ColorPush(color);
             action();
             ColorPop();
         }
 
-        public static T UseColor<T>(Color color, Func<T> func)
+        public static T UsingColor<T>(Color? color, Func<T> func)
         {
             ColorPush(color);
             T result = func();

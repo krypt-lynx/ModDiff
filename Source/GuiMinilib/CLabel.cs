@@ -15,16 +15,22 @@ namespace ModDiff.GuiMinilib
     {
         public string Title;
         public GameFont Font = GameFont.Small;
+        public int lines_debug = 1;
+        internal Color? Color = null;
 
         public override Vector2 IntrinsicSize()
         {   
-            return GuiTools.UseFont(Font, () => Text.CalcSize(Title));
+            var result = GuiTools.UsingFont(Font, () => Text.CalcSize(Title));
+            result.y = result.y * lines_debug;
+            Log.Message($"intinsic size of {NamePrefix()} (\"{Title}\"): {result}");
+            return result;
         }
 
         public override void DoContent()
         {
-            GuiTools.UseFont(Font, () => {
-                Widgets.Label(bounds, Title);
+            GuiTools.UsingFont(Font, () =>
+            {
+                GuiTools.UsingColor(Color, () => Widgets.Label(bounds, Title));
             });
         }
     }

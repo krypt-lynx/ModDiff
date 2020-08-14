@@ -128,11 +128,25 @@ namespace ModDiff
             });
             var disclaimerLabel = gui.AddElement(new CLabel
             {
-                Title = "ModsMismatchWarningText".Translate().RawText.Split('\n').FirstOrDefault()
+                Title = "ModsMismatchWarningText".Translate().RawText.Split('\n').FirstOrDefault(),
+                lines_debug = 2
             });
-            var diffList = gui.AddElement(new CListingStandart
-            {
+
+            var headerPanel = gui.AddElement(new CElement());
+            var headerLeft = headerPanel.AddElement(new CLabel {
+                Font = GameFont.Small,
+                Color = new Color(1, 1, 1, 0.3f),
+                Title = "Savegame mods:"
             });
+            var headerRight = headerPanel.AddElement(new CLabel {
+                Font = GameFont.Small,
+                Color = new Color(1, 1, 1, 0.3f),
+                Title = "Running mods:"
+            });
+            var headerLine = gui.AddElement(new CWidget {
+                Do = bounds => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(bounds.x, bounds.y, bounds.width - 20))
+            });
+            var diffList = gui.AddElement(new CListingStandart());
             var buttonPanel = gui.AddElement(new CElement());
             var backButton = buttonPanel.AddElement(new CButton
             {
@@ -159,8 +173,11 @@ namespace ModDiff
             });
 
             // root constraints
-            gui.StackTop(true, true, (titleLabel, 42), (disclaimerLabel, 50), diffList, 10, (buttonPanel, 40));
-            
+            gui.StackTop(true, true, (titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 2, headerPanel, (headerLine, 1), 4, diffList, 10, (buttonPanel, 40));
+
+            headerPanel.StackLeft(true, true, 16+5, headerLeft, 16+5, (headerRight, headerLeft.width), 20);
+            headerLeft.solver.AddConstraint(headerLeft.height, headerLeft.intrinsicHeight, (a, b) => a == b);
+
             buttonPanel.StackLeft(true, true,
                 backButton, 10.0, (reloadButton, backButton.width), 20.0, (continueButton, backButton.width));
 
@@ -177,7 +194,7 @@ namespace ModDiff
             {
                 var row = diffList.NewRow();
                 CElement bg = null;
-                if (i % 2 == 0)
+                if (i % 2 == 1)
                 {
                     bg = row.AddElement(new CWidget
                     {
@@ -231,7 +248,7 @@ namespace ModDiff
                     Do = bounds =>
                     {
                         GUI.DrawTexture(bounds, style.bgTexture);
-                        GuiTools.UseColor(style.outlineColor, () =>
+                        GuiTools.UsingColor(style.outlineColor, () =>
                         {
                             GuiTools.Box(bounds, new EdgeInsets(2, 2, 2, 5));
                         });
