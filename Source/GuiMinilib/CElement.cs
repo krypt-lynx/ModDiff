@@ -8,52 +8,58 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Verse;
 
 namespace ModDiff.GuiMinilib
 {
     public class CElement
     {
         public static int nextId = 0;
+        public string NamePrefix()
+        {
+            return $"{GetType().Name}_{id}";
+        }
 
         public int id { get; }
         public CElement()
         {
             id = nextId++;
 
-            string variableNameBase = $"{GetType().Name}_{id}_";
+            string variableNameBase = NamePrefix();
 
-            width = new ClVariable(variableNameBase + "W");
-            height = new ClVariable(variableNameBase + "H");
-            left = new ClVariable(variableNameBase + "L");
-            top = new ClVariable(variableNameBase + "T");
-            right = new ClVariable(variableNameBase + "R");
-            bottom = new ClVariable(variableNameBase + "B");
+            left = new ClVariable(variableNameBase + "_L");
+            top = new ClVariable(variableNameBase + "_T");
+            right = new ClVariable(variableNameBase + "_R");
+            bottom = new ClVariable(variableNameBase + "_B");
 
+            width = new ClVariable(variableNameBase + "_W");
+            height = new ClVariable(variableNameBase + "_H");
         }
 
         public virtual ClSimplexSolver solver { get { return parent?.solver; } }
 
         public virtual void UpdateLayoutConstraints(ClSimplexSolver solver)
         {
-            /*
-            solver.AddConstraint(left, width, right, centerX,
-                (l, w, r, c) => l + w == r && c == (l + r) / 2
-                );
-            solver.AddConstraint(top, height, bottom, centerY,
-                (t, h, b, c) => t + h == b && c == (t + b) / 2
-                );
-                */
-
             solver.AddConstraint(new ClLinearEquation(right, Cl.Plus(left, new ClLinearExpression(width))));
             solver.AddConstraint(new ClLinearEquation(bottom, Cl.Plus(top, new ClLinearExpression(height))));
-            if (centerX != null)
+
+            if (centerX_ != null)
             {
                 solver.AddConstraint(new ClLinearEquation(centerX, Cl.Divide(Cl.Plus(left, new ClLinearExpression(right)), new ClLinearExpression(2))));
             }
-            if (centerY != null)
+            if (centerY_ != null)
             {
                 solver.AddConstraint(new ClLinearEquation(centerY, Cl.Divide(Cl.Plus(top, new ClLinearExpression(bottom)), new ClLinearExpression(2))));
             }
+
+            /*if (intrinsicHeight_ != null)
+            {
+                solver.AddConstraint(new ClEditConstraint(intrinsicHeight));
+            }
+            if (intrinsicWidth_ != null)
+            {
+                solver.AddConstraint(new ClEditConstraint(intrinsicWidth));
+            }*/
 
 
             foreach (var constraint in constraints)
@@ -66,7 +72,6 @@ namespace ModDiff.GuiMinilib
                 element.UpdateLayoutConstraints(solver);
             }            
         }
-
         public virtual void PostConstraintsUpdate() {
             foreach (var element in elements)
             {
@@ -74,11 +79,31 @@ namespace ModDiff.GuiMinilib
             }
         }
         public virtual void UpdateLayout() {
+            
+            if (intrinsicWidth_ != null || intrinsicHeight_ != null)
+            {
+                var intrinsicSize = this.IntrinsicSize();
+
+                if (intrinsicWidth_ != null)
+                {
+                    solver.BeginEdit(intrinsicWidth_)
+                        .SuggestValue(intrinsicWidth_, intrinsicSize.x)
+                        .EndEdit();
+
+                }
+                if (intrinsicHeight_ != null)
+                {
+                    solver.BeginEdit(intrinsicHeight_)
+                        .SuggestValue(intrinsicHeight_, intrinsicSize.y)
+                        .EndEdit();
+                }
+            }
             foreach (var element in elements)
             {
                 element.UpdateLayout();
             }
         }
+
         public virtual void PostLayoutUpdate()
         {
             bounds = new Rect((float)left.Value, (float)top.Value, (float)width.Value, (float)height.Value);
@@ -117,14 +142,16 @@ namespace ModDiff.GuiMinilib
         // non-esential variables
         private ClVariable centerX_;
         private ClVariable centerY_;
+        private ClVariable intrinsicWidth_;
+        private ClVariable intrinsicHeight_;
 
-        public ClVariable centerX {
+        public ClVariable centerX
+        {
             get
             {
                 if (centerX_ == null)
                 {
-                    string variableNameBase = $"{GetType().Name}_{id}_";
-                    centerX_ = new ClVariable(variableNameBase + "cX");
+                    centerX_ = new ClVariable(NamePrefix() + "_cX");
                 }
                 return centerX_;
             }
@@ -134,14 +161,40 @@ namespace ModDiff.GuiMinilib
             get {
                 if (centerY_ == null)
                 {
-                    string variableNameBase = $"{GetType().Name}_{id}_";
-                    centerY_ = new ClVariable(variableNameBase + "cY");
+                    centerY_ = new ClVariable(NamePrefix() + "_cY");
                 }
                 return centerY_;
             }
         }
+        public ClVariable intrinsicWidth
+        {
+            get
+            {
+                if (intrinsicWidth_ == null)
+                {
+
+                    intrinsicWidth_ = new ClVariable(NamePrefix() + "_iW");
+                    solver.AddStay(intrinsicWidth_);
+                }
+                return intrinsicWidth_;
+            }
+        }
+        public ClVariable intrinsicHeight
+        {
+            get
+            {
+                if (intrinsicHeight_ == null)
+                {
+                    intrinsicHeight_ = new ClVariable(NamePrefix() + "_iH");
+                    solver.AddStay(intrinsicHeight_);
+                }
+                return intrinsicHeight_;
+            }
+        }
 
         public Rect bounds { get; private set; }
+
+        public virtual Vector2 IntrinsicSize() { return Vector2.zero; }
 
         public void DoElementContent()
         {
@@ -154,9 +207,7 @@ namespace ModDiff.GuiMinilib
         }
 
         public virtual void DoContent() { }
-
-        public virtual Rect IntristicSize() { return Rect.zero; }
-
+        
         // todo: intristic size
     }
 }

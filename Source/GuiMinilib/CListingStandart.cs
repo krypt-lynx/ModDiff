@@ -12,49 +12,8 @@ using Verse;
 
 namespace ModDiff.GuiMinilib
 {
-/*
-    class CListingContentElement : CElement
-    {
-
-        public CListingContentElement(CListingStandart owner)
-        {
-            owner_ = new WeakReference(owner, false);
-        }
-
-        WeakReference owner_ = null;
-        public CListingStandart owner
-        {
-            get { return owner_?.IsAlive ?? false ? owner_.Target as CListingStandart : null; }
-        }
-
-        public override ClSimplexSolver solver
-        {
-            get
-            {
-                return owner?.solver;
-            }
-        }
-
-        public override void UpdateLayoutConstraints(ClSimplexSolver solver)
-        {
-            left.Value = 0;
-            top.Value = 0;
-            
-            // pinning region dimentions
-            solver.AddStay(left);
-            solver.AddStay(top);
-
-            base.UpdateLayoutConstraints(solver);
-        }
-    }
-    */
     public class CListingStandart : CElement
     {
-        public CListingStandart() : base()
-        {
-            //contentElement = new CListingContentElement(this);
-        }
-
         Listing_Standard listing = new Listing_Standard();
         Rect innerRect;
         Vector2 scrollPosition = Vector2.zero;
@@ -84,10 +43,9 @@ namespace ModDiff.GuiMinilib
                 row.InRect = new Rect(0, y, bounds.width - 20, float.NaN);
                 y += row.bounds.height;
             }
+
         }
-
-        //CElement contentElement;
-
+        
         public override void DoContent()
         {
             listing.BeginScrollView(bounds, ref scrollPosition, ref innerRect);
@@ -104,19 +62,7 @@ namespace ModDiff.GuiMinilib
         {
             var row = new CGuiRoot();
             rows.Add(row);
-            //var row = contentElement.AddElement(new CElement());
-            //contentElement.solver.AddConstraint(new ClLinearEquation(row.width, new ClLinearExpression(contentElement.width)));
-            /*
-            contentElement.EmbedW(row);
-            if (contentElement.elements.Count > 1)
-            {
-                contentElement.solver.AddConstraint(new ClLinearEquation(contentElement.elements[contentElement.elements.Count - 2].bottom,
-                    new ClLinearExpression(row.top)));
-            }
-            else
-            {
-                contentElement.solver.AddConstraint(new ClLinearEquation(contentElement.top, new ClLinearExpression(row.top)));
-            }*/
+
             return row;
         }
     }

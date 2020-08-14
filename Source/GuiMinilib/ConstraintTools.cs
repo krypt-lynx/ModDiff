@@ -41,20 +41,7 @@ namespace ModDiff.GuiMinilib
             parent.solver.AddConstraint(new ClLinearEquation(parent.bottom, new ClLinearExpression(child.bottom)));
             parent.solver.AddConstraint(new ClLinearEquation(parent.left, new ClLinearExpression(child.left)));
         }
-
-        /*
-        public static void EmbedW(this CElement parent, CElement child)
-        {
-            parent.solver.AddConstraint(new ClLinearEquation(parent.left, new ClLinearExpression(child.left)));
-            parent.solver.AddConstraint(new ClLinearEquation(parent.right, new ClLinearExpression(child.right)));
-        }*/
-        /*
-        public static void EmbedH(this CElement parent, CElement child)
-        {
-            parent.solver.AddConstraint(new ClLinearEquation(parent.top, new ClLinearExpression(child.top)));
-            parent.solver.AddConstraint(new ClLinearEquation(parent.bottom, new ClLinearExpression(child.bottom)));
-        }*/
-
+        
         public static void Embed(this CElement parent, CElement child, EdgeInsets insets)
         {
             parent.solver.AddConstraint(new ClLinearEquation(parent.top, Cl.Minus(child.top, insets.top)));

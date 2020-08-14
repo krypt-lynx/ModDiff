@@ -41,6 +41,7 @@ namespace ModDiff.GuiMinilib
         public CGuiRoot() : base()
         {
             solver_ = new ClSimplexSolver();
+            solver_.DebugName = NamePrefix() + "_solver";
             solver.AutoSolve = false;
         }
 
@@ -81,25 +82,13 @@ namespace ModDiff.GuiMinilib
                 return;
             }
 
-            //var timer = new Stopwatch();
-            //timer.Start();
             UpdateLayoutConstraints(solver);
-            //timer.Stop();
-            //Log.Message($"generated in: {timer.Elapsed}");
-
-            //timer.Reset();
-            //timer.Start();
             solver.Solve();
-            //timer.Stop();
-            //Log.Message($"solved in: {timer.Elapsed}");
-            //Log.Message($"solver: {solver}");
         }
 
 
         public override void UpdateLayoutConstraints(ClSimplexSolver solver)
         {
-            // pinning region dimentions
-
             left.Value = InRect.xMin;
             solver.AddStay(left);
 
@@ -114,8 +103,7 @@ namespace ModDiff.GuiMinilib
                 bottom.Value = InRect.yMax;
                 solver.AddStay(bottom);
             }
-
-
+            
             base.UpdateLayoutConstraints(solver);
         }
 
@@ -124,7 +112,7 @@ namespace ModDiff.GuiMinilib
 
             needsUpdateLayout = false;
 
-            UpdateLayoutConstraintsIfNeeded(); // to do: fix unnesessary edit then UpdateLayoutConstraints actually do its thing
+            UpdateLayoutConstraintsIfNeeded(); // todo: fix unnesessary edit then UpdateLayoutConstraints actually do its thing
             var edit = solver
                  .BeginEdit(left, right, top, bottom)
                  .SuggestValue(left, InRect.xMin)
@@ -135,9 +123,11 @@ namespace ModDiff.GuiMinilib
             {
                 edit.SuggestValue(bottom, InRect.yMax);
             }
+
             edit.EndEdit();
 
             base.UpdateLayout();
+
         }
 
         public override void DoContent()

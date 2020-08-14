@@ -39,8 +39,9 @@
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Cassowary">
-      <HintPath>..\..\..\..\..\..\..\..\Repo\Cassowary.net\Cassowary\bin\Release\Cassowary.dll</HintPath>
+    <Reference Include="Cassowary, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\Repo\Cassowary.net\Cassowary\bin\Debug\Cassowary.dll</HintPath>
     </Reference>
     <Reference Include="HarmonyMod">
       <HintPath>..\..\RJWEggTest\1.1\Assemblies\HarmonyMod.dll</HintPath>

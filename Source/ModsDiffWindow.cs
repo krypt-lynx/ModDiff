@@ -71,16 +71,16 @@ namespace ModDiff
                 info.Max(x => Text.CalcSize(x.value.name).x + markerWidth),
                 Text.LineHeight);
 
-            initSize = new Vector2(Math.Max(460, cellSize.x * 2 + markerWidth + vSpace * 2 + Margin * 2), 800);
+            initSize = new Vector2(Math.Max(460, cellSize.x * 2 + markerWidth + vSpace * 2 + Margin * 2 + 20), 800);
 
+            var lastNext = CElement.nextId;
             var timer = new Stopwatch();
             timer.Start();
             ConstructGui(confirmedAction);
             timer.Stop();
             Log.Message($"gui init in: {timer.Elapsed}");
 
-            Log.Message($"Elements created: {CElement.nextId}");
-
+            Log.Message($"Elements created: {CElement.nextId - lastNext}");
         }
 
         private void ConstructGui(Action confirmedAction)
@@ -208,20 +208,37 @@ namespace ModDiff
             }
         }
 
-        private CElement ConstructDiffCell(CElement parent, string symbol, bool showSymbol, string title)
+        private CElement ConstructDiffCell(CElement parent, string symbol, bool modified, string title)
         {
             var cell = parent.AddElement(new CElement());
-            var icon = cell.AddElement(
-                showSymbol ? new CLabel { Title = symbol } : new CElement()
-                );
+
+            if (modified)
+            {
+                var highlight = cell.AddElement(new CWidget
+                {
+                    Do = bounds => Widgets.DrawAltRect(bounds)
+                });
+                cell.Embed(highlight);
+            }
+
+            var iconSlot = cell.AddElement(new CElement());
+            if (modified)
+            {
+                var icon = iconSlot.AddElement(new CLabel { Title = symbol });
+                iconSlot.EmbedH(icon);
+                //iconSlot.EmbedW(icon);       
+                iconSlot.solver.AddConstraint(iconSlot.centerX, icon.centerX, (a, b) => a == b);
+                icon.solver.AddConstraint(icon.width, icon.intrinsicWidth, (a, b) => a == b);
+            }
+
             var text = cell.AddElement(new CLabel
             {
                 Title = title
             });
 
-            cell.EmbedW(icon, text);
-            cell.solver.AddConstraint(icon.width, w => w == 16);
-            cell.EmbedH(icon);
+            cell.EmbedW(iconSlot, text);
+            cell.solver.AddConstraint(iconSlot.width, w => w == 16);
+            cell.EmbedH(iconSlot);
             cell.EmbedH(text);
 
             return cell;
@@ -229,14 +246,14 @@ namespace ModDiff
 
         private void CalculateDiff(ModInfo[] saveMods, ModInfo[] runningMods, Action confirmedAction)
         {
-            Log.Message($"save mods: {saveMods.Length}");
-            Log.Message($"running mods: {runningMods.Length}");
+            //Log.Message($"save mods: {saveMods.Length}");
+            //Log.Message($"running mods: {runningMods.Length}");
 
             this.confirmedAction = confirmedAction;
             var diff = new Myers<ModInfo>(saveMods, runningMods);
             diff.Compute();
 
-            Log.Message($"diff length: {diff.changeSet.Count}");
+            //Log.Message($"diff length: {diff.changeSet.Count}");
 
             info = diff.changeSet;
         }
@@ -270,99 +287,6 @@ namespace ModDiff
         {
             gui.InRect = inRect;
             gui.DoElementContent();
-
-            /*
-            var verticalSpacing = 2;
-            var minLineWidth = cellSize.x * 2;
-            var msgHeight = Text.CalcHeight(message, inRect.width);
-            
-            Widgets.Label(new Rect(inRect.xMin, inRect.yMin, inRect.xMax, msgHeight), message);
-            var outerRect = Rect.MinMaxRect(inRect.xMin, inRect.yMin + msgHeight + 10, inRect.xMax, inRect.yMax - 40);
-
-            diffList.verticalSpacing = verticalSpacing;
-            diffList.BeginScrollView(outerRect, ref scrollPosition, ref innerRect);
-
-            var plusW = Text.CalcSize("+").x;
-            var minusW = Text.CalcSize("-").x;
-
-            int i = 0;
-            foreach (var line in info)
-            {
-                var lineRect = diffList.GetRect(cellSize.y);
-
-                if (i % 2 == 0)
-                {
-                    Widgets.DrawAltRect(lineRect);
-                }
-
-                // left
-                if (line.change != ChangeType.Added)
-                {
-                    if (line.change == ChangeType.Removed)
-                    {
-                        Widgets.Label(new Rect((markerWidth - minusW) /2, lineRect.yMin, lineRect.width / 2, lineRect.height), "-");
-                    }
-                    Widgets.Label(new Rect(markerWidth, lineRect.yMin, lineRect.width / 2, lineRect.height), line.value.name);
-                }
-
-                // right
-                if (line.change != ChangeType.Removed)
-                {
-                    if (line.change == ChangeType.Added)
-                    {
-                        Widgets.Label(new Rect((markerWidth - plusW) / 2 + lineRect.width / 2, lineRect.yMin, lineRect.width / 2, lineRect.height), "+");
-                    }
-                    Widgets.Label(new Rect(markerWidth + lineRect.width / 2, lineRect.yMin, lineRect.width / 2, lineRect.height), line.value.name);
-                }
-                // diffList.Label(line);
-                i++;
-            }
-            //diffList.End();
-            diffList.EndScrollView(ref innerRect);
-
-
-            float slotSize = inRect.width / 3f;
-            float btnWidth = slotSize - 10f;
-            
-            if (Widgets.ButtonText(new Rect(slotSize * 2 + 10f, inRect.height - 35f, btnWidth, 35f), continueBtnText, doMouseoverSound: true))
-            {
-                if (confirmedAction!= null)
-                {
-                    confirmedAction();
-                }
-                this.Close(true);
-            }
-            GUI.color = Color.white;
-            if (Widgets.ButtonText(new Rect(0f, inRect.height - 35f, btnWidth, 35f), cancelBtnText, doMouseoverSound: true))
-            {             
-                this.Close(true);
-            }
-            if (Widgets.ButtonText(new Rect(slotSize, inRect.height - 35f, btnWidth, 35f), reloadBtnText, doMouseoverSound: true))
-            {
-                if (Current.ProgramState == ProgramState.Entry)
-                {
-                    ModsConfig.SetActiveToList(ScribeMetaHeaderUtility.loadedModIdsList);
-                }
-                ModsConfig.SaveFromList(ScribeMetaHeaderUtility.loadedModIdsList);
-
-                IEnumerable<string> enumerable = Enumerable
-                    .Range(0, ScribeMetaHeaderUtility.loadedModIdsList.Count)
-                    .Where((int id) => ModLister.GetModWithIdentifier(ScribeMetaHeaderUtility.loadedModIdsList[id], false) == null)
-                    .Select((int id) => ScribeMetaHeaderUtility.loadedModNamesList[id]);
-
-
-                if (enumerable.Any<string>())
-                {
-                    Messages.Message(string.Format("{0}: {1}", "MissingMods".Translate(), enumerable.ToCommaList(false)), MessageTypeDefOf.RejectInput, false);                   
-                }
-                else
-                {
-                    ModsConfig.RestartFromChangedMods();
-                }
-
-                this.Close(true);
-            }
-            */
         }
 
 

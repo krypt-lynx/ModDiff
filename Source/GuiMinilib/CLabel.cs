@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using Verse;
 
 namespace ModDiff.GuiMinilib
@@ -14,6 +15,15 @@ namespace ModDiff.GuiMinilib
     {
         public string Title;
         public GameFont Font = GameFont.Small;
+
+        public override Vector2 IntrinsicSize()
+        {
+            TextTools.FontPush(Font);
+            var size = Text.CalcSize(Title);
+            TextTools.FontPop();
+            Log.Message($"intrinsicSize of {id}: {size}");
+            return size;
+        }
 
         public override void DoContent()
         {
