@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cassowary;
+using Verse;
 
 namespace ModDiff.GuiMinilib
 {
@@ -30,6 +31,16 @@ namespace ModDiff.GuiMinilib
 
         public double top, right, bottom, left;
 
+    }
+
+    struct AnchorMapper
+    {
+        public Func<CElement, ClVariable> Leading;
+        public Func<CElement, ClVariable> Trailing;
+        public Func<CElement, ClVariable> SideA;
+        public Func<CElement, ClVariable> SideB;
+        public Func<CElement, ClVariable> Size;
+        public double multipler;
     }
 
     public static class ConstraintTools
@@ -62,34 +73,114 @@ namespace ModDiff.GuiMinilib
             parent.solver.AddConstraint(new ClLinearEquation(parent.bottom, Cl.Plus(child.bottom, insets.bottom)));
         }
 
-
-        public static void EmbedW(this CElement parent, params CElement[] children)
+        public static void StackLeft(this CElement parent, bool constrainSides = true, bool constrainEnd = true, params object[] items)
         {
-            ClVariable right = parent.left;
-            foreach (var child in children)
+            var mapper = new AnchorMapper
             {
-                parent.solver.AddConstraint(new ClLinearEquation(right, new ClLinearExpression(child.left)));
-                right = child.right;
-            }
-
-            if (right != parent.left)
-            {
-                parent.solver.AddConstraint(new ClLinearEquation(right, new ClLinearExpression(parent.right)));
-            }            
+                Leading = x => x.left,
+                Trailing = x => x.right,
+                SideA = x => x.top,
+                SideB = x => x.bottom,
+                Size = x => x.width,
+                multipler = 1,
+            };
+            Stack(parent, mapper, items, constrainEnd, constrainSides);
         }
 
-        public static void EmbedH(this CElement parent, params CElement[] children)
+        public static void StackTop(this CElement parent, bool constrainSides, bool constrainEnd, params object[] items)
         {
-            ClVariable bottom = parent.top;
-            foreach (var child in children)
+            var mapper = new AnchorMapper
             {
-                parent.solver.AddConstraint(new ClLinearEquation(bottom, new ClLinearExpression(child.top)));
-                bottom = child.bottom;
+                Leading = x => x.top,
+                Trailing = x => x.bottom,
+                SideA = x => x.left,
+                SideB = x => x.right,
+                Size = x => x.height,
+                multipler = 1,
+            };
+            Stack(parent, mapper, items, constrainEnd, constrainSides);
+        }
+
+        public static void StackRight(this CElement parent, bool constrainSides, bool constrainEnd, params object[] items)
+        {
+            var mapper = new AnchorMapper
+            {
+                Leading = x => x.right,
+                Trailing = x => x.left,
+                SideA = x => x.bottom,
+                SideB = x => x.top,
+                Size = x => x.width,
+                multipler = -1,
+            };
+            Stack(parent, mapper, items, constrainEnd, constrainSides);
+        }
+
+        public static void StackBottom(this CElement parent, bool constrainSides, bool constrainEnd, params object[] items)
+        {
+            var mapper = new AnchorMapper
+            {
+                Leading = x => x.bottom,
+                Trailing = x => x.top,
+                SideA = x => x.right,
+                SideB = x => x.left,
+                Size = x => x.height,
+                multipler = -1,
+            };
+            Stack(parent, mapper, items, constrainEnd, constrainSides);
+        }
+
+        private static void Stack(CElement parent, AnchorMapper mapper, IEnumerable<object> items, bool constrainEnd, bool constrainSides)
+        {
+            ClLinearExpression trailing = new ClLinearExpression(mapper.Leading(parent));
+            foreach (var item in items)
+            {
+                CElement element = null;
+                double? size = null;
+                
+                if (item is CElement)
+                {
+                    element = item as CElement;
+                    size = null;
+                }
+                else
+                {
+                    var type = item.GetType();
+                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ValueTuple<,>))
+                    {
+                        var maybeElement = type.GetField("Item1").GetValue(item);
+                        var maybeSize = type.GetField("Item2").GetValue(item);
+
+                        element = maybeElement as CElement;
+                        size = Convert.ToDouble(maybeSize); // todo: Exception handling
+                    }
+                }
+
+                if (element != null)
+                {
+                    var child = element;
+                    parent.solver.AddConstraint(new ClLinearEquation(trailing, new ClLinearExpression(mapper.Leading(child))));
+                    trailing = new ClLinearExpression(mapper.Trailing(child));
+
+                    if (size.HasValue)
+                    {
+                        parent.solver.AddConstraint(new ClLinearEquation(mapper.Size(child), new ClLinearExpression(size.Value)));
+                    }
+                    if (constrainSides)
+                    {
+                        parent.solver.AddConstraint(mapper.SideA(parent), mapper.SideB(parent), mapper.SideA(child), mapper.SideB(child),
+                            (pa, pb, ca, cb) => pa == ca && pb == cb);
+                    }
+                }
+                else
+                {
+                    double space = Convert.ToDouble(item); // todo: Exception handling
+                    trailing = Cl.Plus(trailing, new ClLinearExpression(space * mapper.multipler));
+                }
             }
 
-            if (bottom != parent.top)
+            if (constrainEnd)
             {
-                parent.solver.AddConstraint(new ClLinearEquation(bottom, new ClLinearExpression(parent.bottom)));
+                parent.solver.AddConstraint(new ClLinearEquation(trailing, new ClLinearExpression(mapper.Trailing(parent))));
             }
         }
     }

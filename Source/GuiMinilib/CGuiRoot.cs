@@ -36,8 +36,7 @@ namespace ModDiff.GuiMinilib
                 return solver_;
             }
         }
-
-        
+                
         public CGuiRoot() : base()
         {
             solver_ = new ClSimplexSolver();
@@ -45,7 +44,7 @@ namespace ModDiff.GuiMinilib
             solver.AutoSolve = false;
         }
 
-        bool needsUpdateLayoutConstraints = true;
+        protected bool needsUpdateLayoutConstraints = true;
         public void UpdateLayoutConstraintsIfNeeded()
         {
             if (needsUpdateLayoutConstraints)
@@ -53,10 +52,13 @@ namespace ModDiff.GuiMinilib
                 UpdateLayoutConstraints();
 
                 PostConstraintsUpdate();
+
+                needsUpdateLayout = false;
+                PostLayoutUpdate();
             }
         }
 
-        bool needsUpdateLayout = true;
+        protected bool needsUpdateLayout = true;
         public void UpdateLayoutIfNeeded()
         {
             if (needsUpdateLayout)
@@ -110,9 +112,10 @@ namespace ModDiff.GuiMinilib
         public override void UpdateLayout()
         {
 
+
             needsUpdateLayout = false;
 
-            UpdateLayoutConstraintsIfNeeded(); // todo: fix unnesessary edit then UpdateLayoutConstraints actually do its thing
+            UpdateLayoutConstraintsIfNeeded();
             var edit = solver
                  .BeginEdit(left, right, top, bottom)
                  .SuggestValue(left, InRect.xMin)

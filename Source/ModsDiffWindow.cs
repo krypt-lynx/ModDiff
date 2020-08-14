@@ -124,33 +124,21 @@ namespace ModDiff
             });
 
             // root constraints
-            // horizontal
-            gui.EmbedW(titleLabel);
-            gui.EmbedW(disclaimerLabel);
-            gui.EmbedW(diffList);
-            gui.EmbedW(buttonPanel);
+            gui.StackTop(true, true, (titleLabel, 42), (disclaimerLabel, 50), diffList, 10, (buttonPanel, 40));
             
-            // vertical 
-            gui.solver.AddConstraint(gui.top, titleLabel.top, titleLabel.height, titleLabel.bottom, disclaimerLabel.top, disclaimerLabel.height,
-                (t, tt, th, tb, dt, dh) => t == tt && th == 42 && tb == dt && dh == 50);
-            gui.solver.AddConstraint(gui.bottom, disclaimerLabel.bottom, diffList.top, diffList.bottom, buttonPanel.top, buttonPanel.height, buttonPanel.bottom,
-                (b, db, lt, lb, bt, bh, bb) => db == lt && lb + 10 == bt && bh == 40 && b == bb);
-
+      
             // buttons panel constraints
             // horizontal
-            gui.solver.AddConstraint(
+            /*gui.solver.AddConstraint(
                 buttonPanel.left, buttonPanel.right,
                 backButton.left, backButton.right,
                 reloadButton.left, reloadButton.right,
                 continueButton.left, continueButton.right,
-                (l, r, bl, br, rl, rr, cl, cr) => l == bl && br + 10 == rl && rr + 20 == cl && cr == r);
+                (l, r, bl, br, rl, rr, cl, cr) => l == bl && br + 10 == rl && rr + 20 == cl && cr == r);*/
             gui.solver.AddConstraint(backButton.width, reloadButton.width, continueButton.width,
                 (b, r, c) => b == r && r == c);
 
-            // vertical 
-            buttonPanel.EmbedH(backButton);
-            buttonPanel.EmbedH(reloadButton);
-            buttonPanel.EmbedH(continueButton);
+            buttonPanel.StackLeft(true, true, backButton, 10.0, reloadButton, 20.0, continueButton);
 
             ConstructDiffList(diffList);
 
@@ -197,10 +185,8 @@ namespace ModDiff
                     rCell = row.AddElement(new CElement());
                 }
 
-                row.EmbedW(lCell, rCell);
+                row.StackLeft(true, true, lCell, rCell);
                 row.solver.AddConstraint(lCell.width, rCell.width, (a, b) => a == b);
-                row.EmbedH(lCell);
-                row.EmbedH(rCell);
                 
                 row.solver.AddConstraint(row.height, h => h == cellSize.y);
 
@@ -225,8 +211,7 @@ namespace ModDiff
             if (modified)
             {
                 var icon = iconSlot.AddElement(new CLabel { Title = symbol });
-                iconSlot.EmbedH(icon);
-                //iconSlot.EmbedW(icon);       
+                iconSlot.StackTop(false, true, icon);
                 iconSlot.solver.AddConstraint(iconSlot.centerX, icon.centerX, (a, b) => a == b);
                 icon.solver.AddConstraint(icon.width, icon.intrinsicWidth, (a, b) => a == b);
             }
@@ -236,10 +221,9 @@ namespace ModDiff
                 Title = title
             });
 
-            cell.EmbedW(iconSlot, text);
+            cell.StackLeft(true, true, iconSlot, text);
+            
             cell.solver.AddConstraint(iconSlot.width, w => w == 16);
-            cell.EmbedH(iconSlot);
-            cell.EmbedH(text);
 
             return cell;
         }
