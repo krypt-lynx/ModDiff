@@ -80,7 +80,8 @@
     <Compile Include="GuiMinilib\CListingStandart.cs" />
     <Compile Include="GuiMinilib\ConstraintTools.cs" />
     <Compile Include="GuiMinilib\CWidget.cs" />
-    <Compile Include="GuiMinilib\TextTools.cs" />
+    <Compile Include="GuiMinilib\MiscTools\EdgeInsets.cs" />
+    <Compile Include="GuiMinilib\MiscTools\GuiTools.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="linq.cs" />
     <Compile Include="ModDiff.cs" />

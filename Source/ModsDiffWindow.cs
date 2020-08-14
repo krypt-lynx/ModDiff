@@ -20,6 +20,7 @@ namespace ModDiff
     {
         public string packageId;
         public string name;
+        public bool isMoved = false;
 
         public override bool Equals(object obj)
         {
@@ -43,6 +44,14 @@ namespace ModDiff
         }
     }
 
+
+    struct CellStyleData
+    {
+        public string marker;
+        public Texture2D bgTexture;
+        public Color outlineColor;
+    }
+
     public class ModsDiffWindow : Window
     {
         List<Change<ModInfo>> info;
@@ -62,6 +71,32 @@ namespace ModDiff
                 return initSize;
             }
         }
+
+        private static readonly Texture2D RemovedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.5f, 0.17f, 0.17f, 0.70f));
+        private static readonly Texture2D AddedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.17f, 0.45f, 0.17f, 0.70f));
+        private static readonly Texture2D MovedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.38f, 0.36f, 0.15f, 0.70f));
+
+
+        CellStyleData removedModCellStyle = new CellStyleData()
+        {
+            marker = "-",
+            bgTexture = RemovedModBg,
+            outlineColor = new Color(0.5f, 0.17f, 0.17f, 0.70f),
+        };
+
+        CellStyleData addedModCellStyle = new CellStyleData()
+        {
+            marker = "+",
+            bgTexture = AddedModBg,
+            outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
+        };
+
+        CellStyleData movedModCellStyle = new CellStyleData()
+        {
+            marker = "*",
+            bgTexture = MovedModBg,
+            outlineColor = new Color(0.38f, 0.36f, 0.15f, 0.70f),
+        };
 
         public ModsDiffWindow(ModInfo[] saveMods, ModInfo[] runningMods, Action confirmedAction) : base()
         {
@@ -126,24 +161,12 @@ namespace ModDiff
             // root constraints
             gui.StackTop(true, true, (titleLabel, 42), (disclaimerLabel, 50), diffList, 10, (buttonPanel, 40));
             
-      
-            // buttons panel constraints
-            // horizontal
-            /*gui.solver.AddConstraint(
-                buttonPanel.left, buttonPanel.right,
-                backButton.left, backButton.right,
-                reloadButton.left, reloadButton.right,
-                continueButton.left, continueButton.right,
-                (l, r, bl, br, rl, rr, cl, cr) => l == bl && br + 10 == rl && rr + 20 == cl && cr == r);*/
-            gui.solver.AddConstraint(backButton.width, reloadButton.width, continueButton.width,
-                (b, r, c) => b == r && r == c);
-
-            buttonPanel.StackLeft(true, true, backButton, 10.0, reloadButton, 20.0, continueButton);
+            buttonPanel.StackLeft(true, true,
+                backButton, 10.0, (reloadButton, backButton.width), 20.0, (continueButton, backButton.width));
 
             ConstructDiffList(diffList);
 
             gui.UpdateLayoutConstraintsIfNeeded();
-            // I'm not doing math for that, at least
         }
 
         private void ConstructDiffList(CListingStandart diffList)
@@ -163,11 +186,14 @@ namespace ModDiff
                     row.Embed(bg);
                 }
 
+                bool isMoved = line.value.isMoved;
+
                 // left
                 CElement lCell;
                 if (line.change != ChangeType.Added)
                 {
-                    lCell = ConstructDiffCell(row, "-", line.change == ChangeType.Removed, line.value.name);
+                    
+                    lCell = ConstructDiffCell(row, isMoved ? movedModCellStyle : removedModCellStyle, line.change == ChangeType.Removed, line.value.name);
                 }
                 else
                 {
@@ -178,7 +204,7 @@ namespace ModDiff
                 CElement rCell;
                 if (line.change != ChangeType.Removed)
                 {
-                    rCell = ConstructDiffCell(row, "+", line.change == ChangeType.Added, line.value.name);
+                    rCell = ConstructDiffCell(row, isMoved ? movedModCellStyle : addedModCellStyle, line.change == ChangeType.Added, line.value.name);
                 }
                 else
                 {
@@ -194,7 +220,7 @@ namespace ModDiff
             }
         }
 
-        private CElement ConstructDiffCell(CElement parent, string symbol, bool modified, string title)
+        private CElement ConstructDiffCell(CElement parent, CellStyleData style, bool modified, string title)
         {
             var cell = parent.AddElement(new CElement());
 
@@ -202,7 +228,14 @@ namespace ModDiff
             {
                 var highlight = cell.AddElement(new CWidget
                 {
-                    Do = bounds => Widgets.DrawAltRect(bounds)
+                    Do = bounds =>
+                    {
+                        GUI.DrawTexture(bounds, style.bgTexture);
+                        GuiTools.UseColor(style.outlineColor, () =>
+                        {
+                            GuiTools.Box(bounds, new EdgeInsets(2, 2, 2, 5));
+                        });
+                    }
                 });
                 cell.Embed(highlight);
             }
@@ -210,7 +243,7 @@ namespace ModDiff
             var iconSlot = cell.AddElement(new CElement());
             if (modified)
             {
-                var icon = iconSlot.AddElement(new CLabel { Title = symbol });
+                var icon = iconSlot.AddElement(new CLabel { Title = style.marker });
                 iconSlot.StackTop(false, true, icon);
                 iconSlot.solver.AddConstraint(iconSlot.centerX, icon.centerX, (a, b) => a == b);
                 icon.solver.AddConstraint(icon.width, icon.intrinsicWidth, (a, b) => a == b);
@@ -221,25 +254,34 @@ namespace ModDiff
                 Title = title
             });
 
-            cell.StackLeft(true, true, iconSlot, text);
-            
-            cell.solver.AddConstraint(iconSlot.width, w => w == 16);
+            cell.StackLeft(true, true, 5, (iconSlot, 16), text, 2);
 
             return cell;
         }
 
         private void CalculateDiff(ModInfo[] saveMods, ModInfo[] runningMods, Action confirmedAction)
         {
-            //Log.Message($"save mods: {saveMods.Length}");
-            //Log.Message($"running mods: {runningMods.Length}");
-
             this.confirmedAction = confirmedAction;
             var diff = new Myers<ModInfo>(saveMods, runningMods);
             diff.Compute();
 
-            //Log.Message($"diff length: {diff.changeSet.Count}");
-
             info = diff.changeSet;
+
+            foreach (var x in diff.changeSet)
+            {
+         //       Log.Message(x.value.packageId + "|" + x.value.name + "|" + x.change.ToString());
+            }
+
+            var moved = info.Where(x => x.change == ChangeType.Removed).Select(x => x.value).ToHashSet();
+            moved.IntersectWith(info.Where(x => x.change == ChangeType.Added).Select(x => x.value));
+
+            foreach (var change in diff.changeSet)
+            {
+                if (moved.Contains(change.value))
+                {
+                    change.value.isMoved = true;
+                }
+            }
         }
 
         private static void TrySetActiveMods()
@@ -266,13 +308,10 @@ namespace ModDiff
             }
         }
 
-
         public override void DoWindowContents(Rect inRect)
         {
             gui.InRect = inRect;
             gui.DoElementContent();
         }
-
-
     }
 }

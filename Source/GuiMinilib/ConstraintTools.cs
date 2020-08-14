@@ -11,28 +11,6 @@ using Verse;
 
 namespace ModDiff.GuiMinilib
 {
-    public struct EdgeInsets
-    {
-        public EdgeInsets(double top, double right, double bottom, double left)
-        {
-            this.top = top;
-            this.right = right;
-            this.bottom = bottom;
-            this.left = left;
-        }
-        public EdgeInsets(double margin)
-        {
-            top = margin;
-            right = margin;
-            bottom = margin;
-            left = margin;
-        }
-        public static EdgeInsets Zero = new EdgeInsets(0);
-
-        public double top, right, bottom, left;
-
-    }
-
     struct AnchorMapper
     {
         public Func<CElement, ClVariable> Leading;
@@ -135,7 +113,7 @@ namespace ModDiff.GuiMinilib
             foreach (var item in items)
             {
                 CElement element = null;
-                double? size = null;
+                ClLinearExpression size = null;
                 
                 if (item is CElement)
                 {
@@ -148,10 +126,18 @@ namespace ModDiff.GuiMinilib
                     if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ValueTuple<,>))
                     {
                         var maybeElement = type.GetField("Item1").GetValue(item);
-                        var maybeSize = type.GetField("Item2").GetValue(item);
+                        var maybeVar = type.GetField("Item2").GetValue(item);
 
                         element = maybeElement as CElement;
-                        size = Convert.ToDouble(maybeSize); // todo: Exception handling
+                        if (maybeVar is ClVariable)
+                        {
+
+                            size = new ClLinearExpression(maybeVar as ClVariable);
+                        }
+                        else
+                        {
+                            size = new ClLinearExpression(Convert.ToDouble(maybeVar)); // todo: Exception handling
+                        }
                     }
                 }
 
@@ -161,9 +147,9 @@ namespace ModDiff.GuiMinilib
                     parent.solver.AddConstraint(new ClLinearEquation(trailing, new ClLinearExpression(mapper.Leading(child))));
                     trailing = new ClLinearExpression(mapper.Trailing(child));
 
-                    if (size.HasValue)
+                    if (size != null)
                     {
-                        parent.solver.AddConstraint(new ClLinearEquation(mapper.Size(child), new ClLinearExpression(size.Value)));
+                        parent.solver.AddConstraint(new ClLinearEquation(mapper.Size(child), size));
                     }
                     if (constrainSides)
                     {
@@ -171,7 +157,12 @@ namespace ModDiff.GuiMinilib
                             (pa, pb, ca, cb) => pa == ca && pb == cb);
                     }
                 }
-                else
+                else if (item is ClVariable)
+                {
+                    var space = item as ClVariable;
+                    trailing = Cl.Plus(trailing, Cl.Times(new ClLinearExpression(space), mapper.multipler));
+                }
+                else 
                 {
                     double space = Convert.ToDouble(item); // todo: Exception handling
                     trailing = Cl.Plus(trailing, new ClLinearExpression(space * mapper.multipler));

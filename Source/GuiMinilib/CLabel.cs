@@ -18,12 +18,12 @@ namespace ModDiff.GuiMinilib
 
         public override Vector2 IntrinsicSize()
         {   
-            return TextTools.UseFont(Font, () => Text.CalcSize(Title));
+            return GuiTools.UseFont(Font, () => Text.CalcSize(Title));
         }
 
         public override void DoContent()
         {
-            TextTools.UseFont(Font, () => {
+            GuiTools.UseFont(Font, () => {
                 Widgets.Label(bounds, Title);
             });
         }
