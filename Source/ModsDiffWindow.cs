@@ -205,15 +205,29 @@ namespace ModDiff
             foreach (var line in info)
             {
                 var row = diffList.NewRow();
+                string tip = "packadeId:\n" + line.value.packageId;
                 CElement bg = null;
                 if (i % 2 == 1)
                 {
                     bg = row.AddElement(new CWidget
                     {
-                        DoWidgetContent = bounds => Widgets.DrawAltRect(bounds)
+                        DoWidgetContent = bounds => {
+                            Widgets.DrawAltRect(bounds);
+                            TooltipHandler.TipRegion(bounds, tip);
+                        }
                     });
-                    row.Embed(bg);
+
                 }
+                else
+                {
+                    bg = row.AddElement(new CWidget
+                    {
+                        DoWidgetContent = bounds => {
+                            TooltipHandler.TipRegion(bounds, tip);
+                        }
+                    });
+                }
+                row.Embed(bg);
 
                 bool isMoved = line.value.isMoved;
 
@@ -224,8 +238,7 @@ namespace ModDiff
                     
                     lCell = ConstructDiffCell(row, isMoved ? movedModCellStyle : removedModCellStyle, 
                         line.change == ChangeType.Removed, 
-                        line.value.name,
-                        "packadeId:\n" + line.value.packageId
+                        line.value.name
                         );
                 }
                 else
@@ -239,8 +252,7 @@ namespace ModDiff
                 {
                     rCell = ConstructDiffCell(row, isMoved ? movedModCellStyle : addedModCellStyle,
                         line.change == ChangeType.Added,
-                        line.value.name,
-                        "packadeId:\n" + line.value.packageId
+                        line.value.name
                         );
                 }
                 else
@@ -257,12 +269,9 @@ namespace ModDiff
             }
         }
 
-        private CElement ConstructDiffCell(CElement parent, CellStyleData style, bool modified, string title, string tip)
+        private CElement ConstructDiffCell(CElement parent, CellStyleData style, bool modified, string title)
         {
-            var cell = parent.AddElement(new CWidget
-            {
-                DoWidgetContent = bounds => TooltipHandler.TipRegion(bounds, tip)
-            });
+            var cell = parent.AddElement(new CElement());
 
             if (modified)
             {
