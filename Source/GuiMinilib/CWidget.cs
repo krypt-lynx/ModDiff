@@ -12,11 +12,11 @@ namespace ModDiff.GuiMinilib
 {
     class CWidget : CElement
     {
-        public Action<Rect> Do;
+        public Action<Rect> DoWidgetContent;
 
         public override void DoContent()
         {
-            Do?.Invoke(bounds);
+            DoWidgetContent?.Invoke(bounds);
         }
     }
 }

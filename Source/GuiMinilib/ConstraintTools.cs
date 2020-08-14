@@ -62,7 +62,7 @@ namespace ModDiff.GuiMinilib
                 Size = x => x.width,
                 multipler = 1,
             };
-            Stack(parent, mapper, items, constrainEnd, constrainSides);
+            Stack(parent, mapper, items, constrainEnd, constrainSides, ClStrength.Strong);
         }
 
         public static void StackTop(this CElement parent, bool constrainSides, bool constrainEnd, params object[] items)
@@ -76,7 +76,7 @@ namespace ModDiff.GuiMinilib
                 Size = x => x.height,
                 multipler = 1,
             };
-            Stack(parent, mapper, items, constrainEnd, constrainSides);
+            Stack(parent, mapper, items, constrainEnd, constrainSides, ClStrength.Strong);
         }
 
         public static void StackRight(this CElement parent, bool constrainSides, bool constrainEnd, params object[] items)
@@ -90,7 +90,7 @@ namespace ModDiff.GuiMinilib
                 Size = x => x.width,
                 multipler = -1,
             };
-            Stack(parent, mapper, items, constrainEnd, constrainSides);
+            Stack(parent, mapper, items, constrainEnd, constrainSides, ClStrength.Strong);
         }
 
         public static void StackBottom(this CElement parent, bool constrainSides, bool constrainEnd, params object[] items)
@@ -104,10 +104,10 @@ namespace ModDiff.GuiMinilib
                 Size = x => x.height,
                 multipler = -1,
             };
-            Stack(parent, mapper, items, constrainEnd, constrainSides);
+            Stack(parent, mapper, items, constrainEnd, constrainSides, ClStrength.Strong);
         }
 
-        private static void Stack(CElement parent, AnchorMapper mapper, IEnumerable<object> items, bool constrainEnd, bool constrainSides)
+        private static void Stack(CElement parent, AnchorMapper mapper, IEnumerable<object> items, bool constrainEnd, bool constrainSides, ClStrength strength)
         {
             ClLinearExpression trailing = new ClLinearExpression(mapper.Leading(parent));
             foreach (var item in items)
@@ -144,17 +144,17 @@ namespace ModDiff.GuiMinilib
                 if (element != null)
                 {
                     var child = element;
-                    parent.solver.AddConstraint(new ClLinearEquation(trailing, new ClLinearExpression(mapper.Leading(child))));
+                    parent.solver.AddConstraint(new ClLinearEquation(trailing, new ClLinearExpression(mapper.Leading(child)), strength));
                     trailing = new ClLinearExpression(mapper.Trailing(child));
 
                     if (size != null)
                     {
-                        parent.solver.AddConstraint(new ClLinearEquation(mapper.Size(child), size));
+                        parent.solver.AddConstraint(new ClLinearEquation(mapper.Size(child), size, strength));
                     }
                     if (constrainSides)
                     {
                         parent.solver.AddConstraint(mapper.SideA(parent), mapper.SideB(parent), mapper.SideA(child), mapper.SideB(child),
-                            (pa, pb, ca, cb) => pa == ca && pb == cb);
+                            (pa, pb, ca, cb) => pa == ca && pb == cb, strength);
                     }
                 }
                 else if (item is ClVariable)
@@ -171,7 +171,7 @@ namespace ModDiff.GuiMinilib
 
             if (constrainEnd)
             {
-                parent.solver.AddConstraint(new ClLinearEquation(trailing, new ClLinearExpression(mapper.Trailing(parent))));
+                parent.solver.AddConstraint(new ClLinearEquation(trailing, new ClLinearExpression(mapper.Trailing(parent)), strength));
             }
         }
     }

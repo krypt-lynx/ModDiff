@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 using Verse;
 
 namespace ModDiff.GuiMinilib
@@ -14,13 +15,24 @@ namespace ModDiff.GuiMinilib
     {
         public TaggedString Title { get; internal set; }
         public Action<CElement> Action { get; internal set; }
+        public GameFont Font = GameFont.Small;
+
+        public override Vector2 IntrinsicSize()
+        {         
+            var result = GuiTools.UsingFont(Font, () => Text.CalcSize(Title));
+
+            return result + new Vector2(14, 10);
+        }
 
         public override void DoContent()
         {
-            if (Widgets.ButtonText(bounds, Title, doMouseoverSound: true))
+            GuiTools.UsingFont(Font, () =>
             {
-                this.Action?.Invoke(this);
-            }
+                if (Widgets.ButtonText(bounds, Title, doMouseoverSound: true))
+                {
+                    this.Action?.Invoke(this);
+                }
+            });
         }
     }
 }

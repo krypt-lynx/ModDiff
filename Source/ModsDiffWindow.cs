@@ -143,10 +143,14 @@ namespace ModDiff
                 Color = new Color(1, 1, 1, 0.3f),
                 Title = "Running mods:"
             });
+            CListingStandart diffList = null;
             var headerLine = gui.AddElement(new CWidget {
-                Do = bounds => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(bounds.x, bounds.y, bounds.width - 20))
+                DoWidgetContent = bounds => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(bounds.x, bounds.y, bounds.width - (diffList.ShowScroll ? 20 : 0)))
             });
-            var diffList = gui.AddElement(new CListingStandart());
+            diffList = gui.AddElement(new CListingStandart
+            {
+              
+            });
             var buttonPanel = gui.AddElement(new CElement());
             var backButton = buttonPanel.AddElement(new CButton
             {
@@ -179,7 +183,15 @@ namespace ModDiff
             headerLeft.solver.AddConstraint(headerLeft.height, headerLeft.intrinsicHeight, (a, b) => a == b);
 
             buttonPanel.StackLeft(true, true,
-                backButton, 10.0, (reloadButton, backButton.width), 20.0, (continueButton, backButton.width));
+                backButton, 10.0, reloadButton, 20.0, continueButton);
+
+            buttonPanel.solver.AddConstraint(backButton.width, backButton.intrinsicWidth, (a, b) => a >= b, ClStrength.Strong);
+            buttonPanel.solver.AddConstraint(reloadButton.width, reloadButton.intrinsicWidth, (a, b) => a >= b, ClStrength.Strong);
+            buttonPanel.solver.AddConstraint(continueButton.width, continueButton.intrinsicWidth, (a, b) => a >= b, ClStrength.Strong);
+
+            buttonPanel.solver.AddConstraint(backButton.width, reloadButton.width, (a, b) => a == b, ClStrength.Weak); // todo: it should work with ClStrength.Medium. It is not. Why?
+            buttonPanel.solver.AddConstraint(backButton.width, continueButton.width, (a, b) => a == b, ClStrength.Weak); // todo: it should work with ClStrength.Medium. It is not. Why?
+            // root stays is breaking?
 
             ConstructDiffList(diffList);
 
@@ -198,7 +210,7 @@ namespace ModDiff
                 {
                     bg = row.AddElement(new CWidget
                     {
-                        Do = bounds => Widgets.DrawAltRect(bounds)
+                        DoWidgetContent = bounds => Widgets.DrawAltRect(bounds)
                     });
                     row.Embed(bg);
                 }
@@ -231,7 +243,7 @@ namespace ModDiff
                 row.StackLeft(true, true, lCell, rCell);
                 row.solver.AddConstraint(lCell.width, rCell.width, (a, b) => a == b);
                 
-                row.solver.AddConstraint(row.height, h => h == cellSize.y);
+                //row.solver.AddConstraint(row.height, h => h == cellSize.y);
 
                 i++;
             }
@@ -245,7 +257,7 @@ namespace ModDiff
             {
                 var highlight = cell.AddElement(new CWidget
                 {
-                    Do = bounds =>
+                    DoWidgetContent = bounds =>
                     {
                         GUI.DrawTexture(bounds, style.bgTexture);
                         GuiTools.UsingColor(style.outlineColor, () =>
@@ -272,6 +284,8 @@ namespace ModDiff
             });
 
             cell.StackLeft(true, true, 5, (iconSlot, 16), text, 2);
+
+            cell.solver.AddConstraint(cell.height, text.intrinsicHeight, (a, b) => a == b);
 
             return cell;
         }

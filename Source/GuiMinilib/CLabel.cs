@@ -22,7 +22,7 @@ namespace ModDiff.GuiMinilib
         {   
             var result = GuiTools.UsingFont(Font, () => Text.CalcSize(Title));
             result.y = result.y * lines_debug;
-            Log.Message($"intinsic size of {NamePrefix()} (\"{Title}\"): {result}");
+            //Log.Message($"intinsic size of {NamePrefix()} (\"{Title}\"): {result}");
             return result;
         }
 
