@@ -12,6 +12,7 @@ namespace ModDiff.GuiMinilib
         public Rect bounds { get; private set; }
 
         public virtual Vector2 IntrinsicSize() { return Vector2.zero; }
+        public virtual Vector2 tryFit(Vector2 size) { return Vector2.zero; }
 
         public void DoElementContent()
         {

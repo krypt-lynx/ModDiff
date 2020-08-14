@@ -222,7 +222,11 @@ namespace ModDiff
                 if (line.change != ChangeType.Added)
                 {
                     
-                    lCell = ConstructDiffCell(row, isMoved ? movedModCellStyle : removedModCellStyle, line.change == ChangeType.Removed, line.value.name);
+                    lCell = ConstructDiffCell(row, isMoved ? movedModCellStyle : removedModCellStyle, 
+                        line.change == ChangeType.Removed, 
+                        line.value.name,
+                        "packadeId:\n" + line.value.packageId
+                        );
                 }
                 else
                 {
@@ -233,7 +237,11 @@ namespace ModDiff
                 CElement rCell;
                 if (line.change != ChangeType.Removed)
                 {
-                    rCell = ConstructDiffCell(row, isMoved ? movedModCellStyle : addedModCellStyle, line.change == ChangeType.Added, line.value.name);
+                    rCell = ConstructDiffCell(row, isMoved ? movedModCellStyle : addedModCellStyle,
+                        line.change == ChangeType.Added,
+                        line.value.name,
+                        "packadeId:\n" + line.value.packageId
+                        );
                 }
                 else
                 {
@@ -249,9 +257,12 @@ namespace ModDiff
             }
         }
 
-        private CElement ConstructDiffCell(CElement parent, CellStyleData style, bool modified, string title)
+        private CElement ConstructDiffCell(CElement parent, CellStyleData style, bool modified, string title, string tip)
         {
-            var cell = parent.AddElement(new CElement());
+            var cell = parent.AddElement(new CWidget
+            {
+                DoWidgetContent = bounds => TooltipHandler.TipRegion(bounds, tip)
+            });
 
             if (modified)
             {
