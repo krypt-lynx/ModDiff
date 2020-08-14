@@ -71,6 +71,9 @@
   <ItemGroup>
     <Compile Include="Diff.cs" />
     <Compile Include="GuiMinilib\CButton.cs" />
+    <Compile Include="GuiMinilib\CElement+anchors.cs" />
+    <Compile Include="GuiMinilib\CElement+geometry.cs" />
+    <Compile Include="GuiMinilib\CElement+hierarchy.cs" />
     <Compile Include="GuiMinilib\CElement.cs" />
     <Compile Include="GuiMinilib\CGuiRoot.cs" />
     <Compile Include="GuiMinilib\CLabel.cs" />

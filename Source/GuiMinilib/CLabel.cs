@@ -17,19 +17,15 @@ namespace ModDiff.GuiMinilib
         public GameFont Font = GameFont.Small;
 
         public override Vector2 IntrinsicSize()
-        {
-            TextTools.FontPush(Font);
-            var size = Text.CalcSize(Title);
-            TextTools.FontPop();
-            Log.Message($"intrinsicSize of {id}: {size}");
-            return size;
+        {   
+            return TextTools.UseFont(Font, () => Text.CalcSize(Title));
         }
 
         public override void DoContent()
         {
-            TextTools.FontPush(Font);
-            Widgets.Label(bounds, Title);
-            TextTools.FontPop();
+            TextTools.UseFont(Font, () => {
+                Widgets.Label(bounds, Title);
+            });
         }
     }
 }

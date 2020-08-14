@@ -23,5 +23,19 @@ namespace ModDiff.GuiMinilib
             Text.Font = fonts.Pop();
         }
 
+        public static void UseFont(GameFont font, Action action)
+        {
+            FontPush(font);
+            action();
+            FontPop();
+        }
+
+        public static T UseFont<T>(GameFont font, Func<T> func)
+        {
+            FontPush(font);
+            T result = func();
+            FontPop();
+            return result;
+        }
     }
 }
