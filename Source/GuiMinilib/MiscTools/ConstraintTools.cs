@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Cassowary;
 using Verse;
 
-namespace ModDiff.GuiMinilib
+namespace GuiMinilib
 {
     struct AnchorMapper
     {

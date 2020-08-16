@@ -8,14 +8,28 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace ModDiff.GuiMinilib
+namespace GuiMinilib
 {
     class CWidget : CElement
     {
+
+        public Func<Vector2, Vector2> TryFitContect;
         public Action<Rect> DoWidgetContent;
+
+        public override Vector2 tryFit(Vector2 size)
+        {
+            if (TryFitContect == null)
+            {
+                return base.tryFit(size);
+            } else
+            {
+                return TryFitContect(size);
+            }
+        }
 
         public override void DoContent()
         {
+            base.DoContent();
             DoWidgetContent?.Invoke(bounds);
         }
     }

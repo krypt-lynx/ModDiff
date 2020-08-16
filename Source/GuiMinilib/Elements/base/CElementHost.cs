@@ -11,9 +11,27 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace ModDiff.GuiMinilib
+namespace GuiMinilib
 {
-    public class CGuiRoot : CElement
+
+    public class CListingRow : CElementHost
+    {
+        public override void UpdateLayoutConstraints(ClSimplexSolver solver)
+        {
+            left.Value = InRect.xMin;
+            solver.AddStay(left);
+
+            right.Value = InRect.xMax;
+            solver.AddStay(right);
+
+            top.Value = InRect.yMin;
+            solver.AddStay(top);
+
+            base.UpdateLayoutConstraints(solver);
+        }
+    }
+
+    public class CElementHost : CElement
     {
         public Rect _inRect;
         public Rect InRect
@@ -23,6 +41,7 @@ namespace ModDiff.GuiMinilib
             {
                 needsUpdateLayout = _inRect != value;
                 _inRect = value;
+
                 UpdateLayoutConstraintsIfNeeded();
                 UpdateLayoutIfNeeded();
             }
@@ -37,7 +56,7 @@ namespace ModDiff.GuiMinilib
             }
         }
                 
-        public CGuiRoot() : base()
+        public CElementHost() : base()
         {
             solver_ = new ClSimplexSolver();
             solver_.DebugName = NamePrefix() + "_solver";
@@ -52,17 +71,20 @@ namespace ModDiff.GuiMinilib
                 UpdateLayoutConstraints();
 
                 PostConstraintsUpdate();
-
-                needsUpdateLayout = false;
+                
+                UpdateLayout(); // forcefully updating layout after init to resolve multiline labels
                 PostLayoutUpdate();
+                needsUpdateLayout = true;
             }
         }
 
         protected bool needsUpdateLayout = true;
+   
         public void UpdateLayoutIfNeeded()
         {
-            if (needsUpdateLayout)
+            //if (needsUpdateLayout)
             {
+
                 UpdateLayout();
 
                 PostLayoutUpdate();
@@ -86,57 +108,18 @@ namespace ModDiff.GuiMinilib
 
             UpdateLayoutConstraints(solver);
             solver.Solve();
-        }
+            Log.Message($"solver state of {NamePrefix()}:\n{solver}");
 
-
-        public override void UpdateLayoutConstraints(ClSimplexSolver solver)
-        {
-            left.Value = InRect.xMin;
-            solver.AddStay(left);
-
-            right.Value = InRect.xMax;
-            solver.AddStay(right);
-
-            top.Value = InRect.yMin;
-            solver.AddStay(top);
-
-            if (!float.IsNaN(InRect.yMax)) // todo: separate row host class
-            {
-                bottom.Value = InRect.yMax;
-                solver.AddStay(bottom);
-            }
-            
-            base.UpdateLayoutConstraints(solver);
         }
 
         public override void UpdateLayout()
         {
-
-
             needsUpdateLayout = false;
 
             UpdateLayoutConstraintsIfNeeded();
-            var edit = solver
-                 .BeginEdit(left, right, top, bottom)
-                 .SuggestValue(left, InRect.xMin)
-                 .SuggestValue(right, InRect.xMax)
-                 .SuggestValue(top, InRect.yMin);
-
-            if (!float.IsNaN(InRect.yMax)) // todo: separate row host class
-            {
-                edit.SuggestValue(bottom, InRect.yMax);
-            }
-
-            edit.EndEdit();
 
             base.UpdateLayout();
 
         }
-
-        public override void DoContent()
-        {
-            // nothing
-        }
-
     }
 }

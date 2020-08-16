@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace ModDiff.GuiMinilib
+namespace GuiMinilib
 {
     public partial class CElement
     {
@@ -51,20 +51,21 @@ namespace ModDiff.GuiMinilib
             
             if (intrinsicWidth_ != null || intrinsicHeight_ != null)
             {
-                var intrinsicSize = this.IntrinsicSize();
+                var intrinsicSize = this.tryFit(bounds.size);
 
                 if (intrinsicWidth_ != null)
                 {
-                    solver.BeginEdit(intrinsicWidth_)
-                        .SuggestValue(intrinsicWidth_, intrinsicSize.x)
-                        .EndEdit();
-
+                    solver.RemoveConstraint(intrinsicWidthConstraint_);
+                    intrinsicWidth_.Value = intrinsicSize.x;
+                    intrinsicWidthConstraint_ = new ClStayConstraint(intrinsicWidth_, ClStrength.Required);
+                    solver.AddConstraint(intrinsicWidthConstraint_);
                 }
                 if (intrinsicHeight_ != null)
                 {
-                    solver.BeginEdit(intrinsicHeight_)
-                        .SuggestValue(intrinsicHeight_, intrinsicSize.y)
-                        .EndEdit();
+                    solver.RemoveConstraint(intrinsicHeightConstraint_);
+                    intrinsicHeight_.Value = intrinsicSize.y;
+                    intrinsicHeightConstraint_ = new ClStayConstraint(intrinsicHeight_, ClStrength.Required);
+                    solver.AddConstraint(intrinsicHeightConstraint_);
                 }
             }
             foreach (var element in elements)

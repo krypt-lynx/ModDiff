@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace ModDiff.GuiMinilib
+namespace GuiMinilib
 {
     public class CButton : CElement
     {
@@ -17,8 +17,8 @@ namespace ModDiff.GuiMinilib
         public Action<CElement> Action { get; internal set; }
         public GameFont Font = GameFont.Small;
 
-        public override Vector2 IntrinsicSize()
-        {         
+        public override Vector2 tryFit(Vector2 size)
+        {
             var result = GuiTools.UsingFont(Font, () => Text.CalcSize(Title));
 
             return result + new Vector2(14, 10);
@@ -26,6 +26,7 @@ namespace ModDiff.GuiMinilib
 
         public override void DoContent()
         {
+            base.DoContent();
             GuiTools.UsingFont(Font, () =>
             {
                 if (Widgets.ButtonText(bounds, Title, doMouseoverSound: true))

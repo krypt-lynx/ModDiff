@@ -1,11 +1,14 @@
-﻿using Cassowary;
+﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
+using Cassowary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModDiff.GuiMinilib
+namespace GuiMinilib
 {
     public partial class CElement
     {
@@ -47,12 +50,14 @@ namespace ModDiff.GuiMinilib
         public ClVariable bottom;
 
         // non-esential variables
-        public ClVariable width_;
-        public ClVariable height_;
+        private ClVariable width_;
+        private ClVariable height_;
         private ClVariable centerX_;
         private ClVariable centerY_;
         private ClVariable intrinsicWidth_;
+        private ClConstraint intrinsicWidthConstraint_;
         private ClVariable intrinsicHeight_;
+        private ClConstraint intrinsicHeightConstraint_;
 
         public ClVariable width
         {
@@ -106,7 +111,9 @@ namespace ModDiff.GuiMinilib
                 if (intrinsicWidth_ == null)
                 {
                     intrinsicWidth_ = new ClVariable(NamePrefix() + "_iW");
-                    solver.AddStay(intrinsicWidth_);
+                    intrinsicWidthConstraint_ = new ClStayConstraint(intrinsicWidth_, ClStrength.Required);
+                    solver.AddConstraint(intrinsicWidthConstraint_);
+                    //solver.AddStay(intrinsicWidth_);
                 }
                 return intrinsicWidth_;
             }
@@ -118,7 +125,9 @@ namespace ModDiff.GuiMinilib
                 if (intrinsicHeight_ == null)
                 {
                     intrinsicHeight_ = new ClVariable(NamePrefix() + "_iH");
-                    solver.AddStay(intrinsicHeight_);
+                    intrinsicHeightConstraint_ = new ClStayConstraint(intrinsicHeight_, ClStrength.Required);
+                    solver.AddConstraint(intrinsicHeightConstraint_);
+                    //solver.AddStay(intrinsicHeight_);
                 }
                 return intrinsicHeight_;
             }

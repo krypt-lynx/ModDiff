@@ -15,7 +15,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\1.1\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -69,20 +69,22 @@
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Diff.cs" />
-    <Compile Include="GuiMinilib\CButton.cs" />
-    <Compile Include="GuiMinilib\CElement+anchors.cs" />
-    <Compile Include="GuiMinilib\CElement+geometry.cs" />
-    <Compile Include="GuiMinilib\CElement+hierarchy.cs" />
-    <Compile Include="GuiMinilib\CElement.cs" />
-    <Compile Include="GuiMinilib\CGuiRoot.cs" />
-    <Compile Include="GuiMinilib\CLabel.cs" />
-    <Compile Include="GuiMinilib\CListingStandart.cs" />
-    <Compile Include="GuiMinilib\ConstraintTools.cs" />
-    <Compile Include="GuiMinilib\CWidget.cs" />
+    <Compile Include="GuiMinilib\Elements\base\CGuiRoot.cs" />
+    <Compile Include="GuiMinilib\Elements\CButton.cs" />
+    <Compile Include="GuiMinilib\Elements\base\CElement+anchors.cs" />
+    <Compile Include="GuiMinilib\Elements\base\CElement+geometry.cs" />
+    <Compile Include="GuiMinilib\Elements\base\CElement+hierarchy.cs" />
+    <Compile Include="GuiMinilib\Elements\base\CElement.cs" />
+    <Compile Include="GuiMinilib\Elements\base\CElementHost.cs" />
+    <Compile Include="GuiMinilib\Elements\CLabel.cs" />
+    <Compile Include="GuiMinilib\Elements\ListingStandard\CListingStandart.cs" />
+    <Compile Include="GuiMinilib\MiscTools\ConstraintTools.cs" />
+    <Compile Include="GuiMinilib\Elements\CWidget.cs" />
     <Compile Include="GuiMinilib\MiscTools\EdgeInsets.cs" />
     <Compile Include="GuiMinilib\MiscTools\GuiTools.cs" />
     <Compile Include="HarmonyPatches.cs" />

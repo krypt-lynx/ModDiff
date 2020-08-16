@@ -18,10 +18,12 @@ namespace ModDiff
     {
        
         public bool ignoreSelf = false;
+        public bool selfPreservation = false;
 
         public override void ExposeData()
         {
             Scribe_Values.Look(ref ignoreSelf, "ignoreSelf", true);
+            Scribe_Values.Look(ref selfPreservation, "selfPreservation", true);
 
             base.ExposeData();
         }
@@ -58,6 +60,7 @@ namespace ModDiff
 
             options.Begin(inRect);
             options.CheckboxLabeled("Ignore self in modlist matching check", ref settings.ignoreSelf, "What could go wrong?");
+            options.CheckboxLabeled("Keep self loaded after modlist change", ref settings.ignoreSelf);
 
             options.End();
         }

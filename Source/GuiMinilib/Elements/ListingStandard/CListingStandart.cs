@@ -10,17 +10,37 @@ using Cassowary;
 using UnityEngine;
 using Verse;
 
-namespace ModDiff.GuiMinilib
+namespace GuiMinilib
 {
+    public enum CScrollBarMode
+    {
+        Auto,
+        Show,
+        Hide
+    }
+
     public class CListingStandart : CElement
     {
         Listing_Standard listing = new Listing_Standard();
         Rect innerRect;
         Vector2 scrollPosition = Vector2.zero;
 
-        List<CGuiRoot> rows = new List<CGuiRoot>();
+        List<CListingRow> rows = new List<CListingRow>();
 
-        public bool ShowScroll = true;
+        public CScrollBarMode ShowScrollBar = CScrollBarMode.Auto;
+
+        float contentHeight = 0;
+
+        public override Vector2 tryFit(Vector2 size)
+        {
+            return new Vector2(bounds.width, contentHeight);
+        }
+
+        public bool IsScrollBarVisible()
+        {
+            return (ShowScrollBar == CScrollBarMode.Show) || 
+                (contentHeight > bounds.height);
+        }
 
         public override void PostConstraintsUpdate()
         {
@@ -30,9 +50,10 @@ namespace ModDiff.GuiMinilib
             foreach (var row in rows)
             {
                 row.solver.AddConstraint(row.height, h => h == 20, ClStrength.Weak);
-                row.InRect = new Rect(0, y, bounds.width - (ShowScroll ? 20 : 0), float.NaN);
+                row.InRect = new Rect(0, y, bounds.width - (IsScrollBarVisible() ? 20 : 0), float.NaN);
                 y += row.bounds.height;
             }
+            contentHeight = y;
         }
 
         public override void PostLayoutUpdate()
@@ -42,14 +63,18 @@ namespace ModDiff.GuiMinilib
             float y = 0;
             foreach (var row in rows)
             {
-                row.InRect = new Rect(0, y, bounds.width - (ShowScroll ? 20 : 0), float.NaN);
+                row.InRect = new Rect(0, y, bounds.width - (IsScrollBarVisible() ? 20 : 0), float.NaN);
                 y += row.bounds.height;
             }
+            contentHeight = y;
         }
 
         public override void DoContent()
         {
-            if (ShowScroll)
+            base.DoContent();
+            bool showScrollBar = IsScrollBarVisible();
+
+            if (showScrollBar)
             {
                 listing.BeginScrollView(bounds, ref scrollPosition, ref innerRect);
             }
@@ -63,7 +88,7 @@ namespace ModDiff.GuiMinilib
                 element.DoElementContent();
             }
 
-            if (ShowScroll)
+            if (showScrollBar)
             {
                 listing.EndScrollView(ref innerRect);
             } else
@@ -72,9 +97,21 @@ namespace ModDiff.GuiMinilib
             }
         }
 
+        public override void DoDebugOverlay()
+        {
+            base.DoDebugOverlay();
+
+            GUI.BeginGroup(bounds);
+            foreach (var row in rows)
+            {
+                row.DoDebugOverlay();
+            }
+            GUI.EndGroup();
+        }
+
         internal CElement NewRow()
         {
-            var row = new CGuiRoot();
+            var row = new CListingRow();
             rows.Add(row);
 
             return row;

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace ModDiff.GuiMinilib
+namespace GuiMinilib
 {
     public static class GuiTools
     {
