@@ -38,14 +38,14 @@ namespace GuiMinilib
 
         public bool IsScrollBarVisible()
         {
-            return (ShowScrollBar == CScrollBarMode.Show) || 
+            return (ShowScrollBar == CScrollBarMode.Show) ||
                 (contentHeight > bounds.height);
         }
 
         public override void PostConstraintsUpdate()
         {
             base.PostConstraintsUpdate();
-            
+
             float y = 0;
             foreach (var row in rows)
             {
@@ -55,6 +55,16 @@ namespace GuiMinilib
             }
             contentHeight = y;
         }
+
+        /*
+        public override void UpdateLayout()
+        {
+            base.UpdateLayout();
+            foreach (var row in rows)
+            {
+                row.UpdateLayout();
+            }
+        }*/
 
         public override void PostLayoutUpdate()
         {
@@ -83,7 +93,8 @@ namespace GuiMinilib
                 listing.Begin(bounds);
             }
 
-            foreach (var element in rows) {
+            foreach (var element in rows)
+            {
                 var rect = listing.GetRect(element.bounds.height);
                 element.DoElementContent();
             }
@@ -91,7 +102,8 @@ namespace GuiMinilib
             if (showScrollBar)
             {
                 listing.EndScrollView(ref innerRect);
-            } else
+            }
+            else
             {
                 listing.End();
             }

@@ -82,6 +82,7 @@
     <Compile Include="GuiMinilib\Elements\base\CElement.cs" />
     <Compile Include="GuiMinilib\Elements\base\CElementHost.cs" />
     <Compile Include="GuiMinilib\Elements\CLabel.cs" />
+    <Compile Include="GuiMinilib\Elements\ListingStandard\CListingRow.cs" />
     <Compile Include="GuiMinilib\Elements\ListingStandard\CListingStandart.cs" />
     <Compile Include="GuiMinilib\MiscTools\ConstraintTools.cs" />
     <Compile Include="GuiMinilib\Elements\CWidget.cs" />

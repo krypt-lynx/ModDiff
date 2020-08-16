@@ -25,7 +25,8 @@ namespace GuiMinilib
             {
                 var y = GuiTools.UsingFont(Font, () => Text.CalcHeight(Title, size.x));
                 result = new Vector2(size.x, y);
-            } else
+            }
+            else
             {
                 result = GuiTools.UsingFont(Font, () => Text.CalcSize(Title));
             }
@@ -45,7 +46,8 @@ namespace GuiMinilib
                 if (Title.Length <= 10)
                 {
                     return $" ({Title})";
-                } else
+                }
+                else
                 {
                     return $" ({Title.Substring(0, 10)}…)";
                 }

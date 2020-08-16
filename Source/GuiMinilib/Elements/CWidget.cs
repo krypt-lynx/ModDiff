@@ -12,7 +12,6 @@ namespace GuiMinilib
 {
     class CWidget : CElement
     {
-
         public Func<Vector2, Vector2> TryFitContect;
         public Action<Rect> DoWidgetContent;
 
@@ -21,7 +20,8 @@ namespace GuiMinilib
             if (TryFitContect == null)
             {
                 return base.tryFit(size);
-            } else
+            }
+            else
             {
                 return TryFitContect(size);
             }

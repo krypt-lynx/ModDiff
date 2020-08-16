@@ -60,7 +60,7 @@ namespace ModDiff
 
             options.Begin(inRect);
             options.CheckboxLabeled("Ignore self in modlist matching check", ref settings.ignoreSelf, "What could go wrong?");
-            options.CheckboxLabeled("Keep self loaded after modlist change", ref settings.ignoreSelf);
+            options.CheckboxLabeled("Keep self loaded after modlist change", ref settings.selfPreservation);
 
             options.End();
         }

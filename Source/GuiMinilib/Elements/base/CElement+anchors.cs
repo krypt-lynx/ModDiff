@@ -55,9 +55,9 @@ namespace GuiMinilib
         private ClVariable centerX_;
         private ClVariable centerY_;
         private ClVariable intrinsicWidth_;
-        private ClConstraint intrinsicWidthConstraint_;
+        private ClStayConstraint intrinsicWidthConstraint_;
         private ClVariable intrinsicHeight_;
-        private ClConstraint intrinsicHeightConstraint_;
+        private ClStayConstraint intrinsicHeightConstraint_;
 
         public ClVariable width
         {
@@ -111,8 +111,7 @@ namespace GuiMinilib
                 if (intrinsicWidth_ == null)
                 {
                     intrinsicWidth_ = new ClVariable(NamePrefix() + "_iW");
-                    intrinsicWidthConstraint_ = new ClStayConstraint(intrinsicWidth_, ClStrength.Required);
-                    solver.AddConstraint(intrinsicWidthConstraint_);
+                    intrinsicWidthConstraint_ = CreateStayConstrait(intrinsicWidth_, 0, ClStrength.Required);
                     //solver.AddStay(intrinsicWidth_);
                 }
                 return intrinsicWidth_;
@@ -125,13 +124,34 @@ namespace GuiMinilib
                 if (intrinsicHeight_ == null)
                 {
                     intrinsicHeight_ = new ClVariable(NamePrefix() + "_iH");
-                    intrinsicHeightConstraint_ = new ClStayConstraint(intrinsicHeight_, ClStrength.Required);
-                    solver.AddConstraint(intrinsicHeightConstraint_);
+                    intrinsicHeightConstraint_ = CreateStayConstrait(intrinsicHeight_, 0, ClStrength.Required);
                     //solver.AddStay(intrinsicHeight_);
                 }
                 return intrinsicHeight_;
             }
         }
 
+        public ClStayConstraint CreateStayConstrait(ClVariable variable, double value, ClStrength strength = null)
+        {
+            variable.Value = value;
+            var newStay = new ClStayConstraint(variable, strength == null ? ClStrength.Required : strength);
+            solver.AddConstraint(newStay);
+            return newStay;
+        }
+
+        public void UpdateStayConstrait(ref ClStayConstraint constraint, double value)
+        {
+            var var = constraint.Variable;
+            if (Cl.Approx(var.Value, value))
+            {
+                return;
+            }
+
+            var.Value = value;
+            var newStay = new ClStayConstraint(var, constraint.Strength);
+            solver.RemoveConstraint(constraint);
+            solver.AddConstraint(newStay);
+            constraint = newStay;
+        }
     }
 }

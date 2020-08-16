@@ -204,8 +204,8 @@ namespace ModDiff
 
             //           gui.solver.AddConstraint(diffList.height, diffList.intrinsicHeight, (a, b) => a >= b, ClStrength.Weak);
 
-            gui.FlexibleHeight = true;
-            gui.solver.AddConstraint(new ClLinearEquation(diffList.height, new ClLinearExpression(diffList.intrinsicHeight), ClStrength.Weak));
+            gui.WeakHeight = true;
+            gui.solver.AddConstraint(diffList.height, diffList.intrinsicHeight, (a, b) => a <= b, ClStrength.Strong);
 
             ConstructDiffList(diffList);
 
@@ -387,8 +387,8 @@ namespace ModDiff
         {
             gui.InRect = inRect;
             gui.DoElementContent();
-            GUI.DrawTexture(inRect, debugBg);
-            gui.DoDebugOverlay();
+            //GUI.DrawTexture(inRect, debugBg);
+            //gui.DoDebugOverlay();
         }
 
 

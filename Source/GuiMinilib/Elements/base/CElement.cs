@@ -39,7 +39,8 @@ namespace GuiMinilib
                 element.UpdateLayoutConstraints(solver);
             }
         }
-        public virtual void PostConstraintsUpdate() {
+        public virtual void PostConstraintsUpdate()
+        {
             foreach (var element in elements)
             {
                 element.PostConstraintsUpdate();
@@ -48,24 +49,18 @@ namespace GuiMinilib
 
         public virtual void UpdateLayout()
         {
-            
+
             if (intrinsicWidth_ != null || intrinsicHeight_ != null)
             {
                 var intrinsicSize = this.tryFit(bounds.size);
 
                 if (intrinsicWidth_ != null)
                 {
-                    solver.RemoveConstraint(intrinsicWidthConstraint_);
-                    intrinsicWidth_.Value = intrinsicSize.x;
-                    intrinsicWidthConstraint_ = new ClStayConstraint(intrinsicWidth_, ClStrength.Required);
-                    solver.AddConstraint(intrinsicWidthConstraint_);
+                    UpdateStayConstrait(ref intrinsicWidthConstraint_, intrinsicSize.x);
                 }
                 if (intrinsicHeight_ != null)
                 {
-                    solver.RemoveConstraint(intrinsicHeightConstraint_);
-                    intrinsicHeight_.Value = intrinsicSize.y;
-                    intrinsicHeightConstraint_ = new ClStayConstraint(intrinsicHeight_, ClStrength.Required);
-                    solver.AddConstraint(intrinsicHeightConstraint_);
+                    UpdateStayConstrait(ref intrinsicHeightConstraint_, intrinsicSize.y);
                 }
             }
             foreach (var element in elements)
@@ -83,8 +78,8 @@ namespace GuiMinilib
             }
         }
 
-         
-        
+
+
         // todo: intristic size
     }
 }

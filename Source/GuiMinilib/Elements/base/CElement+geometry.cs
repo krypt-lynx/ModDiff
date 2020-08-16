@@ -27,7 +27,10 @@ namespace GuiMinilib
             }
         }
 
-        public virtual void DoContent() { }
+        public virtual void DoContent()
+        {
+            //GuiTools.UsingColor(new Color(1, 0, 0), () => Widgets.DrawBox(bounds, 1));
+        }
 
         static Texture2D debugBg = SolidColorMaterials.NewSolidColorTexture(new Color(1f, 1f, 1f, 0.3f));
         static Color debugTextColor = new Color(0, 0, 0, 0.5f);

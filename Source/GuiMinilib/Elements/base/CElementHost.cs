@@ -13,24 +13,6 @@ using Verse;
 
 namespace GuiMinilib
 {
-
-    public class CListingRow : CElementHost
-    {
-        public override void UpdateLayoutConstraints(ClSimplexSolver solver)
-        {
-            left.Value = InRect.xMin;
-            solver.AddStay(left);
-
-            right.Value = InRect.xMax;
-            solver.AddStay(right);
-
-            top.Value = InRect.yMin;
-            solver.AddStay(top);
-
-            base.UpdateLayoutConstraints(solver);
-        }
-    }
-
     public class CElementHost : CElement
     {
         public Rect _inRect;
@@ -55,7 +37,7 @@ namespace GuiMinilib
                 return solver_;
             }
         }
-                
+
         public CElementHost() : base()
         {
             solver_ = new ClSimplexSolver();
@@ -71,7 +53,7 @@ namespace GuiMinilib
                 UpdateLayoutConstraints();
 
                 PostConstraintsUpdate();
-                
+
                 UpdateLayout(); // forcefully updating layout after init to resolve multiline labels
                 PostLayoutUpdate();
                 needsUpdateLayout = true;
@@ -79,10 +61,10 @@ namespace GuiMinilib
         }
 
         protected bool needsUpdateLayout = true;
-   
+
         public void UpdateLayoutIfNeeded()
         {
-            //if (needsUpdateLayout)
+            if (needsUpdateLayout)
             {
 
                 UpdateLayout();
@@ -108,7 +90,6 @@ namespace GuiMinilib
 
             UpdateLayoutConstraints(solver);
             solver.Solve();
-            Log.Message($"solver state of {NamePrefix()}:\n{solver}");
 
         }
 
