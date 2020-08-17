@@ -37,32 +37,6 @@ namespace LinqExtansions
             return o as T;
         }
 
-        public static int IndexOfMax<T>(this IEnumerable<T> enumerable, IComparer<T> comparer = null)
-        {
-            if (comparer == null) comparer = Comparer<T>.Default;
-
-            var e = enumerable.GetEnumerator();
-            if (!e.MoveNext())
-            {
-                return -1;
-            }
-            T max = e.Current;
-            int maxI = 0;
-            int i = 1;
-            while (e.MoveNext())
-            {
-                if (comparer.Compare(e.Current, max) > 0)
-                {
-                    maxI = i;
-                    max = e.Current;
-                }
-
-                i++;
-            }
-
-            return maxI;
-        }
-
         /// <summary>
         /// Returns all elements of <paramref name="source"/> without <paramref name="elements"/>.
         /// Does not throw an exception if <paramref name="source"/> does not contain <paramref name="elements"/>.
