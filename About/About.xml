@@ -4,9 +4,10 @@
 	<author>Krypt</author>
 	<supportedVersions>
 		<li>1.1</li>
+		<li>1.2</li>
 	</supportedVersions>
 	<packageId>name.krypt.rimworld.moddiff</packageId>
-	<description>bla-bla-bla</description>
+	<description>An alternative mods mismatch list</description>
 	<modDependencies>
 		<li>
 			<packageId>brrainz.harmony</packageId>

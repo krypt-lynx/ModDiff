@@ -18,11 +18,11 @@ namespace ModDiff
     {
        
         public bool ignoreSelf = false;
-        public bool selfPreservation = false;
+        public bool selfPreservation = true;
 
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref ignoreSelf, "ignoreSelf", true);
+            Scribe_Values.Look(ref ignoreSelf, "ignoreSelf", false);
             Scribe_Values.Look(ref selfPreservation, "selfPreservation", true);
 
             base.ExposeData();
@@ -33,6 +33,7 @@ namespace ModDiff
     {
         public static string packageIdOfMine = null;
         public static Settings settings = null;
+        public static bool CassowaryPackaged = true;
 
         public ModDiff(ModContentPack content) : base(content)
         {

@@ -62,7 +62,7 @@ namespace ModDiff
             var runningIds = LoadedModManager.RunningMods.Select(mod => mod.PackageId);
             var saveIds = ScribeMetaHeaderUtility.loadedModIdsList.AsEnumerable();
 
-            if (ModDiff.settings.ignoreSelf) // todo: option
+            if (ModDiff.settings.ignoreSelf) 
             {
                 runningIds = runningIds.Without(ModDiff.packageIdOfMine);
                 saveIds = saveIds.Without(ModDiff.packageIdOfMine);

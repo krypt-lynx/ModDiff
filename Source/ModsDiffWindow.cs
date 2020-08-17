@@ -108,14 +108,14 @@ namespace ModDiff
             initSize = new Vector2(Math.Max(460, cellSize.x * 2 + markerWidth + vSpace * 2 + 20), 800);
 
 
-            var lastNext = CElement.nextId;
-            var timer = new Stopwatch();
-            timer.Start();
+            //var lastNext = CElement.nextId;
+            //var timer = new Stopwatch();
+            //timer.Start();
             ConstructGui(confirmedAction);
-            timer.Stop();
-            Log.Message($"gui init in: {timer.Elapsed}");
+            //timer.Stop();
+            //Log.Message($"gui init in: {timer.Elapsed}");
 
-            Log.Message($"Elements created: {CElement.nextId - lastNext}");
+            //Log.Message($"Elements created: {CElement.nextId - lastNext}");
         }
 
         private void ConstructGui(Action confirmedAction)
@@ -196,13 +196,12 @@ namespace ModDiff
             buttonPanel.solver.AddConstraint(reloadButton.width, reloadButton.intrinsicWidth, (a, b) => a >= b, ClStrength.Strong);
             buttonPanel.solver.AddConstraint(continueButton.width, continueButton.intrinsicWidth, (a, b) => a >= b, ClStrength.Strong);
 
-            // pairing all 3 buttons: if intrinsic width of one of them is too big - costraints of that button will be bocken, so, we need to bind each to each
+            // pairing all 3 buttons: if intrinsic width of one of them is too big - costraints of that button will be broken, so, we need to bind each to each
 
             buttonPanel.solver.AddConstraint(backButton.width, reloadButton.width, (a, b) => a == b, ClStrength.Medium); 
             buttonPanel.solver.AddConstraint(backButton.width, continueButton.width, (a, b) => a == b, ClStrength.Medium);
             buttonPanel.solver.AddConstraint(reloadButton.width, continueButton.width, (a, b) => a == b, ClStrength.Medium);
 
-            //           gui.solver.AddConstraint(diffList.height, diffList.intrinsicHeight, (a, b) => a >= b, ClStrength.Weak);
 
             gui.WeakHeight = true;
             gui.solver.AddConstraint(diffList.height, diffList.intrinsicHeight, (a, b) => a <= b, ClStrength.Strong);
@@ -213,11 +212,8 @@ namespace ModDiff
             gui.LayoutUpdated = () =>
             {
                 this.initSize = new Vector2(initSize.x, gui.bounds.height);
-                Log.Message($"LayoutUpdated callback initSize: {this.initSize}");
-//                gui.InRect = this.initSize;
             };
 
-            Log.Message($"ConstructGui initSize: {this.initSize}");
             gui.InRect = new Rect(Vector2.zero, initSize);
         }
 
@@ -358,14 +354,36 @@ namespace ModDiff
             }
         }
 
-        private static void TrySetActiveMods()
+
+        static string[] insertionPoints = { "ludeon.rimworld.royalty", "ludeon.rimworld", "brrainz.harmony" };
+
+        private void TrySetActiveMods()
         {
+            var loadedModIdsList = new List<string>(ScribeMetaHeaderUtility.loadedModIdsList);
+
+            if (ModDiff.settings.selfPreservation && !loadedModIdsList.Contains(ModDiff.packageIdOfMine))
+            {
+                int i = 0;
+                int foundPoint = -1;
+                while (i < insertionPoints.Length && foundPoint == -1)
+                {
+                    foundPoint = loadedModIdsList.IndexOf(insertionPoints[i]);
+                    i++;
+                }
+                if (foundPoint == -1) // what are you? 
+                {
+                    foundPoint = loadedModIdsList.Count() - 1;
+                }
+                loadedModIdsList.Insert(foundPoint + 1, ModDiff.packageIdOfMine);
+            }
+
             if (Current.ProgramState == ProgramState.Entry)
             {
-                ModsConfig.SetActiveToList(ScribeMetaHeaderUtility.loadedModIdsList);
+                ModsConfig.SetActiveToList(loadedModIdsList);
             }
-            ModsConfig.SaveFromList(ScribeMetaHeaderUtility.loadedModIdsList);
+            ModsConfig.SaveFromList(loadedModIdsList);
 
+            // Missing mods (DiffMod mostlike is no missing, leaving it is as until next update)
             IEnumerable<string> enumerable = Enumerable
                 .Range(0, ScribeMetaHeaderUtility.loadedModIdsList.Count)
                 .Where((int id) => ModLister.GetModWithIdentifier(ScribeMetaHeaderUtility.loadedModIdsList[id], false) == null)

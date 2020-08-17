@@ -23,12 +23,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>portable</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\1.1\Assemblies\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -41,7 +42,7 @@
     </Reference>
     <Reference Include="Cassowary, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\Repo\Cassowary.net\Cassowary\bin\Debug\Cassowary.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Repo\Cassowary.net\Cassowary\bin\Release\Cassowary.dll</HintPath>
     </Reference>
     <Reference Include="HarmonyMod">
       <HintPath>..\..\RJWEggTest\1.1\Assemblies\HarmonyMod.dll</HintPath>
