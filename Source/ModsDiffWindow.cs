@@ -230,7 +230,7 @@ namespace ModDiff
 
             ConstructDiffList(diffList);
 
-            Gui.solver.AddConstraint(Gui.height <= 800);
+            Gui.solver.AddConstraint(Gui.height <= (this.screenHeight - this.MarginSize().y) * 0.8); // TODO: LayoutGuide
             Gui.solver.AddConstraint(Gui.width ^ InnerSize.x);
 
             Gui.LayoutUpdated = () =>
