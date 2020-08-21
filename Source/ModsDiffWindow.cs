@@ -44,7 +44,6 @@ namespace ModDiff
         }
     }
 
-
     struct CellStyleData
     {
         public string marker;
@@ -67,35 +66,73 @@ namespace ModDiff
             }
         }
 
-        private static readonly Texture2D RemovedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.5f, 0.17f, 0.17f, 0.70f));
-        private static readonly Texture2D AddedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.17f, 0.45f, 0.17f, 0.70f));
-        private static readonly Texture2D MovedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.38f, 0.36f, 0.15f, 0.70f));
+
+        CellStyleData removedModCellStyle;
+        CellStyleData addedModCellStyle;
+        CellStyleData movedModCellStyle;
 
 
-        CellStyleData removedModCellStyle = new CellStyleData()
+        void InitStyles()
         {
-            marker = "-",
-            bgTexture = RemovedModBg,
-            outlineColor = new Color(0.5f, 0.17f, 0.17f, 0.70f),
-        };
+            if (!ModDiff.settings.alternativePallete)
+            {
+                Texture2D RemovedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.5f, 0.17f, 0.17f, 0.70f));
+                Texture2D AddedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.17f, 0.45f, 0.17f, 0.70f));
+                Texture2D MovedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.38f, 0.36f, 0.15f, 0.70f));
 
-        CellStyleData addedModCellStyle = new CellStyleData()
-        {
-            marker = "+",
-            bgTexture = AddedModBg,
-            outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
-        };
+                removedModCellStyle = new CellStyleData()
+                {
+                    marker = "-",
+                    bgTexture = RemovedModBg,
+                    outlineColor = new Color(0.5f, 0.17f, 0.17f, 0.70f),
+                };
+                addedModCellStyle = new CellStyleData()
+                {
+                    marker = "+",
+                    bgTexture = AddedModBg,
+                    outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
+                };
+                movedModCellStyle = new CellStyleData()
+                {
+                    marker = "*",
+                    bgTexture = MovedModBg,
+                    outlineColor = new Color(0.38f, 0.36f, 0.15f, 0.70f),
+                };
+            }
+            else
+            {
+                Texture2D RemovedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.45f, 0.10f, 0.45f, 0.70f));
+                Texture2D AddedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.17f, 0.45f, 0.17f, 0.70f));
+                Texture2D MovedModBg = SolidColorMaterials.NewSolidColorTexture(new Color(0.40f, 0.40f, 0.40f, 0.70f));
 
-        CellStyleData movedModCellStyle = new CellStyleData()
-        {
-            marker = "*",
-            bgTexture = MovedModBg,
-            outlineColor = new Color(0.38f, 0.36f, 0.15f, 0.70f),
-        };
+                removedModCellStyle = new CellStyleData()
+                {
+                    marker = "-",
+                    bgTexture = RemovedModBg,
+                    outlineColor = new Color(0.45f, 0.10f, 0.45f, 0.70f),
+                };
+                addedModCellStyle = new CellStyleData()
+                {
+                    marker = "+",
+                    bgTexture = AddedModBg,
+                    outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
+                };
+                movedModCellStyle = new CellStyleData()
+                {
+                    marker = "*",
+                    bgTexture = MovedModBg,
+                    outlineColor = new Color(0.40f, 0.40f, 0.40f, 0.70f),
+                };
+            }
+
+        }
+
 
         Action confirmedAction = null;
         public ModsDiffWindow(ModInfo[] saveMods, ModInfo[] runningMods, Action confirmedAction) : base()
         {
+            InitStyles();
+
             CalculateDiff(saveMods, runningMods, confirmedAction);
 
             var cellSize = new Vector2(
