@@ -1,9 +1,9 @@
 # Configurable variables
 $repo           = '..'
 $packing        = 'packing'
-$outputFormat   = '..\..\ModDiff-{0}.7z'
+$outputFormat   = '..\..\ModDiff-{0}.zip'
 $internalPath   = 'ModDiff'
-$pathsToRemove = '.git', '.gitattributes', '.gitignore', 'Source', 'Deploy', '1.1/Assemblies/*.pdb', '1.1/Assemblies/*.xml', '1.2/Assemblies/*.pdb', '1.2/Assemblies/*.xml'
+$pathsToRemove = '.git', '.gitattributes', '.gitignore', 'Source', 'Deploy', 'Steam', '1.1/Assemblies/*.pdb', '1.1/Assemblies/*.xml', '1.2/Assemblies/*.pdb', '1.2/Assemblies/*.xml'
 
 [Console]::ResetColor()
 
@@ -87,7 +87,7 @@ $Step++
 Write-Progress -Id $Id -Activity $Activity -Status (& $StatusBlock) -CurrentOperation " " -PercentComplete ($Step / $TotalSteps * 100)
 
 Push-Location -Path  $packing
-& $7z a -r ($startupPath.Path+'\'+$output) + $internalPath | Foreach-Object -Begin { 
+& $7z a -r -tzip ($startupPath.Path+'\'+$output) + $internalPath | Foreach-Object -Begin { 
 	Write-Progress -Id ($Id+1) -ParentId $Id -Activity 'Archiving' -Status "Starting..." -PercentComplete 0
 } -Process {
 	$line = $_.Trim()

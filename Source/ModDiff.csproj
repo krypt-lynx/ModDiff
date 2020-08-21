@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\1.1\Assemblies\</OutputPath>
+    <OutputPath>..\1.2\Assemblies\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>portable</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\1.1\Assemblies\</OutputPath>
+    <OutputPath>..\1.2\Assemblies\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -33,19 +33,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\..\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
+      <HintPath>D:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Cassowary, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\Repo\Cassowary.net\Cassowary\bin\Release\Cassowary.dll</HintPath>
-    </Reference>
-    <Reference Include="HarmonyMod">
-      <HintPath>..\..\RJWEggTest\1.1\Assemblies\HarmonyMod.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -75,26 +67,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Diff.cs" />
-    <Compile Include="GuiMinilib\Elements\base\CGuiRoot.cs" />
-    <Compile Include="GuiMinilib\Elements\CButton.cs" />
-    <Compile Include="GuiMinilib\Elements\base\CElement+anchors.cs" />
-    <Compile Include="GuiMinilib\Elements\base\CElement+geometry.cs" />
-    <Compile Include="GuiMinilib\Elements\base\CElement+hierarchy.cs" />
-    <Compile Include="GuiMinilib\Elements\base\CElement.cs" />
-    <Compile Include="GuiMinilib\Elements\base\CElementHost.cs" />
-    <Compile Include="GuiMinilib\Elements\CLabel.cs" />
-    <Compile Include="GuiMinilib\Elements\ListingStandard\CListingRow.cs" />
-    <Compile Include="GuiMinilib\Elements\ListingStandard\CListingStandart.cs" />
-    <Compile Include="GuiMinilib\MiscTools\ConstraintTools.cs" />
-    <Compile Include="GuiMinilib\Elements\CWidget.cs" />
-    <Compile Include="GuiMinilib\MiscTools\EdgeInsets.cs" />
-    <Compile Include="GuiMinilib\MiscTools\GuiTools.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="linq.cs" />
     <Compile Include="ModDiff.cs" />
     <Compile Include="ModsDiffWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\..\..\Repo\Cassowary.net\Cassowary\Cassowary.csproj">
+      <Project>{f01578a3-ba19-47e6-b333-40e41158658b}</Project>
+      <Name>Cassowary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\GuiMinilib\Source\GuiMinilib\GuiMinilib.csproj">
+      <Project>{859869af-24c5-4aba-a111-f95a794ed7a3}</Project>
+      <Name>GuiMinilib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
