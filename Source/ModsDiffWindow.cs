@@ -118,7 +118,7 @@ namespace ModDiff
                 //lines_debug = 2
             });
 
-            CListingStandart diffList = null;
+            CScrollView diffList = null;
 
             var headerPanel = Gui.AddElement(new CElement());
             var headerLeft = headerPanel.AddElement(new CLabel {
@@ -140,7 +140,7 @@ namespace ModDiff
                 DoWidgetContent = sender => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(sender.bounds.x, sender.bounds.y, sender.bounds.width - (diffList.IsScrollBarVisible() ? 20 : 0)))
             });
 
-            diffList = Gui.AddElement(new CListingStandart
+            diffList = Gui.AddElement(new CScrollView
             {
               
             });
@@ -204,7 +204,7 @@ namespace ModDiff
             Gui.InRect = new Rect(Vector2.zero, initSize);
         }
 
-        private void ConstructDiffList(CListingStandart diffList)
+        private void ConstructDiffList(CScrollView diffList)
         {
             int i = 0;
 
