@@ -67,10 +67,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Diff.cs" />
+    <Compile Include="ModsDiffWindow\ModDiffCell.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="linq.cs" />
     <Compile Include="ModDiff.cs" />
-    <Compile Include="ModsDiffWindow.cs" />
+    <Compile Include="ModsDiffWindow\ModDiffModel.cs" />
+    <Compile Include="ModsDiffWindow\ModDiffWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -78,9 +80,9 @@
       <Project>{f01578a3-ba19-47e6-b333-40e41158658b}</Project>
       <Name>Cassowary</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\GuiMinilib\Source\GuiMinilib\GuiMinilib.csproj">
+    <ProjectReference Include="F:\games\RimWorld\Mods\GuiMinilib\Source\GuiMinilib\RWLayout_moddiff.csproj">
       <Project>{859869af-24c5-4aba-a111-f95a794ed7a3}</Project>
-      <Name>GuiMinilib</Name>
+      <Name>RWLayout_moddiff</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

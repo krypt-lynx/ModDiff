@@ -52,7 +52,7 @@ namespace ModDiff
             var saveMods = Enumerable.Zip(ScribeMetaHeaderUtility.loadedModIdsList, ScribeMetaHeaderUtility.loadedModNamesList, (modId, modMame) => new ModInfo { packageId = modId, name = modMame }).ToArray();
 
 
-            var diffWindow = new ModsDiffWindow(saveMods, runningMods, confirmedAction);
+            var diffWindow = new ModDiffWindow(saveMods, runningMods, confirmedAction);
             Find.WindowStack.Add(diffWindow);
 
         }

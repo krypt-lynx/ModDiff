@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+  <SaveGameMods>Моды сохранения:</SaveGameMods>
+  <RunningMods>Загруженные моды:</RunningMods>
+  <IgnoreSelfTitle>Пропускать себя при проверке совпадения списков модов</IgnoreSelfTitle>
+  <IgnoreSelfHint>Что может пойти не так?</IgnoreSelfHint>
+  <KeepSelfLoaded>Оставлять себя в списке модов при его изменении</KeepSelfLoaded>
+  <AlternativePalette>Альтернативная палитра</AlternativePalette>  
+</LanguageData>

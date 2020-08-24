@@ -61,10 +61,14 @@ namespace ModDiff
             options.maxOneColumn = true;
 
             options.Begin(inRect);
-            options.CheckboxLabeled("Ignore self in modlist matching check", ref settings.ignoreSelf, "What could go wrong?");
-            options.CheckboxLabeled("Keep self loaded after modlist change", ref settings.selfPreservation);
-            options.CheckboxLabeled("Alternative palette", ref settings.alternativePallete);
 
+            options.CheckboxLabeled("IgnoreSelfTitle".Translate(), ref settings.ignoreSelf, "IgnoreSelfHint".Translate());
+            // "Ignore self in modlist matching check"
+            // "What could go wrong?"
+            options.CheckboxLabeled("KeepSelfLoaded".Translate(), ref settings.selfPreservation);
+            // "Keep self loaded after modlist change"
+            options.CheckboxLabeled("AlternativePalette".Translate(), ref settings.alternativePallete);
+            // "Alternative palette"
             options.End();
         }
 

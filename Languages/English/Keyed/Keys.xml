@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+  <SaveGameMods>Savegame mods:</SaveGameMods>
+  <RunningMods>Running mods:</RunningMods>
+  <IgnoreSelfTitle>Ignore self in modlist matching check</IgnoreSelfTitle>
+  <IgnoreSelfHint>What could go wrong?</IgnoreSelfHint>
+  <KeepSelfLoaded>Keep self loaded after modlist change</KeepSelfLoaded>
+  <AlternativePalette>Alternative palette</AlternativePalette>  
+</LanguageData>
