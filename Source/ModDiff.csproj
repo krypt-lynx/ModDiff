@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Diff.cs" />
+    <Compile Include="MissingModsDialog.cs" />
     <Compile Include="ModsDiffWindow\ModDiffCell.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="linq.cs" />

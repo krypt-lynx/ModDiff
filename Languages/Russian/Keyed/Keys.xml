@@ -6,4 +6,7 @@
   <IgnoreSelfHint>Что может пойти не так?</IgnoreSelfHint>
   <KeepSelfLoaded>Оставлять себя в списке модов при его изменении</KeepSelfLoaded>
   <AlternativePalette>Альтернативная палитра</AlternativePalette>  
+  
+  <MissingModsWarningTitle>Отсутствующие моды</MissingModsWarningTitle>
+  <MissingModsWarningText>Несколько модов, использованные в этом сохранении недоступны. Возможно вы отписались от них, авторы удалили свои моды или они были удалены из вашей локальной директории.</MissingModsWarningText>
 </LanguageData>

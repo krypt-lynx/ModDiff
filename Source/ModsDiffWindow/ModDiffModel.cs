@@ -20,6 +20,8 @@ namespace ModDiff
             CalculateDiff(saveMods, runningMods);
         }
 
+        public bool HaveMissingMods = false;
+
         private void CalculateDiff(ModInfo[] saveMods, ModInfo[] runningMods)
         {
             var diff = new Myers<ModInfo>(saveMods, runningMods);
@@ -40,13 +42,9 @@ namespace ModDiff
                 if (ModLister.GetModWithIdentifier(change.value.packageId, false) == null)
                 {
                     change.value.isMissing = true;
+                    HaveMissingMods = true;
                 }
             }
-
-            IEnumerable<string> enumerable = Enumerable
-                .Range(0, ScribeMetaHeaderUtility.loadedModIdsList.Count)
-                .Where((int id) => ModLister.GetModWithIdentifier(ScribeMetaHeaderUtility.loadedModIdsList[id], false) == null)
-                .Select((int id) => ScribeMetaHeaderUtility.loadedModNamesList[id]);
         }
 
 
@@ -78,21 +76,14 @@ namespace ModDiff
             }
             ModsConfig.SaveFromList(loadedModIdsList);
 
-            // Missing mods (DiffMod mostlike is no missing, leaving it is as until next update)
-            IEnumerable<string> enumerable = Enumerable
+            // "MissingMods".Translate(),
+            /*IEnumerable<string> enumerable = Enumerable
                 .Range(0, ScribeMetaHeaderUtility.loadedModIdsList.Count)
                 .Where((int id) => ModLister.GetModWithIdentifier(ScribeMetaHeaderUtility.loadedModIdsList[id], false) == null)
                 .Select((int id) => ScribeMetaHeaderUtility.loadedModNamesList[id]);
+            */
 
-
-            if (enumerable.Any<string>())
-            {
-                Messages.Message(string.Format("{0}: {1}", "MissingMods".Translate(), enumerable.ToCommaList(false)), MessageTypeDefOf.RejectInput, false);
-            }
-            else
-            {
-                ModsConfig.RestartFromChangedMods();
-            }
+            ModsConfig.RestartFromChangedMods();
         }
 
     }

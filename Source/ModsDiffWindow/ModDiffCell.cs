@@ -20,6 +20,8 @@ namespace ModDiff
 
     public class ModDiffCell : CElement
     {
+        public const int MarkerWidth = 16;
+
         public CellStyleData style;
         private bool RepresentsModified;
         private string Title;

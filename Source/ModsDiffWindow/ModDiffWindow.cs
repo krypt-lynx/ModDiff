@@ -47,7 +47,6 @@ namespace ModDiff
 
     public class ModDiffWindow : CWindow
     {
-        const int markerWidth = 16;
         const int vSpace = 8;
 
         public override Vector2 InitialSize
@@ -94,7 +93,7 @@ namespace ModDiff
                 {
                     marker = "!",
                     bgColor = new Color(0.2f, 0.05f, 0.05f, 0.70f),
-                    outlineColor = new Color(0.2f, 0.05f, 0.05f, 0.70f),
+                    outlineColor = new Color(0.4f, 0.10f, 0.10f, 0.70f),
                     insets = new EdgeInsets(2, 2, 2, 5),
                 };
             }
@@ -125,7 +124,7 @@ namespace ModDiff
                 {
                     marker = "!",
                     bgColor = new Color(0.2f, 0.05f, 0.2f, 0.70f),
-                    outlineColor = new Color(0.2f, 0.05f, 0.2f, 0.70f),
+                    outlineColor = new Color(0.4f, 0.10f, 0.4f, 0.70f),
                     insets = new EdgeInsets(2, 2, 2, 5),
                 };
             }
@@ -145,14 +144,19 @@ namespace ModDiff
             model.CalculateDiff();
 
             var cellSize = new Vector2(
-                model.info.Max(x => Text.CalcSize(x.value.name).x + markerWidth),
+                model.info.Max(x => Text.CalcSize(x.value.name).x + ModDiffCell.MarkerWidth),
                 Text.LineHeight);
 
-            InnerSize = new Vector2(Math.Max(460, cellSize.x * 2 + markerWidth + 20), 800);
+            InnerSize = new Vector2(Math.Max(460, cellSize.x * 2 + ModDiffCell.MarkerWidth + 20), 800);
         }
 
         public override void ConstructGui()
         {
+            base.ConstructGui();
+
+
+            this.absorbInputAroundWindow = true;
+
             var titleLabel = Gui.AddElement(new CLabel
             {
                 Font = GameFont.Medium,
@@ -165,7 +169,7 @@ namespace ModDiff
                 //lines_debug = 2
             });
 
-            CScrollView diffList = null;
+            CListView diffList = null;
 
             var headerPanel = Gui.AddElement(new CElement());
             var headerLeft = headerPanel.AddElement(new CLabel {
@@ -187,7 +191,7 @@ namespace ModDiff
                 DoWidgetContent = sender => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(sender.bounds.x, sender.bounds.y, sender.bounds.width - (diffList.IsScrollBarVisible() ? 20 : 0)))
             });
 
-            diffList = Gui.AddElement(new CScrollView
+            diffList = Gui.AddElement(new CListView
             {
               
             });
@@ -200,11 +204,7 @@ namespace ModDiff
             var reloadButton = buttonPanel.AddElement(new CButton
             {
                 Title = "ChangeLoadedMods".Translate(),
-                Action = (_) =>
-                {
-                    model.TrySetActiveMods();
-                    Close(true);
-                }
+                Action = (_) => TrySetActiveMods(),
             });
             var continueButton = buttonPanel.AddElement(new CButton
             {
@@ -217,7 +217,7 @@ namespace ModDiff
             });
 
             // root constraints
-            Gui.StackTop(true, true, ClStrength.Strong, (titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 2, headerPanel, (headerLine, 1), 4, diffList, 10, (buttonPanel, 40));
+            Gui.StackTop(true, true, ClStrength.Strong, (titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 2, headerPanel, (headerLine, 1), 4, diffList, 12, (buttonPanel, 40));
 
             headerPanel.StackLeft(true, true, ClStrength.Strong, 16 +5, headerLeft, 16+5, (headerRight, headerLeft.width), (headerSpacer, headerSpacer.intrinsicWidth));
             headerLeft.Solver.AddConstraint(headerLeft.height ^ headerLeft.intrinsicHeight);
@@ -251,7 +251,20 @@ namespace ModDiff
             Gui.InRect = new Rect(Vector2.zero, initSize);
         }
 
-        private void ConstructDiffList(CScrollView diffList)
+        private void TrySetActiveMods()
+        {
+            if (!model.HaveMissingMods)
+            {
+                model.TrySetActiveMods();
+                Close(true);
+            }
+            else
+            {
+                Find.WindowStack.Add(new MissingModsDialog(model.saveMods.Where(x => x.isMissing), () => model.TrySetActiveMods(), missingModStyle));
+            }
+        }
+
+        private void ConstructDiffList(CListView diffList)
         {
             int i = 0;
 

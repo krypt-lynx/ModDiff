@@ -1,9 +1,9 @@
 mod status: injected (self)
-mod status: missing
++mod status: missing
 mod version tracking?
 
 message on self removal
-missing mods dialog
++missing mods dialog
 +translation support
 api for keeping mods from removal? just window?
 mod on/off on the fly

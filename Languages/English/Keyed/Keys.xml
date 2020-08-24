@@ -6,4 +6,7 @@
   <IgnoreSelfHint>What could go wrong?</IgnoreSelfHint>
   <KeepSelfLoaded>Keep self loaded after modlist change</KeepSelfLoaded>
   <AlternativePalette>Alternative palette</AlternativePalette>  
+  
+  <MissingModsWarningTitle>Missing mods</MissingModsWarningTitle>
+  <MissingModsWarningText>Some mods used in this savegame are unavailable. Maybe you unsubscribed from them, authors are removed its creations, or mods was removed from local directory.</MissingModsWarningText>
 </LanguageData>
