@@ -27,11 +27,6 @@ namespace ModDiff
 
             info = diff.changeSet;
 
-            foreach (var x in diff.changeSet)
-            {
-                //       Log.Message(x.value.packageId + "|" + x.value.name + "|" + x.change.ToString());
-            }
-
             var moved = info.Where(x => x.change == ChangeType.Removed).Select(x => x.value).ToHashSet();
             moved.IntersectWith(info.Where(x => x.change == ChangeType.Added).Select(x => x.value));
 
@@ -41,7 +36,17 @@ namespace ModDiff
                 {
                     change.value.isMoved = true;
                 }
+
+                if (ModLister.GetModWithIdentifier(change.value.packageId, false) == null)
+                {
+                    change.value.isMissing = true;
+                }
             }
+
+            IEnumerable<string> enumerable = Enumerable
+                .Range(0, ScribeMetaHeaderUtility.loadedModIdsList.Count)
+                .Where((int id) => ModLister.GetModWithIdentifier(ScribeMetaHeaderUtility.loadedModIdsList[id], false) == null)
+                .Select((int id) => ScribeMetaHeaderUtility.loadedModNamesList[id]);
         }
 
 

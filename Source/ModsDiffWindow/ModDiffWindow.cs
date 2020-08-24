@@ -21,6 +21,7 @@ namespace ModDiff
         public string packageId;
         public string name;
         public bool isMoved = false;
+        public bool isMissing = false;
 
         public override bool Equals(object obj)
         {
@@ -56,7 +57,7 @@ namespace ModDiff
                 return initSize + new Vector2(Margin * 2, Margin * 2);
             }
         }
-
+        CellStyleData missingModStyle;
         CellStyleData removedModCellStyle;
         CellStyleData addedModCellStyle;
         CellStyleData movedModCellStyle;
@@ -68,57 +69,63 @@ namespace ModDiff
         {
             if (!ModDiff.settings.alternativePallete)
             {
-                Color removedBg = new Color(0.5f, 0.17f, 0.17f, 0.70f);
-                Color addedBg =   new Color(0.17f, 0.45f, 0.17f, 0.70f);
-                Color movedBg =   new Color(0.38f, 0.36f, 0.15f, 0.70f);
-
                 removedModCellStyle = new CellStyleData()
                 {
                     marker = "-",
-                    bgColor = removedBg,
+                    bgColor = new Color(0.5f, 0.17f, 0.17f, 0.70f),
                     outlineColor = new Color(0.5f, 0.17f, 0.17f, 0.70f),
                     insets = new EdgeInsets(2, 2, 2, 5),
                 };
                 addedModCellStyle = new CellStyleData()
                 {
                     marker = "+",
-                    bgColor = addedBg,
+                    bgColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
                     outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
                     insets = new EdgeInsets(2, 2, 2, 5),
                 };
                 movedModCellStyle = new CellStyleData()
                 {
                     marker = "*",
-                    bgColor = movedBg,
+                    bgColor = new Color(0.38f, 0.36f, 0.15f, 0.70f),
                     outlineColor = new Color(0.38f, 0.36f, 0.15f, 0.70f),
+                    insets = new EdgeInsets(2, 2, 2, 5),
+                };
+                missingModStyle = new CellStyleData()
+                {
+                    marker = "!",
+                    bgColor = new Color(0.2f, 0.05f, 0.05f, 0.70f),
+                    outlineColor = new Color(0.2f, 0.05f, 0.05f, 0.70f),
                     insets = new EdgeInsets(2, 2, 2, 5),
                 };
             }
             else
             {
-                Color RemovedModBg = new Color(0.45f, 0.10f, 0.45f, 0.70f);
-                Color AddedModBg =   new Color(0.17f, 0.45f, 0.17f, 0.70f);
-                Color MovedModBg =   new Color(0.40f, 0.40f, 0.40f, 0.70f);
-
                 removedModCellStyle = new CellStyleData()
                 {
                     marker = "-",
-                    bgColor = RemovedModBg,
+                    bgColor = new Color(0.45f, 0.10f, 0.45f, 0.70f),
                     outlineColor = new Color(0.45f, 0.10f, 0.45f, 0.70f),
                     insets = new EdgeInsets(2, 2, 2, 5),
                 };
                 addedModCellStyle = new CellStyleData()
                 {
                     marker = "+",
-                    bgColor = AddedModBg,
+                    bgColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
                     outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
                     insets = new EdgeInsets(2, 2, 2, 5),
                 };
                 movedModCellStyle = new CellStyleData()
                 {
                     marker = "*",
-                    bgColor = MovedModBg,
+                    bgColor = new Color(0.40f, 0.40f, 0.40f, 0.70f),
                     outlineColor = new Color(0.40f, 0.40f, 0.40f, 0.70f),
+                    insets = new EdgeInsets(2, 2, 2, 5),
+                };
+                missingModStyle = new CellStyleData()
+                {
+                    marker = "!",
+                    bgColor = new Color(0.2f, 0.05f, 0.2f, 0.70f),
+                    outlineColor = new Color(0.2f, 0.05f, 0.2f, 0.70f),
                     insets = new EdgeInsets(2, 2, 2, 5),
                 };
             }
@@ -275,15 +282,26 @@ namespace ModDiff
                 }
                 row.Embed(bg);
 
-                bool isMoved = line.value.isMoved;
-
                 // left
                 CElement lCell;
                 if (line.change != ChangeType.Added)
                 {
-                    
+                    CellStyleData style;
+
+                    if (line.value.isMissing)
+                    {
+                        style = missingModStyle;
+                    }
+                    else if (line.value.isMoved)
+                    {
+                        style = movedModCellStyle;
+                    }
+                    else
+                    {
+                        style = removedModCellStyle;
+                    }
                     lCell = row.AddElement(new ModDiffCell(
-                        isMoved ? movedModCellStyle : removedModCellStyle, 
+                        style, 
                         line.change == ChangeType.Removed, 
                         line.value.name
                         ));
@@ -297,8 +315,19 @@ namespace ModDiff
                 CElement rCell;
                 if (line.change != ChangeType.Removed)
                 {
+                    CellStyleData style;
+
+                    if (line.value.isMoved)
+                    {
+                        style = movedModCellStyle;
+                    }
+                    else
+                    {
+                        style = addedModCellStyle;
+                    }
+
                     rCell = row.AddElement(new ModDiffCell(
-                        isMoved ? movedModCellStyle : addedModCellStyle,
+                        style,
                         line.change == ChangeType.Added,
                         line.value.name
                         ));
