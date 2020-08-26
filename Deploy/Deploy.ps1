@@ -3,7 +3,7 @@ $repo           = '..'
 $packing        = 'packing'
 $outputFormat   = '..\..\ModDiff-{0}.zip'
 $internalPath   = 'ModDiff'
-$pathsToRemove = '.git', '.gitattributes', '.gitignore', 'Source', 'Deploy', 'Steam', '1.1/Assemblies/*.pdb', '1.1/Assemblies/*.xml', '1.2/Assemblies/*.pdb', '1.2/Assemblies/*.xml'
+$pathsToRemove = '.git', '.gitattributes', '.gitignore', 'Source', 'Deploy', 'Steam', 'Dependencies', '1.1/Assemblies/*.pdb', '1.1/Assemblies/*.xml', '1.2/Assemblies/*.pdb', '1.2/Assemblies/*.xml'
 
 [Console]::ResetColor()
 
