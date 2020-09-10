@@ -48,7 +48,7 @@ namespace ModDiff
         }
 
 
-        static string[] insertionPoints = { "ludeon.rimworld.royalty", "ludeon.rimworld", "brrainz.harmony" };
+        static string harmonyId = "brrainz.harmony";
 
         public void TrySetActiveMods()
         {
@@ -56,18 +56,18 @@ namespace ModDiff
 
             if (ModDiff.settings.selfPreservation && !loadedModIdsList.Contains(ModDiff.packageIdOfMine))
             {
-                int i = 0;
-                int foundPoint = -1;
-                while (i < insertionPoints.Length && foundPoint == -1)
+                
+                var index = loadedModIdsList.IndexOf(harmonyId);
+
+                if (index != -1)
                 {
-                    foundPoint = loadedModIdsList.IndexOf(insertionPoints[i]);
-                    i++;
+                    loadedModIdsList.Insert(index + 1, ModDiff.packageIdOfMine);
                 }
-                if (foundPoint == -1) // what are you? 
+                else
                 {
-                    foundPoint = loadedModIdsList.Count() - 1;
+                    loadedModIdsList.Insert(0, harmonyId);
+                    loadedModIdsList.Insert(1, ModDiff.packageIdOfMine);
                 }
-                loadedModIdsList.Insert(foundPoint + 1, ModDiff.packageIdOfMine);
             }
 
             if (Current.ProgramState == ProgramState.Entry)
