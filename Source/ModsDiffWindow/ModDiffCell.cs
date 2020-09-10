@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cassowary_moddiff;
-using RWLayout_moddiff;
+using RWLayout.moddiff;
 using UnityEngine;
 using Verse;
 
@@ -31,21 +31,16 @@ namespace ModDiff
             this.style = style;
             this.RepresentsModified = modified;
             this.Title = title;
-        }
-
-        public override void PostAdd()
-        {
-            base.PostAdd();
-            
+   
 
             if (RepresentsModified)
             {
                 var highlight = this.AddElement(new CWidget
                 {
-                    DoWidgetContent = sender =>
+                    DoWidgetContent = (_, bounds) =>
                     {
-                        Widgets.DrawBoxSolid(sender.bounds, style.bgColor);
-                        GuiTools.UsingColor(style.outlineColor, () =>   GuiTools.Box(sender.bounds, style.insets));                        
+                        Widgets.DrawBoxSolid(bounds, style.bgColor);
+                        GuiTools.UsingColor(style.outlineColor, () => GuiTools.Box(bounds, style.insets));                        
                     }
                 });
                 this.Embed(highlight);
@@ -55,7 +50,7 @@ namespace ModDiff
             if (RepresentsModified)
             {
                 var icon = iconSlot.AddElement(new CLabel { Title = style.marker });
-                iconSlot.StackTop(false, true, ClStrength.Strong, icon);
+                iconSlot.StackTop(StackOptions.Create(constrainSides: false), icon);
                 iconSlot.Solver.AddConstraint(iconSlot.centerX ^ icon.centerX);
                 icon.Solver.AddConstraint(icon.width ^ icon.intrinsicWidth);
             }
@@ -65,7 +60,7 @@ namespace ModDiff
                 Title = Title
             });
 
-            this.StackLeft(true, true, ClStrength.Strong, 5, (iconSlot, 16), text, 2);
+            this.StackLeft(5, (iconSlot, 16), text, 2);
 
             this.Solver.AddConstraint(this.height ^ text.intrinsicHeight);
         }

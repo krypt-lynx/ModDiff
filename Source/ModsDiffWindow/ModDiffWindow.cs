@@ -10,7 +10,7 @@ using UnityEngine;
 using Verse;
 using Diff;
 using RimWorld;
-using RWLayout_moddiff;
+using RWLayout.moddiff;
 using Cassowary_moddiff;
 using System.Diagnostics;
 
@@ -49,13 +49,6 @@ namespace ModDiff
     {
         const int vSpace = 8;
 
-        public override Vector2 InitialSize
-        {
-            get
-            {
-                return initSize + new Vector2(Margin * 2, Margin * 2);
-            }
-        }
         CellStyleData missingModStyle;
         CellStyleData removedModCellStyle;
         CellStyleData addedModCellStyle;
@@ -165,7 +158,7 @@ namespace ModDiff
             var disclaimerLabel = Gui.AddElement(new CLabel
             {
                 Title = "ModsMismatchWarningText".Translate().RawText.Split('\n').FirstOrDefault(),
-                Multiline = true
+                // Multiline = true
                 //lines_debug = 2
             });
 
@@ -188,7 +181,7 @@ namespace ModDiff
             });
 
             var headerLine = Gui.AddElement(new CWidget {
-                DoWidgetContent = sender => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(sender.bounds.x, sender.bounds.y, sender.bounds.width - (diffList.IsScrollBarVisible() ? 20 : 0)))
+                DoWidgetContent = (_, bounds) => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(bounds.x, bounds.y, bounds.width - (diffList.IsScrollBarVisible() ? 20 : 0)))
             });
 
             diffList = Gui.AddElement(new CListView
@@ -217,13 +210,12 @@ namespace ModDiff
             });
 
             // root constraints
-            Gui.StackTop(true, true, ClStrength.Strong, (titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 2, headerPanel, (headerLine, 1), 4, diffList, 12, (buttonPanel, 40));
+            Gui.StackTop((titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 2, headerPanel, (headerLine, 1), 4, diffList, 12, (buttonPanel, 40));
 
-            headerPanel.StackLeft(true, true, ClStrength.Strong, 16 +5, headerLeft, 16+5, (headerRight, headerLeft.width), (headerSpacer, headerSpacer.intrinsicWidth));
+            headerPanel.StackLeft(16 + 5, headerLeft, 16+5, (headerRight, headerLeft.width), (headerSpacer, headerSpacer.intrinsicWidth));
             headerLeft.Solver.AddConstraint(headerLeft.height ^ headerLeft.intrinsicHeight);
 
-            buttonPanel.StackLeft(true, true, ClStrength.Strong,
-                backButton, 10.0, reloadButton, 20.0, continueButton);
+            buttonPanel.StackLeft(backButton, 10.0, reloadButton, 20.0, continueButton);
 
             buttonPanel.Solver.AddConstraint(backButton.width >= backButton.intrinsicWidth);
             buttonPanel.Solver.AddConstraint(reloadButton.width >= reloadButton.intrinsicWidth);
@@ -240,15 +232,9 @@ namespace ModDiff
 
             ConstructDiffList(diffList);
 
-            Gui.Solver.AddConstraint(Gui.height <= this.adjustedScreenHeight * 0.8); // TODO: LayoutGuide
+            Gui.Solver.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8); // TODO: LayoutGuide
             Gui.Solver.AddConstraint(Gui.width ^ InnerSize.x);
 
-            Gui.LayoutUpdated = () =>
-            {
-                this.initSize = new Vector2(initSize.x, Gui.bounds.height);
-            };
-
-            Gui.InRect = new Rect(Vector2.zero, initSize);
         }
 
         private void TrySetActiveMods()
@@ -270,16 +256,19 @@ namespace ModDiff
 
             foreach (var line in model.info)
             {
-                var row = diffList.NewRow();
+
+                var row = new CListingRow();
+                diffList.AppendRow(row);
                 string tip = "packadeId:\n" + line.value.packageId;
                 CElement bg = null;
                 if (i % 2 == 1)
                 {
                     bg = row.AddElement(new CWidget
                     {
-                        DoWidgetContent = sender => {
-                            Widgets.DrawAltRect(sender.bounds);
-                            TooltipHandler.TipRegion(sender.bounds, tip);
+
+                        DoWidgetContent = (_, bounds) => {
+                            Widgets.DrawAltRect(bounds);
+                            TooltipHandler.TipRegion(bounds, tip);
                         }
                     });
 
@@ -288,8 +277,8 @@ namespace ModDiff
                 {
                     bg = row.AddElement(new CWidget
                     {
-                        DoWidgetContent = sender => {
-                            TooltipHandler.TipRegion(sender.bounds, tip);
+                        DoWidgetContent = (_, bounds) => {
+                            TooltipHandler.TipRegion(bounds, tip);
                         }
                     });
                 }
@@ -350,8 +339,7 @@ namespace ModDiff
                     rCell = row.AddElement(new CElement());
                 }
 
-                row.StackLeft(true, true, ClStrength.Strong, lCell, rCell);
-                row.Solver.AddConstraint(lCell.width ^ rCell.width);
+                row.StackLeft(lCell, (rCell, lCell.width));
                 
                 //row.Solver.AddConstraint(row.height, h => h == cellSize.y);
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cassowary_moddiff;
-using RWLayout_moddiff;
+using RWLayout.moddiff;
 using UnityEngine;
 using Verse;
 
@@ -44,7 +44,7 @@ namespace ModDiff
             var disclaimerLabel = Gui.AddElement(new CLabel
             {
                 Title = "MissingModsWarningText".Translate(),
-                Multiline = true
+                //Multiline = true
             });
 
             var missingList = Gui.AddElement(new CListView());
@@ -61,8 +61,8 @@ namespace ModDiff
                 Action = (_) => AcceptAction(),
             });
 
-            Gui.StackTop(true, true, ClStrength.Strong, (titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 10, missingList, 12, (buttonPanel, 40));
-            buttonPanel.StackLeft(true, true, ClStrength.Strong, backButton, 20, reloadButton);
+            Gui.StackTop((titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 10, missingList, 12, (buttonPanel, 40));
+            buttonPanel.StackLeft(backButton, 20, reloadButton);
 
             buttonPanel.Solver.AddConstraint(backButton.width >= backButton.intrinsicWidth);
             buttonPanel.Solver.AddConstraint(reloadButton.width >= reloadButton.intrinsicWidth);
@@ -74,14 +74,15 @@ namespace ModDiff
             missingList.Solver.AddConstraint(missingList.height <= missingList.intrinsicHeight);
 
             Gui.Solver.AddConstraint(Gui.width ^ InnerSize.x);
-            Gui.Solver.AddConstraint(Gui.height <= this.adjustedScreenHeight * 0.8); // TODO: LayoutGuide
+            Gui.Solver.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8); // TODO: LayoutGuide
         }
 
         private void GenerateRows(CListView missingList)
         {
             foreach (var mod in missingMods)
             {
-                var row = missingList.NewRow();
+                var row = new CListingRow();
+                missingList.AppendRow(row);
                 var cell = row.AddElement(new ModDiffCell(cellStyle, true, mod.name));
                 row.Embed(cell);
             }
