@@ -3,7 +3,8 @@ $repo           = '..'
 $packing        = 'packing'
 $outputFormat   = '..\..\ModDiff-{0}.zip'
 $internalPath   = 'ModDiff'
-$pathsToRemove = '.git', '.gitattributes', '.gitignore', 'Source', 'Deploy', 'Steam', 'Dependencies', '1.1/Assemblies/*.pdb', '1.1/Assemblies/*.xml', '1.2/Assemblies/*.pdb', '1.2/Assemblies/*.xml'
+$pathsToRemove  = '.git', '.gitattributes', '.gitignore', 'Source', 'Deploy', 'Steam', 'Dependencies', '1.1/Assemblies/*.pdb', '1.1/Assemblies/*.xml', '1.2/Assemblies/*.pdb', '1.2/Assemblies/*.xml'
+$packageId      = 'name.krypt.rimworld.moddiff'
 
 [Console]::ResetColor()
 
@@ -13,7 +14,7 @@ $Id                   = 1
 
 # Complex Progress Bar
 $Step                 = 0
-$TotalSteps           = 6 
+$TotalSteps           = 7 
 $StatusText           = '"Step $($Step.ToString().PadLeft($TotalSteps.ToString().Length)) of $TotalSteps | $Task"' # Single quotes need to be on the outside
 $StatusBlock          = [ScriptBlock]::Create($StatusText) # This script block allows the string above to use the current values of embedded values each time it's run
 
@@ -24,12 +25,12 @@ $Step++
 
 $startupPath = Get-Location
 $7z = (GET-ItemProperty 'HKLM:\SOFTWARE\7-Zip').Path + '7z.exe'
-$packingRjw = $packing + "\" + $internalPath
+$packingMod = $packing + "\" + $internalPath
 
 Push-Location -Path $repo
 
 try {
-	[string]$version = git describe --tags
+	[string]$version = git describe --tags --always --dirty
 } catch {
 	[string]$version = ""
 }
@@ -63,7 +64,7 @@ $items | Foreach-Object -Begin {
     $i++
 	
 	if (-Not ($pathsToRemove -contains $_.Name)) {
-		Copy-Item -Recurse $_.FullName -Destination ($packingRjw + "\" + $_.Name)
+		Copy-Item -Recurse $_.FullName -Destination ($packingMod + "\" + $_.Name)
 	}
 	
 	$p = $i * 100 / $items.Count
@@ -71,13 +72,27 @@ $items | Foreach-Object -Begin {
 }
 Write-Progress -Id ($Id+1) -ParentId $Id -Activity "Copying" -Status "Ready" -Completed
 
+$Task = "Patching..."
+$Step++
+
+$about = $packingMod + "/About/About.xml"
+(Select-Xml -Path $about -XPath '/ModMetaData/packageId' | Select-Object -ExpandProperty Node).innerText = $packageId 
+
+$xml = [xml](Get-Content $about)
+$xml.SelectNodes('/ModMetaData/packageId') | % { 
+    $_."#text" = $packageId
+    }
+
+$xml.Save($about)
+
+
 # removing files from subfolders
 $Task = "Excluding..."
 $Step++
 Write-Progress -Id $Id -Activity $Activity -Status (& $StatusBlock) -CurrentOperation " " -PercentComplete ($Step / $TotalSteps * 100)
 
 foreach ($path in $pathsToRemove) {
-	$p = $packingRjw + '\' + $path
+	$p = $packingMod + '\' + $path
 	if (Test-Path $p) { Remove-Item -Recurse -Force $p }	
 }
 
