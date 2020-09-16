@@ -9,11 +9,63 @@ using Verse;
 
 namespace ModDiff
 {
+    public class ModModel
+    {
+        public string PackageId;
+
+        public ModInfo Left = null;
+        public ModInfo Right = null;
+        public int LeftIndex = -1;
+        public int RightIndex = -1;
+
+        //public ChangeType Change = ChangeType.Unmodified;
+        public bool IsMoved = false;
+        public bool IsMissing = false;
+
+        //public bool Selected = true;
+
+        public string Name { get => Right?.name ?? Left?.name; }
+
+        public override int GetHashCode()
+        {
+            return PackageId.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ModModel other)
+            {
+                return PackageId.Equals(other.PackageId);
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
+    public class DiffListItem
+    {
+        public ModModel ModModel;
+        public ChangeType Change;
+        public bool Selected;
+    }
+
     public class ModDiffModel
     {
         public ModInfo[] saveMods;
         public ModInfo[] runningMods;
-        public List<Change<ModInfo>> info;
+        public DiffListItem[] info;
+
+        //public Dictionary<string, ModInfo> saveModByPackageId;
+        //public Dictionary<string, ModInfo> runningModByPackageId;
+
+        public Dictionary<string, ModModel> modModelByPackageId;
+
+        //public int[][] indexesMap;
+        //public bool[] Activated;
+
+        //ModModel[] editListData;
 
         public void CalculateDiff()
         {
@@ -24,24 +76,72 @@ namespace ModDiff
 
         private void CalculateDiff(ModInfo[] saveMods, ModInfo[] runningMods)
         {
-            var diff = new Myers<ModInfo>(saveMods, runningMods);
+            var diff = new Myers<string>(saveMods.Select(x => x.packageId).ToArray(), runningMods.Select(x => x.packageId).ToArray());
+
             diff.Compute();
 
-            info = diff.changeSet;
 
-            var moved = info.Where(x => x.change == ChangeType.Removed).Select(x => x.value).ToHashSet();
-            moved.IntersectWith(info.Where(x => x.change == ChangeType.Added).Select(x => x.value));
-
-            foreach (var change in diff.changeSet)
+            modModelByPackageId = saveMods.Select(mod => new ModModel
             {
-                if (moved.Contains(change.value))
+                PackageId = mod.packageId,
+                Left = mod
+            }).ToDictionary(x => x.PackageId);
+
+            foreach (var mod in runningMods)
+            {
+                if (modModelByPackageId.ContainsKey(mod.packageId))
                 {
-                    change.value.isMoved = true;
+                    modModelByPackageId[mod.packageId].Right = mod;
+                }
+                else
+                {
+                    modModelByPackageId[mod.packageId] = new ModModel
+                    {
+                        PackageId = mod.packageId,
+                        Right = mod
+                    };                    
+                }
+            }
+
+            var movedIds = diff.changeSet.Where(x => x.change == ChangeType.Removed).Select(x => x.value).ToHashSet();
+            movedIds.IntersectWith(diff.changeSet.Where(x => x.change == ChangeType.Added).Select(x => x.value));
+
+            info = new DiffListItem[diff.changeSet.Count];
+
+            var editListDataUnique = new HashSet<ModModel>();
+
+            for (int i = 0; i < diff.changeSet.Count; i++)
+            {
+                var packageIdChange = diff.changeSet[i];
+                var packageId = packageIdChange.value;
+                var modModel = modModelByPackageId[packageId];
+
+                var change = new DiffListItem
+                {
+                    ModModel = modModel,
+                    Change = packageIdChange.change,
+                };
+                
+                info[i] = change;
+                change.Selected = packageIdChange.change != ChangeType.Removed;
+
+                if (packageIdChange.change != ChangeType.Added)
+                {
+                    modModel.LeftIndex = i;
+                }
+                if (packageIdChange.change != ChangeType.Removed)
+                {
+                    modModel.RightIndex = i;
                 }
 
-                if (ModLister.GetModWithIdentifier(change.value.packageId, false) == null)
+                if (movedIds.Contains(packageId))
                 {
-                    change.value.isMissing = true;
+                    modModel.IsMoved = true;
+                }
+
+                if (ModLister.GetModWithIdentifier(packageId, false) == null)
+                {
+                    modModel.IsMissing = true;
                     HaveMissingMods = true;
                 }
             }
@@ -54,19 +154,19 @@ namespace ModDiff
         {
             var loadedModIdsList = new List<string>(ScribeMetaHeaderUtility.loadedModIdsList);
 
-            if (ModDiff.settings.selfPreservation && !loadedModIdsList.Contains(ModDiff.packageIdOfMine))
+            if (ModDiff.Settings.selfPreservation && !loadedModIdsList.Contains(ModDiff.PackageIdOfMine))
             {
                 
                 var index = loadedModIdsList.IndexOf(harmonyId);
 
                 if (index != -1)
                 {
-                    loadedModIdsList.Insert(index + 1, ModDiff.packageIdOfMine);
+                    loadedModIdsList.Insert(index + 1, ModDiff.PackageIdOfMine);
                 }
                 else
                 {
                     loadedModIdsList.Insert(0, harmonyId);
-                    loadedModIdsList.Insert(1, ModDiff.packageIdOfMine);
+                    loadedModIdsList.Insert(1, ModDiff.PackageIdOfMine);
                 }
             }
 

@@ -27,21 +27,24 @@ namespace ModDiff
             Scribe_Values.Look(ref alternativePallete, "alternativePallete", false);
 
             base.ExposeData();
+
+            ModDiffCell.NeedInitStyles = true;
         }
     }
 
     public class ModDiff : Mod
     {
-        public static string packageIdOfMine = null;
-        public static Settings settings = null;
+        public static string PackageIdOfMine = null;
+        public static Settings Settings { get; private set; }
+
         public static bool CassowaryPackaged = true;
 
         public ModDiff(ModContentPack content) : base(content)
         {
-            packageIdOfMine = content.PackageId;
-            settings = GetSettings<Settings>();
+            PackageIdOfMine = content.PackageId;
+            Settings = GetSettings<Settings>();
 
-            Harmony harmony = new Harmony(packageIdOfMine);
+            Harmony harmony = new Harmony(PackageIdOfMine);
 
             harmony.Patch(AccessTools.Method(typeof(ScribeMetaHeaderUtility), "TryCreateDialogsForVersionMismatchWarnings"),
                 prefix: new HarmonyMethod(typeof(HarmonyPatches), "TryCreateDialogsForVersionMismatchWarnings_Prefix"));               
@@ -62,13 +65,10 @@ namespace ModDiff
 
             options.Begin(inRect);
 
-            options.CheckboxLabeled("IgnoreSelfTitle".Translate(), ref settings.ignoreSelf, "IgnoreSelfHint".Translate());
-            // "Ignore self in modlist matching check"
-            // "What could go wrong?"
-            options.CheckboxLabeled("KeepSelfLoaded".Translate(), ref settings.selfPreservation);
-            // "Keep self loaded after modlist change"
-            options.CheckboxLabeled("AlternativePalette".Translate(), ref settings.alternativePallete);
-            // "Alternative palette"
+            options.CheckboxLabeled("IgnoreSelfTitle".Translate(), ref Settings.ignoreSelf, "IgnoreSelfHint".Translate());
+            options.CheckboxLabeled("KeepSelfLoaded".Translate(), ref Settings.selfPreservation);
+            options.CheckboxLabeled("AlternativePalette".Translate(), ref Settings.alternativePallete);
+
             options.End();
         }
 

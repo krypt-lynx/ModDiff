@@ -1,7 +1,4 @@
-﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,8 +17,6 @@ namespace ModDiff
     {
         public string packageId;
         public string name;
-        public bool isMoved = false;
-        public bool isMissing = false;
 
         public override bool Equals(object obj)
         {
@@ -45,90 +40,113 @@ namespace ModDiff
         }
     }
 
+    public static class ModInfoToStyle
+    {
+        public static CellStyle LeftCellStyle(this DiffListItem info)
+        {
+            CellStyle style;
+
+            if (info.Change == ChangeType.Unmodified)
+            {
+                style = CellStyle.Default;
+            }
+            else if (info.ModModel.IsMissing)
+            {
+                style = CellStyle.Missing;
+            }
+            else if (info.ModModel.IsMoved)
+            {
+                style = CellStyle.Moved;
+            }
+            else
+            {
+                style = CellStyle.Removed;
+            }
+
+            return style;
+        }
+
+        public static CellStyle RightCellStyle(this DiffListItem info)
+        {
+            CellStyle style;
+
+            if (info.Change == ChangeType.Unmodified)
+            {
+                style = CellStyle.Default;
+            }
+            else if (info.ModModel.IsMoved)
+            {
+                style = CellStyle.Moved;
+            }
+            else
+            {
+                style = CellStyle.Added;
+            }
+
+            return style;
+        }
+
+        public static CellStyle MiddleCellStyle(this DiffListItem info)
+        {
+            if (info.ModModel.IsMoved)
+            {
+                return CellStyle.EditMoved;
+            }
+            else if (info.ModModel.IsMissing)
+            {
+                return CellStyle.Unavailable;
+            }
+
+            switch (info.Change)
+            {
+                case ChangeType.Added:
+                    return CellStyle.EditAdded;
+                case ChangeType.Removed:
+                    return CellStyle.EditAdded;
+                case ChangeType.Unmodified:
+                    return CellStyle.Default;
+                default:
+                    throw new Exception();
+            }
+        }
+    }
+
+    public class CIconButton : CButton
+    {
+        public Texture2D Icon = null;
+        public EdgeInsets IconInsets = EdgeInsets.Zero;
+        public Color IconTint = UnityEngine.Color.white;
+
+        public override void DoContent()
+        {
+            base.DoContent();
+
+            GuiTools.UsingColor(IconTint, () =>
+            {
+                GUI.DrawTexture(
+                    new Rect(
+                        BoundsRounded.xMin + IconInsets.left + (BoundsRounded.width - Icon.width - IconInsets.left - IconInsets.right) / 2,
+                        BoundsRounded.yMin + IconInsets.top + (BoundsRounded.height - Icon.height - IconInsets.top - IconInsets.bottom) / 2,
+                        Icon.width, Icon.height
+                    ), Icon);
+            });
+        }
+    }
+
+    [StaticConstructorOnStartup]
     public class ModDiffWindow : CWindow
     {
         const int vSpace = 8;
 
-        CellStyleData missingModStyle;
-        CellStyleData removedModCellStyle;
-        CellStyleData addedModCellStyle;
-        CellStyleData movedModCellStyle;
+        public static readonly Texture2D EditIcon = ContentFinder<Texture2D>.Get("UI/Icons/DiffEdit", true);
 
 
         ModDiffModel model;
-
-        void InitStyles()
-        {
-            if (!ModDiff.settings.alternativePallete)
-            {
-                removedModCellStyle = new CellStyleData()
-                {
-                    marker = "-",
-                    bgColor = new Color(0.5f, 0.17f, 0.17f, 0.70f),
-                    outlineColor = new Color(0.5f, 0.17f, 0.17f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                };
-                addedModCellStyle = new CellStyleData()
-                {
-                    marker = "+",
-                    bgColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
-                    outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                };
-                movedModCellStyle = new CellStyleData()
-                {
-                    marker = "*",
-                    bgColor = new Color(0.38f, 0.36f, 0.15f, 0.70f),
-                    outlineColor = new Color(0.38f, 0.36f, 0.15f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                };
-                missingModStyle = new CellStyleData()
-                {
-                    marker = "!",
-                    bgColor = new Color(0.2f, 0.05f, 0.05f, 0.70f),
-                    outlineColor = new Color(0.4f, 0.10f, 0.10f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                };
-            }
-            else
-            {
-                removedModCellStyle = new CellStyleData()
-                {
-                    marker = "-",
-                    bgColor = new Color(0.45f, 0.10f, 0.45f, 0.70f),
-                    outlineColor = new Color(0.45f, 0.10f, 0.45f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                };
-                addedModCellStyle = new CellStyleData()
-                {
-                    marker = "+",
-                    bgColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
-                    outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                };
-                movedModCellStyle = new CellStyleData()
-                {
-                    marker = "*",
-                    bgColor = new Color(0.40f, 0.40f, 0.40f, 0.70f),
-                    outlineColor = new Color(0.40f, 0.40f, 0.40f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                };
-                missingModStyle = new CellStyleData()
-                {
-                    marker = "!",
-                    bgColor = new Color(0.2f, 0.05f, 0.2f, 0.70f),
-                    outlineColor = new Color(0.4f, 0.10f, 0.4f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                };
-            }
-
-        }
 
 
         Action confirmedAction = null;
         public ModDiffWindow(ModInfo[] saveMods, ModInfo[] runningMods, Action confirmedAction) : base()
         {
-            InitStyles();
             this.confirmedAction = confirmedAction;
 
             model = new ModDiffModel();
@@ -137,7 +155,10 @@ namespace ModDiff
             model.CalculateDiff();
 
             var cellSize = new Vector2(
-                model.info.Max(x => Text.CalcSize(x.value.name).x + ModDiffCell.MarkerWidth),
+                model.info.Max(x => Mathf.Max(
+                    x.ModModel.Left != null ? Text.CalcSize(x.ModModel.Left.name).x : 0, 
+                    x.ModModel.Right != null ? Text.CalcSize(x.ModModel.Right.name).x : 0
+                    ) + ModDiffCell.MarkerWidth),
                 Text.LineHeight);
 
             InnerSize = new Vector2(Math.Max(460, cellSize.x * 2 + ModDiffCell.MarkerWidth + 20), 800);
@@ -147,6 +168,8 @@ namespace ModDiff
         {
             base.ConstructGui();
 
+            var guide = new CVarListGuide();
+            Gui.AddGuide(guide);
 
             this.absorbInputAroundWindow = true;
 
@@ -158,8 +181,7 @@ namespace ModDiff
             var disclaimerLabel = Gui.AddElement(new CLabel
             {
                 Title = "ModsMismatchWarningText".Translate().RawText.Split('\n').FirstOrDefault(),
-                // Multiline = true
-                //lines_debug = 2
+                WordWrap = true,
             });
 
             CListView diffList = null;
@@ -177,7 +199,7 @@ namespace ModDiff
             });
             var headerSpacer = headerPanel.AddElement(new CWidget
             {
-                TryFitContect = (_) => new Vector2(diffList.IsScrollBarVisible() ? 20 : 0, 0)
+                TryFitContect = (_) => new Vector2(diffList.IsScrollBarVisible() ? 16 : 0, 0)
             });
 
             var headerLine = Gui.AddElement(new CWidget {
@@ -188,6 +210,7 @@ namespace ModDiff
             {
               
             });
+
             var buttonPanel = Gui.AddElement(new CElement());
             var backButton = buttonPanel.AddElement(new CButton
             {
@@ -199,6 +222,13 @@ namespace ModDiff
                 Title = "ChangeLoadedMods".Translate(),
                 Action = (_) => TrySetActiveMods(),
             });
+            var editButton = buttonPanel.AddElement(new CIconButton
+            {
+                Icon = EditIcon,
+                IconTint = new Color(1, 1, 1, 0.83f),
+                Action = (_) => MergeMods(),
+            });
+            
             var continueButton = buttonPanel.AddElement(new CButton
             {
                 Title = "LoadAnyway".Translate(),
@@ -213,28 +243,34 @@ namespace ModDiff
             Gui.StackTop((titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 2, headerPanel, (headerLine, 1), 4, diffList, 12, (buttonPanel, 40));
 
             headerPanel.StackLeft(16 + 5, headerLeft, 16+5, (headerRight, headerLeft.width), (headerSpacer, headerSpacer.intrinsicWidth));
-            headerLeft.Solver.AddConstraint(headerLeft.height ^ headerLeft.intrinsicHeight);
+            headerLeft.AddConstraint(headerLeft.height ^ headerLeft.intrinsicHeight);
 
-            buttonPanel.StackLeft(backButton, 10.0, reloadButton, 20.0, continueButton);
+            buttonPanel.StackLeft(backButton, 10.0, reloadButton, 5, (editButton, editButton.height), 20.0, continueButton);
 
-            buttonPanel.Solver.AddConstraint(backButton.width >= backButton.intrinsicWidth);
-            buttonPanel.Solver.AddConstraint(reloadButton.width >= reloadButton.intrinsicWidth);
-            buttonPanel.Solver.AddConstraint(continueButton.width >= continueButton.intrinsicWidth);
+            var buttonsWidth = new ClVariable("buttonsWidth");
+            guide.Variables.Add(buttonsWidth);
 
-            // pairing all 3 buttons: if intrinsic width of one of them is too big - costraints of that button will be broken, so, we need to bind each to each
+            buttonPanel.AddConstraint(backButton.width >= backButton.intrinsicWidth);
+            buttonPanel.AddConstraint(reloadButton.width >= reloadButton.intrinsicWidth);
+            buttonPanel.AddConstraint(continueButton.width >= continueButton.intrinsicWidth);
 
-            buttonPanel.Solver.AddConstraints(ClStrength.Medium, backButton.width ^ reloadButton.width); 
-            buttonPanel.Solver.AddConstraints(ClStrength.Medium, backButton.width ^ continueButton.width);
-            buttonPanel.Solver.AddConstraints(ClStrength.Medium, reloadButton.width ^ continueButton.width);
+            buttonPanel.AddConstraint(backButton.width ^ buttonsWidth, ClStrength.Medium);
+            buttonPanel.AddConstraint(reloadButton.width ^ buttonsWidth, ClStrength.Medium);
+            buttonPanel.AddConstraint(continueButton.width ^ buttonsWidth, ClStrength.Medium);
 
 
-            Gui.Solver.AddConstraint(diffList.height <= diffList.intrinsicHeight);
+            Gui.AddConstraint(diffList.height <= diffList.intrinsicHeight);
 
             ConstructDiffList(diffList);
 
-            Gui.Solver.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8); // TODO: LayoutGuide
-            Gui.Solver.AddConstraint(Gui.width ^ InnerSize.x);
+            Gui.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8); // TODO: LayoutGuide
+            Gui.AddConstraint(Gui.width ^ InnerSize.x, ClStrength.Medium);
 
+        }
+
+        private void MergeMods()
+        {                        
+            Find.WindowStack.Add(new MergeModsWindow(model));
         }
 
         private void TrySetActiveMods()
@@ -246,7 +282,7 @@ namespace ModDiff
             }
             else
             {
-                Find.WindowStack.Add(new MissingModsDialog(model.saveMods.Where(x => x.isMissing), () => model.TrySetActiveMods(), missingModStyle));
+                Find.WindowStack.Add(new MissingModsDialog(model.info.Where(x => x.ModModel.IsMissing).Select(x => x.ModModel), model.TrySetActiveMods));
             }
         }
 
@@ -256,10 +292,9 @@ namespace ModDiff
 
             foreach (var line in model.info)
             {
-
                 var row = new CListingRow();
                 diffList.AppendRow(row);
-                string tip = "packadeId:\n" + line.value.packageId;
+                string tip = "packadeId:\n" + line.ModModel.PackageId;
                 CElement bg = null;
                 if (i % 2 == 1)
                 {
@@ -286,27 +321,9 @@ namespace ModDiff
 
                 // left
                 CElement lCell;
-                if (line.change != ChangeType.Added)
+                if (line.Change != ChangeType.Added)
                 {
-                    CellStyleData style;
-
-                    if (line.value.isMissing)
-                    {
-                        style = missingModStyle;
-                    }
-                    else if (line.value.isMoved)
-                    {
-                        style = movedModCellStyle;
-                    }
-                    else
-                    {
-                        style = removedModCellStyle;
-                    }
-                    lCell = row.AddElement(new ModDiffCell(
-                        style, 
-                        line.change == ChangeType.Removed, 
-                        line.value.name
-                        ));
+                    lCell = row.AddElement(new ModDiffCell(line.LeftCellStyle(), line.ModModel.Left.name));
                 }
                 else
                 {
@@ -315,24 +332,10 @@ namespace ModDiff
 
                 // right
                 CElement rCell;
-                if (line.change != ChangeType.Removed)
+                if (line.Change != ChangeType.Removed)
                 {
-                    CellStyleData style;
 
-                    if (line.value.isMoved)
-                    {
-                        style = movedModCellStyle;
-                    }
-                    else
-                    {
-                        style = addedModCellStyle;
-                    }
-
-                    rCell = row.AddElement(new ModDiffCell(
-                        style,
-                        line.change == ChangeType.Added,
-                        line.value.name
-                        ));
+                    rCell = row.AddElement(new ModDiffCell(line.RightCellStyle(), line.ModModel.Right.name));
                 }
                 else
                 {
@@ -340,8 +343,6 @@ namespace ModDiff
                 }
 
                 row.StackLeft(lCell, (rCell, lCell.width));
-                
-                //row.Solver.AddConstraint(row.height, h => h == cellSize.y);
 
                 i++;
             }

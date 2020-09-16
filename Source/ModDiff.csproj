@@ -40,10 +40,6 @@
       <HintPath>D:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2009463077\Current\Assemblies\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="0RWLayout_moddiff, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\1.2\0RWLayout_moddiff.dll</HintPath>
-    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -68,6 +64,10 @@
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
       <HintPath>..\..\..\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Diff.cs" />
+    <Compile Include="MergeModsWindow.cs" />
     <Compile Include="MissingModsDialog.cs" />
     <Compile Include="ModsDiffWindow\ModDiffCell.cs" />
     <Compile Include="HarmonyPatches.cs" />
@@ -84,5 +85,15 @@
     <Compile Include="ModsDiffWindow\ModDiffWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\RWLayout_dev\Source\RWLayout\RWLayout.csproj">
+      <Project>{859869af-24c5-4aba-a111-f95a794ed7a3}</Project>
+      <Name>RWLayout</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>cd "$(TargetDir)"
+del /Q *.*</PreBuildEvent>
+  </PropertyGroup>
 </Project>
