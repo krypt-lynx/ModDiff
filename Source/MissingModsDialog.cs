@@ -10,7 +10,7 @@ using Verse;
 
 namespace ModDiff
 {
-    class MissingModsDialog : CWindow
+    class MissingModsDialog : CWindow, IListViewDataSource
     {
         private ModModel[] missingMods;
         private Action AcceptAction;
@@ -29,7 +29,7 @@ namespace ModDiff
                 missingMods.Max(x => Text.CalcSize(x.Name).x + ModDiffCell.MarkerWidth),
                 Text.LineHeight);
 
-            InnerSize = new Vector2(Math.Max(350, cellSize.x + ModDiffCell.MarkerWidth + 20), 800);
+            InnerSize = new Vector2(Math.Max(350, cellSize.x + ModDiffCell.MarkerWidth + 16), 800);
 
             this.absorbInputAroundWindow = true;
 
@@ -47,7 +47,7 @@ namespace ModDiff
                 //Multiline = true
             });
 
-            var missingList = Gui.AddElement(new CListView());
+            var missingList = Gui.AddElement(new CListView_vNext());
 
             var buttonPanel = Gui.AddElement(new CElement());
             var backButton = buttonPanel.AddElement(new CButton
@@ -69,23 +69,32 @@ namespace ModDiff
 
             buttonPanel.AddConstraints(ClStrength.Medium, backButton.width + 20 ^ reloadButton.width);
 
+            missingList.DataSource = this;
 
-            PopulateList(missingList);
             missingList.AddConstraint(missingList.height <= missingList.intrinsicHeight);
 
             //Gui.AddConstraint(Gui.width ^ InnerSize.x);
             Gui.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8); // TODO: LayoutGuide
         }
 
-        private void PopulateList(CListView missingList)
+        public float HeightForRowAt(int index)
         {
-            foreach (var mod in missingMods)
-            {
-                var row = new CListingRow();
-                missingList.AppendRow(row);
-                var cell = row.AddElement(new ModDiffCell(CellStyle.Missing, mod.Name));
-                row.Embed(cell);
-            }
+            return ModDiffCell.DefaultHeight;
+        }
+
+        public CListingRow ListingRowForRowAt(int index)
+        {
+            var mod = missingMods[index];
+            var row = new CListingRow();
+            var cell = row.AddElement(new ModDiffCell(CellStyle.Missing, mod.Name));
+            row.Embed(cell);
+
+            return row;
+        }
+
+        public int NumberOfRows()
+        {
+            return missingMods.Length;
         }
     }
 }

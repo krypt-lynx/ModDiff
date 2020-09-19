@@ -215,6 +215,20 @@ namespace ModDiff
         public CellStyle style;
         private string Title;
 
+        static float defaultHeight = 0;
+        public static float DefaultHeight { 
+            get
+            {
+                if (defaultHeight == 0)
+                {
+                    GuiTools.PushFont(GameFont.Small);
+                    defaultHeight = Text.CalcHeight(" ", 100);
+                    GuiTools.PopFont();
+                }
+                return defaultHeight;
+            }
+        }
+
         public ModDiffCell(CellStyle style, string title) : base()
         {
             InitStyles();

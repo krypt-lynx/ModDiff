@@ -134,7 +134,7 @@ namespace ModDiff
     }
 
     [StaticConstructorOnStartup]
-    public class ModDiffWindow : CWindow
+    public class ModDiffWindow : CWindow, IListViewDataSource
     {
         const int vSpace = 8;
 
@@ -155,13 +155,13 @@ namespace ModDiff
             model.CalculateDiff();
 
             var cellSize = new Vector2(
-                model.info.Max(x => Mathf.Max(
+                model.modsList.Max(x => Mathf.Max(
                     x.ModModel.Left != null ? Text.CalcSize(x.ModModel.Left.name).x : 0, 
                     x.ModModel.Right != null ? Text.CalcSize(x.ModModel.Right.name).x : 0
-                    ) + ModDiffCell.MarkerWidth),
+                    ) + ModDiffCell.MarkerWidth + 7 + 8),
                 Text.LineHeight);
 
-            InnerSize = new Vector2(Math.Max(460, cellSize.x * 2 + ModDiffCell.MarkerWidth + 20), 800);
+            InnerSize = new Vector2(Math.Max(460, cellSize.x * 2 + 16), 800);
         }
 
         public override void ConstructGui()
@@ -184,7 +184,7 @@ namespace ModDiff
                 WordWrap = true,
             });
 
-            CListView diffList = null;
+            CListView_vNext diffList = null;
 
             var headerPanel = Gui.AddElement(new CElement());
             var headerLeft = headerPanel.AddElement(new CLabel {
@@ -203,10 +203,10 @@ namespace ModDiff
             });
 
             var headerLine = Gui.AddElement(new CWidget {
-                DoWidgetContent = (_, bounds) => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(bounds.x, bounds.y, bounds.width - (diffList.IsScrollBarVisible() ? 20 : 0)))
+                DoWidgetContent = (_, bounds) => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(bounds.x, bounds.y, bounds.width - (diffList.IsScrollBarVisible() ? 16 : 0)))
             });
 
-            diffList = Gui.AddElement(new CListView
+            diffList = Gui.AddElement(new CListView_vNext
             {
               
             });
@@ -242,7 +242,7 @@ namespace ModDiff
             // root constraints
             Gui.StackTop((titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 2, headerPanel, (headerLine, 1), 4, diffList, 12, (buttonPanel, 40));
 
-            headerPanel.StackLeft(16 + 5, headerLeft, 16+5, (headerRight, headerLeft.width), (headerSpacer, headerSpacer.intrinsicWidth));
+            headerPanel.StackLeft(16 + 5, headerLeft, 2+16+5, (headerRight, headerLeft.width), 2, (headerSpacer, headerSpacer.intrinsicWidth));
             headerLeft.AddConstraint(headerLeft.height ^ headerLeft.intrinsicHeight);
 
             buttonPanel.StackLeft(backButton, 10.0, reloadButton, 5, (editButton, editButton.height), 20.0, continueButton);
@@ -261,7 +261,7 @@ namespace ModDiff
 
             Gui.AddConstraint(diffList.height <= diffList.intrinsicHeight);
 
-            ConstructDiffList(diffList);
+            diffList.DataSource = this;
 
             Gui.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8); // TODO: LayoutGuide
             Gui.AddConstraint(Gui.width ^ InnerSize.x, ClStrength.Medium);
@@ -282,70 +282,78 @@ namespace ModDiff
             }
             else
             {
-                Find.WindowStack.Add(new MissingModsDialog(model.info.Where(x => x.ModModel.IsMissing).Select(x => x.ModModel), model.TrySetActiveMods));
+                Find.WindowStack.Add(new MissingModsDialog(model.modsList.Where(x => x.ModModel.IsMissing).Select(x => x.ModModel), model.TrySetActiveMods));
             }
         }
 
-        private void ConstructDiffList(CListView diffList)
+        public int NumberOfRows()
         {
-            int i = 0;
+            return model.modsList.Length;
+        }
 
-            foreach (var line in model.info)
+        public float HeightForRowAt(int index)
+        {
+            return ModDiffCell.DefaultHeight;
+        }
+
+        public CListingRow ListingRowForRowAt(int index)
+        {
+            var line = model.modsList[index];
+
+            var row = new CListingRow();
+
+            string tip = "packadeId:\n" + line.ModModel.PackageId;
+            CElement bg = null;
+            if (index % 2 == 1)
             {
-                var row = new CListingRow();
-                diffList.AppendRow(row);
-                string tip = "packadeId:\n" + line.ModModel.PackageId;
-                CElement bg = null;
-                if (i % 2 == 1)
-                {
-                    bg = row.AddElement(new CWidget
-                    {
-
-                        DoWidgetContent = (_, bounds) => {
-                            Widgets.DrawAltRect(bounds);
-                            TooltipHandler.TipRegion(bounds, tip);
-                        }
-                    });
-
-                }
-                else
-                {
-                    bg = row.AddElement(new CWidget
-                    {
-                        DoWidgetContent = (_, bounds) => {
-                            TooltipHandler.TipRegion(bounds, tip);
-                        }
-                    });
-                }
-                row.Embed(bg);
-
-                // left
-                CElement lCell;
-                if (line.Change != ChangeType.Added)
-                {
-                    lCell = row.AddElement(new ModDiffCell(line.LeftCellStyle(), line.ModModel.Left.name));
-                }
-                else
-                {
-                    lCell = row.AddElement(new CElement());
-                }
-
-                // right
-                CElement rCell;
-                if (line.Change != ChangeType.Removed)
+                bg = row.AddElement(new CWidget
                 {
 
-                    rCell = row.AddElement(new ModDiffCell(line.RightCellStyle(), line.ModModel.Right.name));
-                }
-                else
-                {
-                    rCell = row.AddElement(new CElement());
-                }
+                    DoWidgetContent = (_, bounds) => {
+                        Widgets.DrawAltRect(bounds);
+                        TooltipHandler.TipRegion(bounds, tip);
+                    }
+                });
 
-                row.StackLeft(lCell, (rCell, lCell.width));
-
-                i++;
             }
+            else
+            {
+                bg = row.AddElement(new CWidget
+                {
+                    DoWidgetContent = (_, bounds) => {
+                        TooltipHandler.TipRegion(bounds, tip);
+                    }
+                });
+            }
+            row.Embed(bg);
+
+            // left
+            CElement lCell;
+            if (line.Change != ChangeType.Added)
+            {
+                lCell = row.AddElement(new ModDiffCell(line.LeftCellStyle(), line.ModModel.Left.name));
+            }
+            else
+            {
+                lCell = row.AddElement(new CElement());
+            }
+
+            // right
+            CElement rCell;
+            if (line.Change != ChangeType.Removed)
+            {
+
+                rCell = row.AddElement(new ModDiffCell(line.RightCellStyle(), line.ModModel.Right.name));
+            }
+            else
+            {
+                rCell = row.AddElement(new CElement());
+            }
+
+            row.StackLeft(lCell, (rCell, lCell.width));
+
+
+            return row;
         }
     }
 }

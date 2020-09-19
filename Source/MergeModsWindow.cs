@@ -9,45 +9,56 @@ using RWLayout.moddiff;
 using UnityEngine;
 using Verse;
 using Cassowary_moddiff;
+using Verse.Sound;
 
 namespace ModDiff
 {
     class MergeListRow : CListingRow
     {
-        public DiffListItem Change;
+        public DiffListItem Item;
         public int Index;
-        public ModModel Model { get => Change.ModModel; }
+        public ModModel Model { get => Item.ModModel; }
 
-        bool activated = false;
-        public bool Selected
+        bool selected = false;
+        bool Selected
         {
             set
             {
-                activated = value;
-                cCell.Hidden = !activated;
+                selected = value;
+                cCell.Hidden = !selected;
                 if (cCellDeselected != null)
                 {
-                    cCellDeselected.Hidden = activated;
+                    cCellDeselected.Hidden = selected /*|| Model.Selected*/;
                 }
             }
-            get => activated;
+            get => selected;
         }
 
-        ModDiffCell cCell;
-        ModDiffCell cCellDeselected;
+        CElement cCell;
+        CElement cCellDeselected;
 
 
-        public MergeListRow(DiffListItem change, int index)
+        public MergeListRow(DiffListItem item, int index)
         {
-            Change = change;
+            Item = item;
             Index = index;
-            activated = change.Selected;
+            selected = item.Selected;
+            // We are not cleaning memory after window close, so, without weak reference item model will prevent row destruction by GC
+            // with weak reference only closure will stay in memory until parent window is closed. We can live with this.
+            var weakThis = new WeakReference(this, false); 
+            item.OnSelectedChanged = (newSelected) => {
+                if (weakThis.IsAlive)
+                {
+                    (weakThis.Target as MergeListRow).Selected = newSelected;
+                }
+            };
+
             Construct();
         }
 
         private void Construct()
         {
-            string tip = "packadeId:\n" + Change.ModModel.PackageId;
+            string tip = "packadeId:\n" + Item.ModModel.PackageId;
             CElement bg = null;
             if (Index % 2 == 1)
             {
@@ -77,9 +88,9 @@ namespace ModDiff
 
             // left
             CElement lCell;
-            if (Change.Change != ChangeType.Added)
+            if (Item.Change != ChangeType.Added)
             {
-                lCell = bg.AddElement(new ModDiffCell(Change.LeftCellStyle(), Change.ModModel.Left.name));
+                lCell = bg.AddElement(new ModDiffCell(Item.LeftCellStyle(), Item.ModModel.Left.name));
             }
             else
             {
@@ -89,27 +100,24 @@ namespace ModDiff
             // center
             if (!Model.IsMissing)
             {
-                cCell = bg.AddElement(new ModDiffCell(Change.MiddleCellStyle(), Change.ModModel.Name));
-                cCell.Hidden = !Selected;
-
-                if (Change.Change != ChangeType.Unmodified && !Change.ModModel.IsMoved)
-                {
-                    cCellDeselected = bg.AddElement(new ModDiffCell(CellStyle.EditRemoved, ""));
-                    cCellDeselected.Hidden = Selected;
-                    cCell.Embed(cCellDeselected);
-                }
+                cCell = bg.AddElement(new ModDiffCell(Item.MiddleCellStyle(), Item.ModModel.Name));
+                cCellDeselected = bg.AddElement(new ModDiffCell(CellStyle.EditRemoved, ""));
             }
             else
             {
-                cCell = bg.AddElement(new ModDiffCell(CellStyle.Unavailable, "(unavailable)"));
+                cCell = bg.AddElement(new CElement());
+                cCellDeselected = bg.AddElement(new ModDiffCell(CellStyle.Unavailable, "(unavailable)"));
             }
+            cCell.Embed(cCellDeselected);
+            cCell.Hidden = !Selected;
+            cCellDeselected.Hidden = Selected;
 
             // right
             CElement rCell;
-            if (Change.Change != ChangeType.Removed)
+            if (Item.Change != ChangeType.Removed)
             {
 
-                rCell = bg.AddElement(new ModDiffCell(Change.RightCellStyle(), Change.ModModel.Right.name));
+                rCell = bg.AddElement(new ModDiffCell(Item.RightCellStyle(), Item.ModModel.Right.name));
             }
             else
             {
@@ -129,18 +137,141 @@ namespace ModDiff
     }
 
 
-    class MergeModsWindow : CWindow
+    class DragTracker
+    {
+        CElement observedElement;
+        public CElement Element { get; private set; } = null;
+        public bool IsDragging { get; private set; } = false;
+        public bool JustStarted { get; private set; } = false;
+        public bool JustEnded { get; private set; } = false;
+        public bool Entered { get; private set; } = false;
+
+        public DragTracker(CElement element)
+        {
+            this.observedElement = element;
+        }
+
+        void StartDrag(CElement element)
+        {
+            Element = element;
+            JustStarted = true;
+            IsDragging = true;
+        }
+
+        void EndDrag()
+        {
+            IsDragging = false;
+            JustEnded = true;
+            Element = null;
+        }
+
+
+        bool wasScrolled = false;
+        bool postScroll = false;
+
+        public void RegisterEvents()
+        {
+            wasScrolled = Event.current.type == EventType.ScrollWheel;
+        }
+
+        public void ProcessEvents()
+        {
+            JustStarted = false;
+            JustEnded = false;
+            Entered = false;
+
+            if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !Mouse.IsInputBlockedNow)
+            {
+                //Log.Message($"MouseDown start");
+
+                StartDrag(observedElement.hitTest(Event.current.mousePosition));
+                Event.current.Use();
+            }
+            else if (IsDragging)
+            {
+                if (!Input.GetMouseButton(0))
+                {
+                    //Log.Message($"Mouse up outside");
+                    EndDrag();
+                    return;
+                }
+
+                if (Mouse.IsInputBlockedNow)
+                {
+                    return;
+                }
+
+                if (Event.current.type == EventType.MouseDrag)
+                {
+                    //Log.Message($"MouseDrag");
+
+                    var newDrag = observedElement.hitTest(Event.current.mousePosition);
+                    Event.current.Use();
+                    if (newDrag != null && Element != newDrag)
+                    {
+                        Entered = true;
+                        Element = newDrag;
+                    }
+                }
+                else if (postScroll)
+                {
+                    //Log.Message($"Scroll");
+
+                    var newDrag = observedElement.hitTest(Event.current.mousePosition);
+                    if (newDrag != null && Element != newDrag)
+                    {
+                        Entered = true;
+                        Element = newDrag;
+                    }
+                    postScroll = false;
+                }
+                else if (Event.current.type == EventType.MouseDown && (Event.current.button != 0 || Mouse.IsInputBlockedNow))
+                {
+                    //Log.Message($"MouseUp canceled");
+                    EndDrag();
+                }
+                else if (Event.current.type == EventType.MouseUp)
+                {
+                    Log.Message($"MouseUp");
+                    //Event.current.Use();
+
+                    EndDrag();
+                }
+                else if (Event.current.type == EventType.MouseMove)
+                {
+                    //Log.Message($"MouseMove");
+                    EndDrag();
+                }
+
+            }
+
+            postScroll = wasScrolled; // view geometly is ctually updated on next update
+            wasScrolled = false;
+        }
+    }
+
+    class MergeModsWindow : CWindow, IListViewDataSource
     {
 
         private ModDiffModel model;
         DragTracker clickTracker;
 
-        CListView modsList;
+        CListView_vNext modsList;
 
         public MergeModsWindow(ModDiffModel model)
         {
             this.model = model;
             clickTracker = new DragTracker(Gui);
+
+
+            var cellSize = new Vector2(
+                model.modsList.Max(x => Mathf.Max(
+                    x.ModModel.Left != null ? Text.CalcSize(x.ModModel.Left.name).x : 0,
+                    x.ModModel.Right != null ? Text.CalcSize(x.ModModel.Right.name).x : 0
+                    ) + ModDiffCell.MarkerWidth + 7 + 8),
+                Text.LineHeight);
+
+            InnerSize = new Vector2(Math.Max(460, cellSize.x * 3 + 4 + 16), 800);
         }
 
         public override void ConstructGui()
@@ -148,7 +279,50 @@ namespace ModDiff
             base.ConstructGui();
             this.absorbInputAroundWindow = true;
 
-            modsList = Gui.AddElement(new CListView());
+            var titleLabel = Gui.AddElement(new CLabel
+            {
+                Font = GameFont.Medium,
+                Title = "EditModListTitle".Translate()
+            });
+            var disclaimerLabel = Gui.AddElement(new CLabel
+            {
+                Title = "EditModListText".Translate().RawText.Split('\n').FirstOrDefault(),
+                WordWrap = true,
+            });
+
+            var headerPanel = Gui.AddElement(new CElement());
+            var headerLeft = headerPanel.AddElement(new CLabel
+            {
+                Font = GameFont.Small,
+                Color = new Color(1, 1, 1, 0.3f),
+                Title = "SaveGameMods".Translate(), // "Savegame mods:"
+            });
+            var headerCenter = headerPanel.AddElement(new CLabel
+            {
+                Font = GameFont.Small,
+                Color = new Color(1, 1, 1, 0.3f),
+                Title = "MergedMods".Translate(), // "Running mods:"
+            });
+            var headerRight = headerPanel.AddElement(new CLabel
+            {
+                Font = GameFont.Small,
+                Color = new Color(1, 1, 1, 0.3f),
+                Title = "RunningMods".Translate(), // "Running mods:"
+            });
+            var headerSpacer = headerPanel.AddElement(new CWidget
+            {
+                TryFitContect = (_) => new Vector2(modsList.IsScrollBarVisible() ? 16 : 0, 0)
+            });
+
+            headerPanel.StackLeft(16 + 5, headerLeft, 2 + 16 + 5, 2, (headerCenter, headerLeft.width), 2 + 16 + 5, 2, (headerRight, headerLeft.width), 2, (headerSpacer, headerSpacer.intrinsicWidth));
+
+            var headerLine = Gui.AddElement(new CWidget
+            {
+                DoWidgetContent = (_, bounds) => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(bounds.x, bounds.y, bounds.width - (modsList.IsScrollBarVisible() ? 16 : 0)))
+            });
+
+
+            modsList = Gui.AddElement(new CListView_vNext());
             modsList.Margin = new EdgeInsets(2, 0, 2, 0);
 
             var activeFrame = modsList.Background.AddElement(new CFrame
@@ -164,185 +338,62 @@ namespace ModDiff
                 activeFrame.right ^ modsList.Background.right - (modsList.Background.width - 4) / 3
                 );
 
+            modsList.DataSource = this;
+            //PopulateList(modsList);
 
-            PopulateList(modsList);
-
-            Gui.Embed(modsList);
+            //Gui.Embed(modsList);
             //Gui.ConstrainSize(1000, 800);
 
+            var buttonPanel = Gui.AddElement(new CElement());
+            var backButton = buttonPanel.AddElement(new CButton
+            {
+                Title = "GoBack".Translate(),
+                Action = (_) => Close(true)
+            });
+            var resetButton = buttonPanel.AddElement(new CButton
+            {
+                Title = "Reset".Translate(),
+                Action = (_) => model.ResetMerge()
+            });
+
+            var continueButton = buttonPanel.AddElement(new CButton
+            {
+                Title = "Load".Translate(),
+                Action = (_) =>
+                {
+                    //confirmedAction?.Invoke();
+                    Close(true);
+                }
+            });
+
+            buttonPanel.StackLeft(backButton, 10.0, resetButton, 20.0, continueButton);
+
+            var guide = new CVarListGuide();
+            buttonPanel.AddGuide(guide);
+            var buttonsWidth = new ClVariable("buttonsWidth");
+            guide.Variables.Add(buttonsWidth);
+
+            buttonPanel.AddConstraint(backButton.width ^ buttonsWidth, ClStrength.Medium);
+            buttonPanel.AddConstraint(resetButton.width ^ buttonsWidth, ClStrength.Medium);
+            buttonPanel.AddConstraint(continueButton.width ^ buttonsWidth, ClStrength.Medium);
+
+            buttonPanel.AddConstraint(backButton.width >= backButton.intrinsicWidth, ClStrength.Strong);
+            buttonPanel.AddConstraint(resetButton.width >= resetButton.intrinsicWidth, ClStrength.Strong);
+            buttonPanel.AddConstraint(continueButton.width >= continueButton.intrinsicWidth, ClStrength.Strong);
 
             modsList.AddConstraint(modsList.height <= modsList.intrinsicHeight);
 
-            //Gui.AddConstraint(Gui.width ^ InnerSize.x);
-            Gui.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8); // TODO: LayoutGuide
+            Gui.AddConstraint(Gui.width ^ InnerSize.x);
+            Gui.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8);
+
+
+            Gui.StackTop((titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 2, headerPanel, (headerLine, 1), 4, modsList, 12, (buttonPanel, 40));
+
+
+            headerLeft.AddConstraint(headerLeft.height ^ headerLeft.intrinsicHeight);
         }
 
-        private void PopulateList(CListView diffList)
-        {
-            for (int i = 0; i < model.info.Length; i++)
-            {
-                var line = model.info[i];
 
-                var row = new MergeListRow(line, i);
-
-                diffList.AppendRow(row);
-            }
-        }
-
-        class ClickTracker
-        {
-            CElement element;
-            CElement clickCandidate = null;
-
-            public ClickTracker(CElement element)
-            {
-                this.element = element;
-            }
-
-            public CElement TrackEvents()
-            {
-                if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !Mouse.IsInputBlockedNow)
-                {
-                    clickCandidate = element.hitTest(Event.current.mousePosition);
-                }
-
-                if (Event.current.type == EventType.MouseDown && (Event.current.button != 0 || Mouse.IsInputBlockedNow))
-                {
-                    clickCandidate = null;
-                }
-
-                if (Event.current.type == EventType.MouseUp && Event.current.button == 0)
-                {
-                    if (Mouse.IsInputBlockedNow)
-                    {
-                        clickCandidate = null;
-                    }
-                    else
-                    {
-                        var underCursor = element.hitTest(Event.current.mousePosition);
-                        if (clickCandidate == underCursor)
-                        {
-                            return clickCandidate;
-                        }
-                    }
-                }
-
-                return null;
-            }
-        }
-
-        class DragTracker
-        {
-            CElement observedElement;
-            public CElement Element { get; private set; } = null;
-            public bool IsDragging { get; private set; }  = false;
-            public bool JustStarted { get; private set; } = false;
-            public bool JustEnded { get; private set; } = false;
-            public bool Entered { get; private set; } = false;
-
-            public DragTracker(CElement element)
-            {
-                this.observedElement = element;
-            }
-
-            void StartDrag(CElement element)
-            {
-                Element = element;
-                JustStarted = true;
-                IsDragging = true;
-            }
-
-            void EndDrag()
-            {
-                IsDragging = false;
-                JustEnded = true;
-                Element = null;
-            }
-
-
-            bool wasScrolled = false;
-            bool postScroll = false;
-
-            public void RegisterEvents()
-            {
-                wasScrolled = Event.current.type == EventType.ScrollWheel;
-            }
-
-            public void ProcessEvents()
-            {
-                JustStarted = false;
-                JustEnded = false;
-                Entered = false;
-
-                if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !Mouse.IsInputBlockedNow)
-                {
-                    Log.Message($"MouseDown start");
-
-                    StartDrag(observedElement.hitTest(Event.current.mousePosition));
-                    Event.current.Use();
-                }
-                else if (IsDragging)
-                {
-                    if (!Input.GetMouseButton(0))
-                    {
-                        Log.Message($"Mouse up outside");
-                        EndDrag();
-                        return;
-                    }
-
-                    if (Mouse.IsInputBlockedNow)
-                    {
-                        return;
-                    }
-
-                    if (Event.current.type == EventType.MouseDrag)
-                    {
-                        Log.Message($"MouseDrag");
-
-                        var newDrag = observedElement.hitTest(Event.current.mousePosition);
-                        Event.current.Use();
-                        if (newDrag != null && Element != newDrag)
-                        {
-                            Entered = true;
-                            Element = newDrag;
-                        }
-                    }
-                    else if (postScroll)
-                    {
-                        Log.Message($"Scroll");
-
-                        var newDrag = observedElement.hitTest(Event.current.mousePosition);
-                        if (newDrag != null && Element != newDrag)
-                        {
-                            Entered = true;
-                            Element = newDrag;
-                        }
-                        postScroll = false;
-                    }
-                    else if (Event.current.type == EventType.MouseDown && (Event.current.button != 0 || Mouse.IsInputBlockedNow))
-                    {
-                        Log.Message($"MouseUp canceled");
-                        EndDrag();
-                    }
-                    else if (Event.current.type == EventType.MouseUp)
-                    {
-                        Log.Message($"MouseUp");
-                        Event.current.Use();
-
-                        EndDrag();
-                    }
-                    else if (Event.current.type == EventType.MouseMove)
-                    {
-                        Log.Message($"MouseMove");
-                        EndDrag();
-                    }
-
-                }
-
-                postScroll = wasScrolled; // view geometly is ctually updated on next update
-                wasScrolled = false;
-            }
-        }
 
         bool DraggedFlag;
         public override void DoWindowContents(Rect inRect)
@@ -369,7 +420,7 @@ namespace ModDiff
                 {
                     if (clickTracker.JustStarted)
                     {
-                        DraggedFlag = row.Change.Selected;
+                        DraggedFlag = row.Item.Selected;
                         lastInteractedIndex = row.Index;
                     }
                 }
@@ -411,40 +462,84 @@ namespace ModDiff
 
         private void ProcessSelection(MergeListRow row)
         {
-
-            bool wasSelected = DraggedFlag;
-            if (wasSelected)
+            if (row.Model.IsMissing)
             {
-                row.Change.Selected = false;
-                row.Selected = row.Change.Selected;
+                return;
+            }
+
+            SoundDef sound = SoundDefOf.Mouseover_Standard;
+
+            bool deselect = DraggedFlag;
+            if (deselect)
+            {
+                if (row.Item.Selected)
+                {
+                    row.Item.TrySetSelected(false);
+                    row.Model.Selected = true;
+                    sound.PlayOneShotOnCamera(null);
+                }
             }
             else
             {
                 var left = row.Model.LeftIndex;
                 var right = row.Model.RightIndex;
 
-                if (left != -1)
+                if (!row.Item.Selected)
                 {
-                    model.info[left].Selected = false;
-                }
-                if (right != -1)
-                {
-                    model.info[right].Selected = false;
-                }
+                    if (left != -1)
+                    {
+                        model.modsList[left].TrySetSelected(false);
+                    }
+                    if (right != -1)
+                    {
+                        model.modsList[right].TrySetSelected(false);
+                    }
 
-                row.Change.Selected = true;
+                    row.Item.TrySetSelected(true);
+                    row.Model.Selected = true;
 
-                if (left != -1)
-                {
-                    (modsList.Rows[left] as MergeListRow).Selected = model.info[left].Selected;
-                }
-                if (right != -1)
-                {
-                    (modsList.Rows[right] as MergeListRow).Selected = model.info[right].Selected;
-                }
 
+                    sound.PlayOneShotOnCamera(null);
+                }
             }
 
+        }
+
+        public int NumberOfRows()
+        {
+            return model.modsList.Length;
+        }
+
+        public float HeightForRowAt(int index)
+        {
+            return ModDiffCell.DefaultHeight;
+        }
+
+        public CListingRow ListingRowForRowAt(int index)
+        {
+            var line = model.modsList[index];
+
+            var row = new MergeListRow(line, index);
+
+            return row;
+        }
+    }
+
+    static class NullCheck
+    {
+        /// <summary>
+        /// Performs action if obj is not null
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public static void IfNotNull<T>(this T obj, Action<T> action)
+        {
+            if (obj != null)
+            {
+                action(obj);
+            }
         }
     }
 }

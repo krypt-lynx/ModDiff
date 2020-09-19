@@ -25,6 +25,7 @@ namespace ModDiff
         //public bool Selected = true;
 
         public string Name { get => Right?.name ?? Left?.name; }
+        public bool Selected = false;
 
         public override int GetHashCode()
         {
@@ -48,14 +49,36 @@ namespace ModDiff
     {
         public ModModel ModModel;
         public ChangeType Change;
-        public bool Selected;
+        private bool selected = false;
+        public bool Selected {
+            get => selected;
+        }
+
+        public void TrySetSelected(bool value)
+        {
+            selected = value && !ModModel.IsMissing;
+            OnSelectedChanged?.Invoke(selected);
+        }
+
+        public Action<bool> OnSelectedChanged;
     }
 
     public class ModDiffModel
     {
         public ModInfo[] saveMods;
         public ModInfo[] runningMods;
-        public DiffListItem[] info;
+        public DiffListItem[] modsList;
+
+        public DiffListItem GetModListItem(int index)
+        {
+            if (index == -1)
+            {
+                return null;
+            } else
+            {
+                return modsList[index];
+            }
+        }
 
         //public Dictionary<string, ModInfo> saveModByPackageId;
         //public Dictionary<string, ModInfo> runningModByPackageId;
@@ -106,7 +129,7 @@ namespace ModDiff
             var movedIds = diff.changeSet.Where(x => x.change == ChangeType.Removed).Select(x => x.value).ToHashSet();
             movedIds.IntersectWith(diff.changeSet.Where(x => x.change == ChangeType.Added).Select(x => x.value));
 
-            info = new DiffListItem[diff.changeSet.Count];
+            modsList = new DiffListItem[diff.changeSet.Count];
 
             var editListDataUnique = new HashSet<ModModel>();
 
@@ -122,8 +145,8 @@ namespace ModDiff
                     Change = packageIdChange.change,
                 };
                 
-                info[i] = change;
-                change.Selected = packageIdChange.change != ChangeType.Removed;
+                modsList[i] = change;
+                change.TrySetSelected(packageIdChange.change != ChangeType.Removed);
 
                 if (packageIdChange.change != ChangeType.Added)
                 {
@@ -186,5 +209,12 @@ namespace ModDiff
             ModsConfig.RestartFromChangedMods();
         }
 
+        internal void ResetMerge()
+        {
+            foreach (var change in modsList) {
+                change.TrySetSelected(change.Change != ChangeType.Removed);
+            }
+            
+        }
     }
 }

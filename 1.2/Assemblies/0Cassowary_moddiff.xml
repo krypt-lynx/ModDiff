@@ -6,7 +6,7 @@
     <members>
         <member name="T:Cassowary_moddiff.Cl">
             <summary>
-            The enumerations from ClLinearInequality,
+            The enumerations from ClLinearConstraint,
             and `global' functions that we want easy to access
             </summary>
         </member>
@@ -190,22 +190,6 @@
             <param name="e2"></param>
             <returns>linear expression</returns>
         </member>
-        <member name="M:Cassowary_moddiff.ClAbstractVariable.op_LessThan(Cassowary_moddiff.ClAbstractVariable,Cassowary_moddiff.ClAbstractVariable)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClAbstractVariable.op_GreaterThan(Cassowary_moddiff.ClAbstractVariable,Cassowary_moddiff.ClAbstractVariable)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
         <member name="M:Cassowary_moddiff.ClAbstractVariable.op_LessThanOrEqual(Cassowary_moddiff.ClAbstractVariable,Cassowary_moddiff.ClAbstractVariable)">
             <summary>
             Creates linear inequality constraint with default strenght
@@ -215,38 +199,6 @@
             <returns></returns>
         </member>
         <member name="M:Cassowary_moddiff.ClAbstractVariable.op_GreaterThanOrEqual(Cassowary_moddiff.ClAbstractVariable,Cassowary_moddiff.ClAbstractVariable)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClAbstractVariable.op_LessThan(Cassowary_moddiff.ClAbstractVariable,System.Double)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClAbstractVariable.op_GreaterThan(System.Double,Cassowary_moddiff.ClAbstractVariable)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClAbstractVariable.op_GreaterThan(Cassowary_moddiff.ClAbstractVariable,System.Double)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClAbstractVariable.op_LessThan(System.Double,Cassowary_moddiff.ClAbstractVariable)">
             <summary>
             Creates linear inequality constraint with default strenght
             </summary>
@@ -279,38 +231,6 @@
             <returns></returns>
         </member>
         <member name="M:Cassowary_moddiff.ClAbstractVariable.op_LessThanOrEqual(System.Double,Cassowary_moddiff.ClAbstractVariable)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClAbstractVariable.op_LessThan(Cassowary_moddiff.ClAbstractVariable,System.Int32)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClAbstractVariable.op_GreaterThan(System.Int32,Cassowary_moddiff.ClAbstractVariable)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClAbstractVariable.op_GreaterThan(Cassowary_moddiff.ClAbstractVariable,System.Int32)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClAbstractVariable.op_LessThan(System.Int32,Cassowary_moddiff.ClAbstractVariable)">
             <summary>
             Creates linear inequality constraint with default strenght
             </summary>
@@ -459,12 +379,7 @@
             constants from the Smalltalk version of the code.
             </summary>
         </member>
-        <member name="T:Cassowary_moddiff.ClLinearEquation">
-            <summary>
-            represents linear equation constraint
-            </summary>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.#ctor(Cassowary_moddiff.ClDouble,System.Collections.Generic.Dictionary{Cassowary_moddiff.ClAbstractVariable,Cassowary_moddiff.ClDouble})">
+        <member name="M:Cassowary_moddiff.ClLinearExpression.#ctor(System.Double,System.Collections.Generic.Dictionary{Cassowary_moddiff.ClAbstractVariable,System.Double})">
             <summary>
             For use by the clone method.
             </summary>
@@ -620,22 +535,6 @@
             <param name="e1"></param>
             <param name="e2"></param>
         </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_LessThan(Cassowary_moddiff.ClLinearExpression,Cassowary_moddiff.ClLinearExpression)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_GreaterThan(Cassowary_moddiff.ClLinearExpression,Cassowary_moddiff.ClLinearExpression)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
         <member name="M:Cassowary_moddiff.ClLinearExpression.op_LessThanOrEqual(Cassowary_moddiff.ClLinearExpression,Cassowary_moddiff.ClLinearExpression)">
             <summary>
             Creates linear inequality constraint with default strenght
@@ -645,38 +544,6 @@
             <returns></returns>
         </member>
         <member name="M:Cassowary_moddiff.ClLinearExpression.op_GreaterThanOrEqual(Cassowary_moddiff.ClLinearExpression,Cassowary_moddiff.ClLinearExpression)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_LessThan(Cassowary_moddiff.ClLinearExpression,Cassowary_moddiff.ClAbstractVariable)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_GreaterThan(Cassowary_moddiff.ClAbstractVariable,Cassowary_moddiff.ClLinearExpression)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_GreaterThan(Cassowary_moddiff.ClLinearExpression,Cassowary_moddiff.ClAbstractVariable)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_LessThan(Cassowary_moddiff.ClAbstractVariable,Cassowary_moddiff.ClLinearExpression)">
             <summary>
             Creates linear inequality constraint with default strenght
             </summary>
@@ -716,38 +583,6 @@
             <param name="e2"></param>
             <returns></returns>
         </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_LessThan(Cassowary_moddiff.ClLinearExpression,System.Double)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_GreaterThan(System.Double,Cassowary_moddiff.ClLinearExpression)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_GreaterThan(Cassowary_moddiff.ClLinearExpression,System.Double)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_LessThan(System.Double,Cassowary_moddiff.ClLinearExpression)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
         <member name="M:Cassowary_moddiff.ClLinearExpression.op_LessThanOrEqual(Cassowary_moddiff.ClLinearExpression,System.Double)">
             <summary>
             Creates linear inequality constraint with default strenght
@@ -773,38 +608,6 @@
             <returns></returns>
         </member>
         <member name="M:Cassowary_moddiff.ClLinearExpression.op_LessThanOrEqual(System.Double,Cassowary_moddiff.ClLinearExpression)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_LessThan(Cassowary_moddiff.ClLinearExpression,System.Int32)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_GreaterThan(System.Int32,Cassowary_moddiff.ClLinearExpression)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_GreaterThan(Cassowary_moddiff.ClLinearExpression,System.Int32)">
-            <summary>
-            Creates linear inequality constraint with default strenght
-            </summary>
-            <param name="e1"></param>
-            <param name="e2"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Cassowary_moddiff.ClLinearExpression.op_LessThan(System.Int32,Cassowary_moddiff.ClLinearExpression)">
             <summary>
             Creates linear inequality constraint with default strenght
             </summary>
@@ -900,7 +703,7 @@
             <param name="e2"></param>
             <returns></returns>
         </member>
-        <member name="T:Cassowary_moddiff.ClLinearInequality">
+        <member name="T:Cassowary_moddiff.ClLinearConstraint">
             <summary>
             Represents linear inequality constraint
             </summary>
@@ -1222,6 +1025,13 @@
             (ClEditInfo replaces the parallel vectors from the Smalltalk impl.)
             </remarks>
         </member>
+        <member name="M:Cassowary_moddiff.ClSimplexSolver.MergeWith(Cassowary_moddiff.ClSimplexSolver)">
+            <summary>
+            Is solvers does not contains same variables we can marge them
+            Second solver must not be used after this operation.
+            </summary>
+            <param name="other"></param>
+        </member>
         <member name="T:Cassowary_moddiff.ConstraintsBuilder">
             <summary>
             Constraints builder extension
@@ -1341,6 +1151,17 @@
             creating a new set if needed. 
             </summary>
         </member>
+        <member name="M:Cassowary_moddiff.ClTableau.AddRow(Cassowary_moddiff.ClAbstractVariable,Cassowary_moddiff.ClLinearExpression)">
+            <summary>
+            Add v=expr to the tableau, update column cross indices
+            v becomes a basic variable
+            expr is now owned by ClTableau class, 
+            and ClTableau is responsible for deleting it
+            (also, expr better be allocated on the heap!).
+            </summary>
+            <param name="var"></param>
+            <param name="expr"></param>
+        </member>
         <member name="M:Cassowary_moddiff.ClTableau.RemoveColumn(Cassowary_moddiff.ClAbstractVariable)">
             <summary>
             Remove v from the tableau -- remove the column cross indices for v
@@ -1372,7 +1193,7 @@
             _rows maps basic variables to the expressions for that row in the tableau.
             </summary>
         </member>
-        <member name="M:Cassowary_moddiff.ClTableau.ColumnsHasKey(Cassowary_moddiff.ClAbstractVariable)">
+        <member name="M:Cassowary_moddiff.ClTableau.RowExpression(Cassowary_moddiff.ClAbstractVariable)">
             <summary>
             Return true if and only if the variable subject is in the columns keys 
             </summary>
