@@ -71,7 +71,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Diff.cs" />
-    <Compile Include="MergeModsWindow.cs" />
+    <Compile Include="MergeWindow\DragTracker.cs" />
+    <Compile Include="MergeWindow\MergeListRow.cs" />
+    <Compile Include="MergeWindow\MergeModsWindow.cs" />
+    <Compile Include="MergeWindow\MergeListDataSource.cs" />
     <Compile Include="MissingModsDialog.cs" />
     <Compile Include="ModsDiffWindow\ModDiffCell.cs" />
     <Compile Include="HarmonyPatches.cs" />

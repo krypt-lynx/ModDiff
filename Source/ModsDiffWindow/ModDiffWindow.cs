@@ -355,5 +355,11 @@ namespace ModDiff
 
             return row;
         }
+
+        public override void DoWindowContents(Rect inRect)
+        {
+            model.DoBGThings();
+            base.DoWindowContents(inRect);
+        }
     }
 }

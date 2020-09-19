@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Diff;
+using ModDiff.MergeWindow;
 using RimWorld;
+using RWLayout.moddiff;
 using Verse;
 
 namespace ModDiff
@@ -69,30 +71,30 @@ namespace ModDiff
         public ModInfo[] runningMods;
         public DiffListItem[] modsList;
 
+        internal MergeListDataSource MergeListDataSource;
+
         public DiffListItem GetModListItem(int index)
         {
             if (index == -1)
             {
                 return null;
-            } else
+            } 
+            else
             {
                 return modsList[index];
             }
         }
 
-        //public Dictionary<string, ModInfo> saveModByPackageId;
-        //public Dictionary<string, ModInfo> runningModByPackageId;
 
         public Dictionary<string, ModModel> modModelByPackageId;
 
-        //public int[][] indexesMap;
-        //public bool[] Activated;
-
-        //ModModel[] editListData;
 
         public void CalculateDiff()
         {
             CalculateDiff(saveMods, runningMods);
+
+            MergeListDataSource = new MergeListDataSource();
+            MergeListDataSource.ModDiffModel = this;
         }
 
         public bool HaveMissingMods = false;
@@ -215,6 +217,12 @@ namespace ModDiff
                 change.TrySetSelected(change.Change != ChangeType.Removed);
             }
             
+        }
+
+
+        public void DoBGThings() // cheating a bit to hide edit window lag :(
+        {
+            MergeListDataSource.GenItem();
         }
     }
 }
