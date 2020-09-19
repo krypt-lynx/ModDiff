@@ -53,9 +53,8 @@ namespace ModDiff.MergeWindow
             return row;
         }
 
-        public void GenItem()
+        public void GenNextItem()
         {
-
             if (rowsGenerated < ModDiffModel.modsList.Length)
             {
                 if (rows[rowsGenerated] == null)

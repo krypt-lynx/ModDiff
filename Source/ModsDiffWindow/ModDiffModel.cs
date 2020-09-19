@@ -13,21 +13,42 @@ namespace ModDiff
 {
     public class ModModel
     {
+        /// <summary>
+        /// mod's package id
+        /// </summary>
         public string PackageId;
 
+        /// <summary>
+        /// mod info stored if the save
+        /// </summary>
         public ModInfo Left = null;
+        /// <summary>
+        /// mod info loaded by game
+        /// </summary>
         public ModInfo Right = null;
+
+        /// <summary>
+        /// index of left entry in merged list
+        /// </summary>
         public int LeftIndex = -1;
+        /// <summary>
+        /// index of right entry in merged list
+        /// </summary>
         public int RightIndex = -1;
 
-        //public ChangeType Change = ChangeType.Unmodified;
+        /// <summary>
+        /// mod was moved
+        /// </summary>
         public bool IsMoved = false;
+        /// <summary>
+        /// mod is no available
+        /// </summary>
         public bool IsMissing = false;
 
-        //public bool Selected = true;
-
+        /// <summary>
+        /// Name for item in m,erged list
+        /// </summary>
         public string Name { get => Right?.name ?? Left?.name; }
-        public bool Selected = false;
 
         public override int GetHashCode()
         {
@@ -49,44 +70,63 @@ namespace ModDiff
 
     public class DiffListItem
     {
+        /// <summary>
+        /// Mod model
+        /// </summary>
         public ModModel ModModel;
+        /// <summary>
+        /// Change in diff list
+        /// </summary>
         public ChangeType Change;
+
         private bool selected = false;
+        /// <summary>
+        /// Item is selected
+        /// </summary>
         public bool Selected {
             get => selected;
         }
 
+        /// <summary>
+        /// select item if possible
+        /// </summary>
+        /// <param name="value"></param>
         public void TrySetSelected(bool value)
         {
             selected = value && !ModModel.IsMissing;
+
             OnSelectedChanged?.Invoke(selected);
         }
 
+        /// <summary>
+        /// item was selected callback
+        /// </summary>
         public Action<bool> OnSelectedChanged;
     }
 
     public class ModDiffModel
     {
+        /// <summary>
+        /// mods info from save
+        /// </summary>
         public ModInfo[] saveMods;
+        /// <summary>
+        /// mods info loaded by game
+        /// </summary>
         public ModInfo[] runningMods;
+
+        /// <summary>
+        /// merged list
+        /// </summary>
         public DiffListItem[] modsList;
 
+        /// <summary>
+        /// model for merge mods window
+        /// </summary>
         internal MergeListDataSource MergeListDataSource;
 
-        public DiffListItem GetModListItem(int index)
-        {
-            if (index == -1)
-            {
-                return null;
-            } 
-            else
-            {
-                return modsList[index];
-            }
-        }
 
-
-        public Dictionary<string, ModModel> modModelByPackageId;
+       
 
 
         public void CalculateDiff()
@@ -101,12 +141,13 @@ namespace ModDiff
 
         private void CalculateDiff(ModInfo[] saveMods, ModInfo[] runningMods)
         {
+            // merging/calculeting diffs lists 
             var diff = new Myers<string>(saveMods.Select(x => x.packageId).ToArray(), runningMods.Select(x => x.packageId).ToArray());
 
             diff.Compute();
 
-
-            modModelByPackageId = saveMods.Select(mod => new ModModel
+            // mod info by packageId for fast access
+            var modModelByPackageId = saveMods.Select(mod => new ModModel
             {
                 PackageId = mod.packageId,
                 Left = mod
@@ -128,13 +169,13 @@ namespace ModDiff
                 }
             }
 
+            // searching moved mods
             var movedIds = diff.changeSet.Where(x => x.change == ChangeType.Removed).Select(x => x.value).ToHashSet();
             movedIds.IntersectWith(diff.changeSet.Where(x => x.change == ChangeType.Added).Select(x => x.value));
 
             modsList = new DiffListItem[diff.changeSet.Count];
 
-            var editListDataUnique = new HashSet<ModModel>();
-
+            // bulding item models
             for (int i = 0; i < diff.changeSet.Count; i++)
             {
                 var packageIdChange = diff.changeSet[i];
@@ -211,18 +252,20 @@ namespace ModDiff
             ModsConfig.RestartFromChangedMods();
         }
 
+        /// <summary>
+        /// reset selection
+        /// </summary>
         internal void ResetMerge()
         {
             foreach (var change in modsList) {
                 change.TrySetSelected(change.Change != ChangeType.Removed);
-            }
-            
+            }            
         }
 
 
         public void DoBGThings() // cheating a bit to hide edit window lag :(
         {
-            MergeListDataSource.GenItem();
+            MergeListDataSource.GenNextItem();
         }
     }
 }

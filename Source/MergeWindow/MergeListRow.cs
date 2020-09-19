@@ -24,7 +24,7 @@ namespace ModDiff
                 cCell.Hidden = !selected;
                 if (cCellDeselected != null)
                 {
-                    cCellDeselected.Hidden = selected /*|| Model.Selected*/;
+                    cCellDeselected.Hidden = value || Model.IsMoved;
                 }
             }
             get => selected;
@@ -94,19 +94,27 @@ namespace ModDiff
             }
 
             // center
-            if (!Model.IsMissing)
+            if (Model.IsMoved)
+            {
+                cCell = bg.AddElement(new ModDiffCell(Item.MiddleCellStyle(), Item.ModModel.Name));
+            } 
+            else if (!Model.IsMissing)
             {
                 cCell = bg.AddElement(new ModDiffCell(Item.MiddleCellStyle(), Item.ModModel.Name));
                 cCellDeselected = bg.AddElement(new ModDiffCell(CellStyle.EditRemoved, ""));
             }
             else
-            {
+            { 
                 cCell = bg.AddElement(new CElement());
                 cCellDeselected = bg.AddElement(new ModDiffCell(CellStyle.Unavailable, "(unavailable)"));
             }
-            cCell.Embed(cCellDeselected);
+
             cCell.Hidden = !Selected;
-            cCellDeselected.Hidden = Selected;
+            if (cCellDeselected != null)
+            {
+                cCell.Embed(cCellDeselected);
+                cCellDeselected.Hidden = Selected;
+            }
 
             // right
             CElement rCell;

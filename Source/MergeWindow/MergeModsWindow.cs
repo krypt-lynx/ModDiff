@@ -122,7 +122,7 @@ namespace ModDiff
 
             var continueButton = buttonPanel.AddElement(new CButton
             {
-                Title = "Load".Translate(),
+                Title = "LoadModList".Translate(),
                 Action = (_) =>
                 {
                     //confirmedAction?.Invoke();
@@ -239,7 +239,6 @@ namespace ModDiff
                 if (row.Item.Selected)
                 {
                     row.Item.TrySetSelected(false);
-                    row.Model.Selected = true;
                     sound.PlayOneShotOnCamera(null);
                 }
             }
@@ -260,7 +259,6 @@ namespace ModDiff
                     }
 
                     row.Item.TrySetSelected(true);
-                    row.Model.Selected = true;
 
 
                     sound.PlayOneShotOnCamera(null);
