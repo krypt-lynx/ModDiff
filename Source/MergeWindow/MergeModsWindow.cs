@@ -91,14 +91,14 @@ namespace ModDiff
 
             var activeFrame = modsList.Background.AddElement(new CFrame
             {
-                Color = new Color(1,1,1, 0.5f),
+                Color = new Color(1, 1, 1, 0.5f),
                 Insets = new EdgeInsets(2)
             });
 
             modsList.Background.AddConstraints(
                 activeFrame.top ^ modsList.Background.top,
                 activeFrame.bottom ^ modsList.Background.bottom,
-                activeFrame.left ^ modsList.Background.left + (modsList.Background.width - 4) / 3 ,
+                activeFrame.left ^ modsList.Background.left + (modsList.Background.width - 4) / 3,
                 activeFrame.right ^ modsList.Background.right - (modsList.Background.width - 4) / 3
                 );
 
@@ -114,10 +114,15 @@ namespace ModDiff
                 Title = "GoBack".Translate(),
                 Action = (_) => Close(true)
             });
-            var resetButton = buttonPanel.AddElement(new CButton
+            var leftButton = buttonPanel.AddElement(new CButton
             {
-                Title = "Reset".Translate(),
-                Action = (_) => model.ResetMerge()
+                Title = "LeftMods".Translate(),
+                Action = (_) => model.UseLeftList()
+            });
+            var rightButton = buttonPanel.AddElement(new CButton
+            {
+                Title = "RightMods".Translate(),
+                Action = (_) => model.UseRightList()
             });
 
             var continueButton = buttonPanel.AddElement(new CButton
@@ -125,12 +130,25 @@ namespace ModDiff
                 Title = "LoadModList".Translate(),
                 Action = (_) =>
                 {
-                    //confirmedAction?.Invoke();
-                    Close(true);
+                    if (model.MergedListIsValid())
+                    {
+                        model.TrySetActiveModsFromMerge();
+                        Close(true);
+                    }
+                    else
+                    {
+                        Find.WindowStack.Add(
+                            Dialog_MessageBox.CreateConfirmation("ModDiffWillBeDisabledText".Translate(), () =>
+                            {
+                                model.TrySetActiveModsFromMerge();
+                                Close(true);
+                            }, false, "ModDiffWillBeDisabledTitle")
+                        );
+                    }
                 }
             });
 
-            buttonPanel.StackLeft(backButton, 10.0, resetButton, 20.0, continueButton);
+            buttonPanel.StackLeft(backButton, 20.0, leftButton, 10, rightButton, 20.0, continueButton);
 
             var guide = new CVarListGuide();
             buttonPanel.AddGuide(guide);
@@ -138,16 +156,20 @@ namespace ModDiff
             guide.Variables.Add(buttonsWidth);
 
             buttonPanel.AddConstraint(backButton.width ^ buttonsWidth, ClStrength.Medium);
-            buttonPanel.AddConstraint(resetButton.width ^ buttonsWidth, ClStrength.Medium);
+            buttonPanel.AddConstraint(leftButton.width ^ buttonsWidth / 2, ClStrength.Medium);
+            buttonPanel.AddConstraint(rightButton.width ^ buttonsWidth / 2, ClStrength.Medium);
             buttonPanel.AddConstraint(continueButton.width ^ buttonsWidth, ClStrength.Medium);
 
             buttonPanel.AddConstraint(backButton.width >= backButton.intrinsicWidth, ClStrength.Strong);
-            buttonPanel.AddConstraint(resetButton.width >= resetButton.intrinsicWidth, ClStrength.Strong);
+            buttonPanel.AddConstraint(leftButton.width >= leftButton.intrinsicWidth, ClStrength.Strong);
+            buttonPanel.AddConstraint(rightButton.width >= rightButton.intrinsicWidth, ClStrength.Strong);
             buttonPanel.AddConstraint(continueButton.width >= continueButton.intrinsicWidth, ClStrength.Strong);
+
+            buttonPanel.AddConstraint(leftButton.width ^ rightButton.width, ClStrength.Strong);
 
             modsList.AddConstraint(modsList.height <= modsList.intrinsicHeight);
 
-            Gui.AddConstraint(Gui.width ^ InnerSize.x);
+            Gui.AddConstraint(Gui.width ^ InnerSize.x, ClStrength.Medium);
             Gui.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8);
 
 
@@ -231,43 +253,13 @@ namespace ModDiff
                 return;
             }
 
-            SoundDef sound = SoundDefOf.Mouseover_Standard;
+            bool select = !DraggedFlag;
 
-            bool deselect = DraggedFlag;
-            if (deselect)
+            if (model.TrySetSelected(row, select))
             {
-                if (row.Item.Selected)
-                {
-                    row.Item.TrySetSelected(false);
-                    sound.PlayOneShotOnCamera(null);
-                }
+                SoundDefOf.Mouseover_Standard.PlayOneShotOnCamera(null);
             }
-            else
-            {
-                var left = row.Model.LeftIndex;
-                var right = row.Model.RightIndex;
-
-                if (!row.Item.Selected)
-                {
-                    if (left != -1)
-                    {
-                        model.modsList[left].TrySetSelected(false);
-                    }
-                    if (right != -1)
-                    {
-                        model.modsList[right].TrySetSelected(false);
-                    }
-
-                    row.Item.TrySetSelected(true);
-
-
-                    sound.PlayOneShotOnCamera(null);
-                }
-            }
-
         }
-
-
     }
 
     static class NullCheck

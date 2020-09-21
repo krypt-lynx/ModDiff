@@ -277,12 +277,12 @@ namespace ModDiff
         {
             if (!model.HaveMissingMods)
             {
-                model.TrySetActiveMods();
+                model.TrySetActiveModsFromSamegame();
                 Close(true);
             }
             else
             {
-                Find.WindowStack.Add(new MissingModsDialog(model.modsList.Where(x => x.ModModel.IsMissing).Select(x => x.ModModel), model.TrySetActiveMods));
+                Find.WindowStack.Add(new MissingModsDialog(model.modsList.Where(x => x.ModModel.IsMissing).Select(x => x.ModModel), model.TrySetActiveModsFromSamegame));
             }
         }
 

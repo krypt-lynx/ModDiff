@@ -229,7 +229,7 @@ namespace ModDiff
             }
         }
 
-        public ModDiffCell(CellStyle style, string title) : base()
+        public ModDiffCell(CellStyle style, string title, string altIcon = null) : base()
         {
             InitStyles();
 
@@ -252,9 +252,9 @@ namespace ModDiff
             }
 
             var iconSlot = this.AddElement(new CElement());
-            if (styleData.marker != null)
+            if (styleData.marker != null || altIcon != null)
             {
-                var icon = iconSlot.AddElement(new CLabel { Title = styleData.marker });
+                var icon = iconSlot.AddElement(new CLabel { Title = altIcon ?? styleData.marker });
                 iconSlot.StackTop(StackOptions.Create(constrainSides: false), icon);
                 iconSlot.AddConstraint(iconSlot.centerX ^ icon.centerX);
                 icon.AddConstraint(icon.width ^ icon.intrinsicWidth);

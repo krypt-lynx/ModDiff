@@ -96,11 +96,11 @@ namespace ModDiff
             // center
             if (Model.IsMoved)
             {
-                cCell = bg.AddElement(new ModDiffCell(Item.MiddleCellStyle(), Item.ModModel.Name));
+                cCell = bg.AddElement(new ModDiffCell(Item.MiddleCellStyle(), Item.ModModel.Name, Item.ModModel.IsRequired ? "/" : null));
             } 
             else if (!Model.IsMissing)
             {
-                cCell = bg.AddElement(new ModDiffCell(Item.MiddleCellStyle(), Item.ModModel.Name));
+                cCell = bg.AddElement(new ModDiffCell(Item.MiddleCellStyle(), Item.ModModel.Name, Item.ModModel.IsRequired ? "/" : null));
                 cCellDeselected = bg.AddElement(new ModDiffCell(CellStyle.EditRemoved, ""));
             }
             else

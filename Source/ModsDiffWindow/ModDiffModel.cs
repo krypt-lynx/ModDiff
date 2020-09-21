@@ -45,8 +45,10 @@ namespace ModDiff
         /// </summary>
         public bool IsMissing = false;
 
+        public bool IsRequired = false;
+
         /// <summary>
-        /// Name for item in m,erged list
+        /// Name for item in merged list
         /// </summary>
         public string Name { get => Right?.name ?? Left?.name; }
 
@@ -91,11 +93,19 @@ namespace ModDiff
         /// select item if possible
         /// </summary>
         /// <param name="value"></param>
-        public void TrySetSelected(bool value)
+        public bool TrySetSelected(bool value, bool force = false)
         {
-            selected = value && !ModModel.IsMissing;
+            if (force)
+            {
+                selected = value;
+            }
+            else
+            {
+                selected = (value && !ModModel.IsMissing) || ModModel.IsRequired;
+            }
 
             OnSelectedChanged?.Invoke(selected);
+            return selected == value;
         }
 
         /// <summary>
@@ -169,6 +179,14 @@ namespace ModDiff
                 }
             }
 
+            HashSet<string> requiredIds = new HashSet<string>();
+            requiredIds.Add(coreMod);
+            if (ModDiff.Settings.selfPreservation)
+            {
+                requiredIds.Add(harmonyId);
+                requiredIds.Add(ModDiff.PackageIdOfMine);
+            }
+
             // searching moved mods
             var movedIds = diff.changeSet.Where(x => x.change == ChangeType.Removed).Select(x => x.value).ToHashSet();
             movedIds.IntersectWith(diff.changeSet.Where(x => x.change == ChangeType.Added).Select(x => x.value));
@@ -181,6 +199,7 @@ namespace ModDiff
                 var packageIdChange = diff.changeSet[i];
                 var packageId = packageIdChange.value;
                 var modModel = modModelByPackageId[packageId];
+                modModel.IsRequired = requiredIds.Contains(packageId);
 
                 var change = new DiffListItem
                 {
@@ -189,7 +208,7 @@ namespace ModDiff
                 };
                 
                 modsList[i] = change;
-                change.TrySetSelected(packageIdChange.change != ChangeType.Removed);
+                change.TrySetSelected(packageIdChange.change != ChangeType.Removed, true);
 
                 if (packageIdChange.change != ChangeType.Added)
                 {
@@ -214,33 +233,55 @@ namespace ModDiff
         }
 
 
+        internal bool MergedListIsValid()
+        {
+            var selectedMods = modsList.Where(mod => mod.Selected).Select(mod => mod.ModModel.PackageId).ToHashSet();
+
+            return 
+                selectedMods.Contains(harmonyId) &&
+                selectedMods.Contains(ModDiff.PackageIdOfMine);
+        }
+
+        static string coreMod = "ludeon.rimworld";
         static string harmonyId = "brrainz.harmony";
 
-        public void TrySetActiveMods()
+        public void TrySetActiveModsFromSamegame()
         {
             var loadedModIdsList = new List<string>(ScribeMetaHeaderUtility.loadedModIdsList);
+            TrySetActiveMods(loadedModIdsList, true);
+        }
 
-            if (ModDiff.Settings.selfPreservation && !loadedModIdsList.Contains(ModDiff.PackageIdOfMine))
+        public void TrySetActiveModsFromMerge()
+        {
+            var editedList = modsList.Where(mod => mod.Selected).Select(mod => mod.ModModel.PackageId).ToList();
+            TrySetActiveMods(editedList, false);
+        }
+
+        private void TrySetActiveMods(List<string> activeMods, bool insertSelfIfNeeded = false)
+        {
+            //
+
+            if (insertSelfIfNeeded && ModDiff.Settings.selfPreservation && !activeMods.Contains(ModDiff.PackageIdOfMine))
             {
                 
-                var index = loadedModIdsList.IndexOf(harmonyId);
+                var index = activeMods.IndexOf(harmonyId);
 
                 if (index != -1)
                 {
-                    loadedModIdsList.Insert(index + 1, ModDiff.PackageIdOfMine);
+                    activeMods.Insert(index + 1, ModDiff.PackageIdOfMine);
                 }
                 else
                 {
-                    loadedModIdsList.Insert(0, harmonyId);
-                    loadedModIdsList.Insert(1, ModDiff.PackageIdOfMine);
+                    activeMods.Insert(0, harmonyId);
+                    activeMods.Insert(1, ModDiff.PackageIdOfMine);
                 }
             }
 
             if (Current.ProgramState == ProgramState.Entry)
             {
-                ModsConfig.SetActiveToList(loadedModIdsList);
+                ModsConfig.SetActiveToList(activeMods);
             }
-            ModsConfig.SaveFromList(loadedModIdsList);
+            ModsConfig.SaveFromList(activeMods);
 
             // "MissingMods".Translate(),
             /*IEnumerable<string> enumerable = Enumerable
@@ -252,20 +293,63 @@ namespace ModDiff
             ModsConfig.RestartFromChangedMods();
         }
 
+
         /// <summary>
         /// reset selection
         /// </summary>
-        internal void ResetMerge()
+        internal void UseLeftList()
         {
             foreach (var change in modsList) {
-                change.TrySetSelected(change.Change != ChangeType.Removed);
+                change.TrySetSelected(change.Change != ChangeType.Added && !change.ModModel.IsMissing, true);
             }            
         }
 
+        internal void UseRightList()
+        {
+            foreach (var change in modsList)
+            {
+                change.TrySetSelected(change.Change != ChangeType.Removed, true);
+            }
+        }
 
         public void DoBGThings() // cheating a bit to hide edit window lag :(
         {
             MergeListDataSource.GenNextItem();
+        }
+
+        internal bool TrySetSelected(MergeListRow row, bool select)
+        {
+
+            if (!select)
+            {
+                if (row.Item.Selected)
+                {
+                    return row.Item.TrySetSelected(false);                    
+                }
+            }
+            else
+            {
+                var left = row.Model.LeftIndex;
+                var right = row.Model.RightIndex;
+
+                if (!row.Item.Selected)
+                {
+                    if (row.Model.IsMoved)
+                    {
+                        if (left != -1)
+                        {
+                            modsList[left].TrySetSelected(false, true);
+                        }
+                        if (right != -1)
+                        {
+                            modsList[right].TrySetSelected(false, true);
+                        }
+                    }
+                    return row.Item.TrySetSelected(true);
+                }
+            }
+
+            return false;
         }
     }
 }
