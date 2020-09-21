@@ -6,7 +6,7 @@
 		<li>1.1</li>
 		<li>1.2</li>
 	</supportedVersions>
-	<packageId>name.krypt.rimworld.moddiff</packageId>
+	<packageId>name.krypt.rimworld.moddiff.dev</packageId>
 	<description>An alternative mods mismatch list</description>
 	<modDependencies>
 		<li>
