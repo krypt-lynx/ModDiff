@@ -52,22 +52,5 @@ namespace ModDiff.MergeWindow
 
             return row;
         }
-
-        public void GenNextItem()
-        {
-            if (rowsGenerated < ModDiffModel.modsList.Length)
-            {
-                if (rows[rowsGenerated] == null)
-                {
-                    var line = ModDiffModel.modsList[rowsGenerated];
-                    var row = new MergeListRow(line, rowsGenerated);
-                    rows[rowsGenerated] = row;
-                    row.InRect = new UnityEngine.Rect(0, 0, 30, 100);
-                    row.UpdateLayoutIfNeeded();
-                    rowsGenerated++;
-                }
-            }
-            
-        }
     }
 }

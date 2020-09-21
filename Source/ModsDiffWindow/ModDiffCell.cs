@@ -213,7 +213,7 @@ namespace ModDiff
         public const int MarkerWidth = 16;
 
         public CellStyle style;
-        private string Title;
+        private string title;
 
         static float defaultHeight = 0;
         public static float DefaultHeight { 
@@ -229,46 +229,50 @@ namespace ModDiff
             }
         }
 
+        CellStyleData styleData;
+        Rect outlineRect;
+        Rect iconRect;
+        Rect titleRect;
+
+        public override void PostLayoutUpdate()
+        {
+            base.PostLayoutUpdate();
+
+            outlineRect = BoundsRounded;
+            iconRect = new Rect(BoundsRounded.xMin + 5, BoundsRounded.yMin, 16, BoundsRounded.height);
+            titleRect = new Rect(BoundsRounded.xMin + 5 + 16, BoundsRounded.yMin, BoundsRounded.width - 5 - 16 - 2, BoundsRounded.height);
+        }
+
+        public override void DoContent()
+        {
+            base.DoContent();
+
+            if (styleData.drawBg)
+            {
+                Widgets.DrawBoxSolid(outlineRect, styleData.bgColor);
+                GuiTools.UsingColor(styleData.outlineColor, () => GuiTools.Box(outlineRect, styleData.insets));
+            }
+            GuiTools.PushFont(GameFont.Small);
+            GuiTools.PushTextAnchor(TextAnchor.UpperCenter);
+
+            GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(iconRect, styleData.marker));
+            Text.Anchor = TextAnchor.UpperLeft;
+
+            GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(titleRect, title));
+            GuiTools.PopTextAnchor();
+            GuiTools.PopFont();
+        }
+
         public ModDiffCell(CellStyle style, string title, string altIcon = null) : base()
         {
             InitStyles();
 
             this.style = style;
-            this.Title = title;
+            this.title = title;
 
-            var styleData = styles[style];
+            styleData = styles[style];
 
-            if (styleData.drawBg)
-            {
-                var highlight = this.AddElement(new CWidget
-                {
-                    DoWidgetContent = (_, bounds) =>
-                    {
-                        Widgets.DrawBoxSolid(bounds, styleData.bgColor);
-                        GuiTools.UsingColor(styleData.outlineColor, () => GuiTools.Box(bounds, styleData.insets));                        
-                    }
-                });
-                this.Embed(highlight);
-            }
-
-            var iconSlot = this.AddElement(new CElement());
-            if (styleData.marker != null || altIcon != null)
-            {
-                var icon = iconSlot.AddElement(new CLabel { Title = altIcon ?? styleData.marker });
-                iconSlot.StackTop(StackOptions.Create(constrainSides: false), icon);
-                iconSlot.AddConstraint(iconSlot.centerX ^ icon.centerX);
-                icon.AddConstraint(icon.width ^ icon.intrinsicWidth);
-            }
-
-            var text = this.AddElement(new CLabel
-            {
-                Title = Title,
-                Color = styleData.textColor,
-            });
-
-            this.StackLeft(5, (iconSlot, 16), text, 2);
-
-            this.AddConstraint(this.height ^ text.intrinsicHeight);
+            this.AddConstraint(this.height ^ DefaultHeight);
         }
     }
 }

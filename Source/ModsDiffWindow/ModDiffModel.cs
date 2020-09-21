@@ -283,13 +283,6 @@ namespace ModDiff
             }
             ModsConfig.SaveFromList(activeMods);
 
-            // "MissingMods".Translate(),
-            /*IEnumerable<string> enumerable = Enumerable
-                .Range(0, ScribeMetaHeaderUtility.loadedModIdsList.Count)
-                .Where((int id) => ModLister.GetModWithIdentifier(ScribeMetaHeaderUtility.loadedModIdsList[id], false) == null)
-                .Select((int id) => ScribeMetaHeaderUtility.loadedModNamesList[id]);
-            */
-
             ModsConfig.RestartFromChangedMods();
         }
 
@@ -310,11 +303,6 @@ namespace ModDiff
             {
                 change.TrySetSelected(change.Change != ChangeType.Removed, true);
             }
-        }
-
-        public void DoBGThings() // cheating a bit to hide edit window lag :(
-        {
-            MergeListDataSource.GenNextItem();
         }
 
         internal bool TrySetSelected(MergeListRow row, bool select)
