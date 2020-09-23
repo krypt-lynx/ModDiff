@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cassowary_moddiff;
+using RimWorld.IO;
 using RWLayout.moddiff;
 using UnityEngine;
 using Verse;
@@ -34,9 +36,11 @@ namespace ModDiff
         EditMoved,
     }
 
-
+    //[StaticConstructorOnStartup]
     public class ModDiffCell : CElement
     {
+        static Resource<Texture2D> lockIcon = new Resource<Texture2D>("UI/Icons/Lock");
+
         static Dictionary<CellStyle, CellStyleData> styles = null;
 
         static public bool NeedInitStyles = true;
@@ -212,8 +216,9 @@ namespace ModDiff
 
         public const int MarkerWidth = 16;
 
-        public CellStyle style;
+        private CellStyle style;
         private string title;
+        private bool drawLock;
 
         static float defaultHeight = 0;
         public static float DefaultHeight { 
@@ -233,6 +238,7 @@ namespace ModDiff
         Rect outlineRect;
         Rect iconRect;
         Rect titleRect;
+        Rect lockRect;
 
         public override void PostLayoutUpdate()
         {
@@ -241,6 +247,10 @@ namespace ModDiff
             outlineRect = BoundsRounded;
             iconRect = new Rect(BoundsRounded.xMin + 5, BoundsRounded.yMin, 16, BoundsRounded.height);
             titleRect = new Rect(BoundsRounded.xMin + 5 + 16, BoundsRounded.yMin, BoundsRounded.width - 5 - 16 - 2, BoundsRounded.height);
+            if (drawLock)
+            {
+                lockRect = GuiTools.SizeCenteredIn(iconRect, new EdgeInsets(-1, 0, 1, 0), lockIcon.Value.Size());
+            }
         }
 
         public override void DoContent()
@@ -253,11 +263,21 @@ namespace ModDiff
                 GuiTools.UsingColor(styleData.outlineColor, () => GuiTools.Box(outlineRect, styleData.insets));
             }
             GuiTools.PushFont(GameFont.Small);
-            GuiTools.PushTextAnchor(TextAnchor.UpperCenter);
+          
 
-            GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(iconRect, styleData.marker));
-            Text.Anchor = TextAnchor.UpperLeft;
+            if (drawLock)
+            {
+                GUI.DrawTexture(lockRect, lockIcon.Value);
+            }
+            else
+            {
+                GuiTools.PushTextAnchor(TextAnchor.UpperCenter);
+                GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(iconRect, styleData.marker));
+                GuiTools.PopTextAnchor();
 
+            }
+
+            GuiTools.PushTextAnchor(TextAnchor.UpperLeft);
             GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(titleRect, title));
             GuiTools.PopTextAnchor();
             GuiTools.PopFont();
@@ -269,6 +289,7 @@ namespace ModDiff
 
             this.style = style;
             this.title = title;
+            this.drawLock = altIcon != null;
 
             styleData = styles[style];
 

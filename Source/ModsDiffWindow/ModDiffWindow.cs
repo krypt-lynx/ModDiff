@@ -117,28 +117,33 @@ namespace ModDiff
         public EdgeInsets IconInsets = EdgeInsets.Zero;
         public Color IconTint = UnityEngine.Color.white;
 
+        Rect iconRect;
+
+        public override void PostLayoutUpdate()
+        {
+            base.PostLayoutUpdate();
+            //GuiTools.GUIRounded
+
+            iconRect = GuiTools.SizeCenteredIn(BoundsRounded, IconInsets, Icon.Size());
+        }
+
         public override void DoContent()
         {
             base.DoContent();
 
             GuiTools.UsingColor(IconTint, () =>
             {
-                GUI.DrawTexture(
-                    new Rect(
-                        BoundsRounded.xMin + IconInsets.left + (BoundsRounded.width - Icon.width - IconInsets.left - IconInsets.right) / 2,
-                        BoundsRounded.yMin + IconInsets.top + (BoundsRounded.height - Icon.height - IconInsets.top - IconInsets.bottom) / 2,
-                        Icon.width, Icon.height
-                    ), Icon);
+                GUI.DrawTexture(iconRect, Icon);
             });
         }
     }
 
-    [StaticConstructorOnStartup]
+    //[StaticConstructorOnStartup]
     public class ModDiffWindow : CWindow, IListViewDataSource
     {
         const int vSpace = 8;
 
-        public static readonly Texture2D EditIcon = ContentFinder<Texture2D>.Get("UI/Icons/DiffEdit", true);
+       // public static readonly Texture2D EditIcon = ContentFinder<Texture2D>.Get("UI/Icons/DiffEdit", true);
 
 
         ModDiffModel model;
@@ -224,7 +229,8 @@ namespace ModDiff
             });
             var editButton = buttonPanel.AddElement(new CIconButton
             {
-                Icon = EditIcon,
+                //Icon = EditIcon,
+                Icon = ContentFinder<Texture2D>.Get("UI/Icons/DiffEdit", true),
                 IconTint = new Color(1, 1, 1, 0.83f),
                 Action = (_) => MergeMods(),
             });
@@ -351,7 +357,6 @@ namespace ModDiff
             }
 
             row.StackLeft(lCell, (rCell, lCell.width));
-
 
             return row;
         }

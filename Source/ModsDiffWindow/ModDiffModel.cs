@@ -293,7 +293,10 @@ namespace ModDiff
         internal void UseLeftList()
         {
             foreach (var change in modsList) {
-                change.TrySetSelected(change.Change != ChangeType.Added && !change.ModModel.IsMissing, true);
+                change.TrySetSelected(
+                    (change.Change != ChangeType.Added && !change.ModModel.IsMissing) ||
+                    (!change.ModModel.IsMoved && change.ModModel.IsRequired) 
+                    , true);
             }            
         }
 
