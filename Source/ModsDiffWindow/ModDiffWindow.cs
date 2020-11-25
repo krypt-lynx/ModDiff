@@ -7,8 +7,8 @@ using UnityEngine;
 using Verse;
 using Diff;
 using RimWorld;
-using RWLayout.moddiff;
-using Cassowary_moddiff;
+using RWLayout.alpha2;
+using Cassowary;
 using System.Diagnostics;
 
 namespace ModDiff

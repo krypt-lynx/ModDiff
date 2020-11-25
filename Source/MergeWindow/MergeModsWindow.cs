@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Diff;
 using RimWorld;
-using RWLayout.moddiff;
+using RWLayout.alpha2;
 using UnityEngine;
 using Verse;
-using Cassowary_moddiff;
+using Cassowary;
 using Verse.Sound;
 
 namespace ModDiff

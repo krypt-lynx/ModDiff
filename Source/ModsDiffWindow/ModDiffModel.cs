@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Diff;
 using ModDiff.MergeWindow;
 using RimWorld;
-using RWLayout.moddiff;
+using RWLayout.alpha2;
 using Verse;
 
 namespace ModDiff
@@ -181,9 +181,10 @@ namespace ModDiff
 
             HashSet<string> requiredIds = new HashSet<string>();
             requiredIds.Add(coreMod);
+            requiredIds.AddRange(ModDiff.Settings.LockedMods);
             if (ModDiff.Settings.selfPreservation)
             {
-                requiredIds.Add(harmonyId);
+                requiredIds.AddRange(requiredMods);
                 requiredIds.Add(ModDiff.PackageIdOfMine);
             }
 
@@ -237,13 +238,18 @@ namespace ModDiff
         {
             var selectedMods = modsList.Where(mod => mod.Selected).Select(mod => mod.ModModel.PackageId).ToHashSet();
 
-            return 
-                selectedMods.Contains(harmonyId) &&
+            return
+                requiredMods.All(x => selectedMods.Contains(x)) &&
                 selectedMods.Contains(ModDiff.PackageIdOfMine);
         }
 
+
         static string coreMod = "ludeon.rimworld";
         static string harmonyId = "brrainz.harmony";
+        static string[] requiredMods = {
+            harmonyId, // Harmony
+            "name.krypt.rimworld.rwlayout.alpha2.dev", // RWLayout
+        };
 
         public void TrySetActiveModsFromSamegame()
         {
@@ -259,22 +265,24 @@ namespace ModDiff
 
         private void TrySetActiveMods(List<string> activeMods, bool insertSelfIfNeeded = false)
         {
-            //
-
-            if (insertSelfIfNeeded && ModDiff.Settings.selfPreservation && !activeMods.Contains(ModDiff.PackageIdOfMine))
+            if (insertSelfIfNeeded && ModDiff.Settings.selfPreservation)
             {
-                
-                var index = activeMods.IndexOf(harmonyId);
-
-                if (index != -1)
+                int index = -1;
+                int indexToInsert = 0;
+                foreach (var modId in requiredMods.Concat(ModDiff.Settings.LockedMods))
                 {
-                    activeMods.Insert(index + 1, ModDiff.PackageIdOfMine);
+                    index = activeMods.IndexOf(modId);
+                    if (index == -1)
+                    {
+                        activeMods.Insert(indexToInsert, modId);
+                        index = indexToInsert;
+                    }
+                    indexToInsert = index + 1;
                 }
-                else
+                if (!activeMods.Contains(ModDiff.PackageIdOfMine))
                 {
-                    activeMods.Insert(0, harmonyId);
-                    activeMods.Insert(1, ModDiff.PackageIdOfMine);
-                }
+                    activeMods.Insert(indexToInsert, ModDiff.PackageIdOfMine);
+                }                
             }
 
             if (Current.ProgramState == ProgramState.Entry)

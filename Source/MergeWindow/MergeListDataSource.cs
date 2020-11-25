@@ -1,4 +1,4 @@
-﻿using RWLayout.moddiff;
+﻿using RWLayout.alpha2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,6 @@ namespace ModDiff.MergeWindow
     {
         Verse.WeakReference<ModDiffModel> modDiffModel;
         MergeListRow[] rows;
-        int rowsGenerated ;
 
         public ModDiffModel ModDiffModel
         {
@@ -26,7 +25,6 @@ namespace ModDiff.MergeWindow
         private void InitRows()
         {
             rows = new MergeListRow[ModDiffModel.modsList.Length];
-            rowsGenerated = 0;
         }
 
         public int NumberOfRows()

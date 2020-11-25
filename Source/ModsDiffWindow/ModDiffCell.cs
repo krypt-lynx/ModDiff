@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Cassowary_moddiff;
+using Cassowary;
 using RimWorld.IO;
-using RWLayout.moddiff;
+using RWLayout.alpha2;
 using UnityEngine;
 using Verse;
 
@@ -257,30 +257,33 @@ namespace ModDiff
         {
             base.DoContent();
 
-            if (styleData.drawBg)
+            if (Event.current.type == EventType.Repaint)
             {
-                Widgets.DrawBoxSolid(outlineRect, styleData.bgColor);
-                GuiTools.UsingColor(styleData.outlineColor, () => GuiTools.Box(outlineRect, styleData.insets));
-            }
-            GuiTools.PushFont(GameFont.Small);
-          
+                if (styleData.drawBg)
+                {
+                    Widgets.DrawBoxSolid(outlineRect, styleData.bgColor);
+                    GuiTools.UsingColor(styleData.outlineColor, () => GuiTools.Box(outlineRect, styleData.insets));
+                }
+                GuiTools.PushFont(GameFont.Small);
 
-            if (drawLock)
-            {
-                GUI.DrawTexture(lockRect, lockIcon.Value);
-            }
-            else
-            {
-                GuiTools.PushTextAnchor(TextAnchor.UpperCenter);
-                GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(iconRect, styleData.marker));
+
+                if (drawLock)
+                {
+                    GUI.DrawTexture(lockRect, lockIcon.Value);
+                }
+                else
+                {
+                    GuiTools.PushTextAnchor(TextAnchor.UpperCenter);
+                    GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(iconRect, styleData.marker));
+                    GuiTools.PopTextAnchor();
+
+                }
+
+                GuiTools.PushTextAnchor(TextAnchor.UpperLeft);
+                GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(titleRect, title));
                 GuiTools.PopTextAnchor();
-
+                GuiTools.PopFont();
             }
-
-            GuiTools.PushTextAnchor(TextAnchor.UpperLeft);
-            GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(titleRect, title));
-            GuiTools.PopTextAnchor();
-            GuiTools.PopFont();
         }
 
         public ModDiffCell(CellStyle style, string title, string altIcon = null) : base()

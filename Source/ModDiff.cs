@@ -1,8 +1,5 @@
-﻿// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
-
-using HarmonyLib;
-using RWLayout.moddiff;
+﻿using HarmonyLib;
+using RWLayout.alpha2;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,6 +29,12 @@ namespace ModDiff
 
             ModDiffCell.NeedInitStyles = true;
         }
+
+        public string[] LockedMods = {
+            "dubwise.dubsperformanceanalyzer",
+            "automatic.startupimpact",
+            "unlimitedhugs.hugslib" 
+        };
     }
 
 
@@ -126,8 +129,8 @@ namespace ModDiff
             Gui.StackTop(StackOptions.Create(intrinsicIfNotSet: true, constrainEnd: false),
              Gui.AddElement(new CCheckBox
              {
-                Title = "IgnoreSelfTitle".Translate(),
-                Checked = Settings.ignoreSelf,
+                 Title = "IgnoreSelfTitle".Translate(),
+                 Checked = Settings.ignoreSelf,
                  Changed = (_, value) => Settings.ignoreSelf = value,
              }), 2,
              Gui.AddElement(new CCheckBox
@@ -147,7 +150,7 @@ namespace ModDiff
             Gui.StackBottom(StackOptions.Create(intrinsicIfNotSet: true, constrainEnd: false),
                 Gui.AddElement(new CLabel
                 {
-                    Title = CommitInfo,
+                    Title = $"Mod Diff version: {CommitInfo}",
                     TextAlignment = TextAnchor.LowerRight,
                     Color = new Color(1, 1, 1, 0.5f),
                     Font = GameFont.Tiny
