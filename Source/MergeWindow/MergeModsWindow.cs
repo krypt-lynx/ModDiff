@@ -75,7 +75,7 @@ namespace ModDiff
             });
             var headerSpacer = headerPanel.AddElement(new CWidget
             {
-                TryFitContect = (_) => new Vector2(modsList.IsScrollBarVisible() ? 16 : 0, 0)
+                TryFitContent = (_) => new Vector2(modsList.IsScrollBarVisible() ? 16 : 0, 0)
             });
 
             headerPanel.StackLeft(16 + 5, headerLeft, 2 + 16 + 5, 2, (headerCenter, headerLeft.width), 2 + 16 + 5, 2, (headerRight, headerLeft.width), 2, (headerSpacer, headerSpacer.intrinsicWidth));

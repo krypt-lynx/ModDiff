@@ -90,8 +90,13 @@ namespace ModDiff
             Harmony harmony = new Harmony(PackageIdOfMine);
 
             harmony.Patch(AccessTools.Method(typeof(ScribeMetaHeaderUtility), "TryCreateDialogsForVersionMismatchWarnings"),
-                prefix: new HarmonyMethod(typeof(HarmonyPatches), "TryCreateDialogsForVersionMismatchWarnings_Prefix"));               
+                prefix: new HarmonyMethod(typeof(HarmonyPatches), "TryCreateDialogsForVersionMismatchWarnings_Prefix"));
 
+            harmony.Patch(AccessTools.Method(typeof(UIRoot), "UIRootOnGUI"),
+                prefix: new HarmonyMethod(typeof(WindowStackAddPatches), "UIRoot_UIRootOnGUI_prefix"),
+                postfix: new HarmonyMethod(typeof(WindowStackAddPatches), "UIRoot_UIRootOnGUI_postfix"));
+            harmony.Patch(AccessTools.Method(typeof(WindowStack), "Add"),
+                prefix: new HarmonyMethod(typeof(WindowStackAddPatches), "WindowStack_Add_prefix"));
         }
 
         private static void ReadModInfo(ModContentPack content)
