@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Verse;
 using LinqExtansions;
-using RWLayout.moddiff;
+using RWLayout.alpha2;
 
 namespace ModDiff
 {
