@@ -56,6 +56,8 @@ namespace ModDiff
             harmony.Patch(AccessTools.Method(typeof(ScribeMetaHeaderUtility), "TryCreateDialogsForVersionMismatchWarnings"),
                 prefix: new HarmonyMethod(typeof(HarmonyPatches), "TryCreateDialogsForVersionMismatchWarnings_Prefix"));
 
+            RWLayoutHarmonyPatches.PatchOnce();
+
             /*
             harmony.Patch(AccessTools.Method(typeof(UIRoot), "UIRootOnGUI"),
                 prefix: new HarmonyMethod(typeof(WindowStackAddPatches), "UIRoot_UIRootOnGUI_prefix"),

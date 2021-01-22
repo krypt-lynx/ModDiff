@@ -18,5 +18,6 @@
 	</modDependencies>
 	<loadAfter>
 		<li>brrainz.harmony</li>
+		<li>name.krypt.rimworld.rwlayout.alpha2</li>
 	</loadAfter>
 </ModMetaData>
