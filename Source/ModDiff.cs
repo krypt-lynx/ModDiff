@@ -30,11 +30,11 @@ namespace ModDiff
             ModDiffCell.NeedInitStyles = true;
         }
 
-        public string[] LockedMods = {
-            "dubwise.dubsperformanceanalyzer",
-            "automatic.startupimpact",
-            "unlimitedhugs.hugslib" 
-        };
+        //public string[] LockedMods = {
+        //    "dubwise.dubsperformanceanalyzer",
+        //    "automatic.startupimpact",
+        //    "unlimitedhugs.hugslib" 
+        //};
     }
 
 

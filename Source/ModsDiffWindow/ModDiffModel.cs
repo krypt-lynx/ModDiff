@@ -181,7 +181,7 @@ namespace ModDiff
 
             HashSet<string> requiredIds = new HashSet<string>();
             requiredIds.Add(coreMod);
-            requiredIds.AddRange(ModDiff.Settings.LockedMods);
+            //requiredIds.AddRange(ModDiff.Settings.LockedMods);
             if (ModDiff.Settings.selfPreservation)
             {
                 requiredIds.AddRange(requiredMods);
@@ -248,7 +248,7 @@ namespace ModDiff
         static string harmonyId = "brrainz.harmony";
         static string[] requiredMods = {
             harmonyId, // Harmony
-            "name.krypt.rimworld.rwlayout.alpha2.dev", // RWLayout
+            //"name.krypt.rimworld.rwlayout.alpha2.dev", // RWLayout
         };
 
         public void TrySetActiveModsFromSamegame()
@@ -269,7 +269,7 @@ namespace ModDiff
             {
                 int index = -1;
                 int indexToInsert = 0;
-                foreach (var modId in requiredMods.Concat(ModDiff.Settings.LockedMods))
+                foreach (var modId in requiredMods/*.Concat(ModDiff.Settings.LockedMods)*/)
                 {
                     index = activeMods.IndexOf(modId);
                     if (index == -1)
