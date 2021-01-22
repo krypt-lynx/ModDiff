@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using RWLayout.alpha2;
 using System;
 using System.Collections.Generic;
@@ -57,14 +57,6 @@ namespace ModDiff
                 prefix: new HarmonyMethod(typeof(HarmonyPatches), "TryCreateDialogsForVersionMismatchWarnings_Prefix"));
 
             RWLayoutHarmonyPatches.PatchOnce();
-
-            /*
-            harmony.Patch(AccessTools.Method(typeof(UIRoot), "UIRootOnGUI"),
-                prefix: new HarmonyMethod(typeof(WindowStackAddPatches), "UIRoot_UIRootOnGUI_prefix"),
-                postfix: new HarmonyMethod(typeof(WindowStackAddPatches), "UIRoot_UIRootOnGUI_postfix"));
-            harmony.Patch(AccessTools.Method(typeof(WindowStack), "Add"),
-                prefix: new HarmonyMethod(typeof(WindowStackAddPatches), "WindowStack_Add_prefix"));
-            */
         }
 
         private static void ReadModInfo(ModContentPack content)
@@ -97,19 +89,19 @@ namespace ModDiff
         public override void ConstructGui()
         {
             Gui.StackTop(StackOptions.Create(intrinsicIfNotSet: true, constrainEnd: false),
-             Gui.AddElement(new CCheckBox
+             Gui.AddElement(new CCheckboxLabeled
              {
                  Title = "IgnoreSelfTitle".Translate(),
                  Checked = Settings.ignoreSelf,
                  Changed = (_, value) => Settings.ignoreSelf = value,
              }), 2,
-             Gui.AddElement(new CCheckBox
+             Gui.AddElement(new CCheckboxLabeled
              {
                  Title = "KeepSelfLoaded".Translate(),
                  Checked = Settings.selfPreservation,
                  Changed = (_, value) => Settings.selfPreservation = value,
              }), 2,
-             Gui.AddElement(new CCheckBox
+             Gui.AddElement(new CCheckboxLabeled
              {
                  Title = "AlternativePalette".Translate(),
                  Checked = Settings.alternativePallete,

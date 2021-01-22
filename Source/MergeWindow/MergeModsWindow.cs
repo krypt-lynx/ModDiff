@@ -109,23 +109,23 @@ namespace ModDiff
             //Gui.ConstrainSize(1000, 800);
 
             var buttonPanel = Gui.AddElement(new CElement());
-            var backButton = buttonPanel.AddElement(new CButton
+            var backButton = buttonPanel.AddElement(new CButtonText
             {
                 Title = "GoBack".Translate(),
                 Action = (_) => Close(true)
             });
-            var leftButton = buttonPanel.AddElement(new CButton
+            var leftButton = buttonPanel.AddElement(new CButtonText
             {
                 Title = "LeftMods".Translate(),
                 Action = (_) => model.UseLeftList()
             });
-            var rightButton = buttonPanel.AddElement(new CButton
+            var rightButton = buttonPanel.AddElement(new CButtonText
             {
                 Title = "RightMods".Translate(),
                 Action = (_) => model.UseRightList()
             });
 
-            var continueButton = buttonPanel.AddElement(new CButton
+            var continueButton = buttonPanel.AddElement(new CButtonText
             {
                 Title = "LoadModList".Translate(),
                 Action = (_) =>

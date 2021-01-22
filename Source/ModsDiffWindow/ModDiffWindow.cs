@@ -111,7 +111,7 @@ namespace ModDiff
         }
     }
 
-    public class CIconButton : CButton
+    public class CIconButton : CButtonText
     {
         public Texture2D Icon = null;
         public EdgeInsets IconInsets = EdgeInsets.Zero;
@@ -217,12 +217,12 @@ namespace ModDiff
             });
 
             var buttonPanel = Gui.AddElement(new CElement());
-            var backButton = buttonPanel.AddElement(new CButton
+            var backButton = buttonPanel.AddElement(new CButtonText
             {
                 Title = "GoBack".Translate(),
                 Action = (_) => Close(true)
             });
-            var reloadButton = buttonPanel.AddElement(new CButton
+            var reloadButton = buttonPanel.AddElement(new CButtonText
             {
                 Title = "ChangeLoadedMods".Translate(),
                 Action = (_) => TrySetActiveMods(),
@@ -235,7 +235,7 @@ namespace ModDiff
                 Action = (_) => MergeMods(),
             });
             
-            var continueButton = buttonPanel.AddElement(new CButton
+            var continueButton = buttonPanel.AddElement(new CButtonText
             {
                 Title = "LoadAnyway".Translate(),
                 Action = (_) =>

@@ -50,12 +50,12 @@ namespace ModDiff
             var missingList = Gui.AddElement(new CListView_vNext());
 
             var buttonPanel = Gui.AddElement(new CElement());
-            var backButton = buttonPanel.AddElement(new CButton
+            var backButton = buttonPanel.AddElement(new CButtonText
             {
                 Title = "GoBack".Translate(),
                 Action = (_) => Close(true)
             });
-            var reloadButton = buttonPanel.AddElement(new CButton
+            var reloadButton = buttonPanel.AddElement(new CButtonText
             {
                 Title = "ChangeLoadedMods".Translate(),
                 Action = (_) => AcceptAction(),
