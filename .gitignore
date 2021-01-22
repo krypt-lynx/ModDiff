@@ -8,7 +8,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-git.txt
+#rimworld mod assemblies
+1.1/Assemblies
+1.2/Assemblies
 
 # User-specific files
 *.rsuser
@@ -37,6 +39,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+1.2/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -360,3 +363,7 @@ MigrationBackup/
 .ionide/
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio
+
+# embeded git info generation
+git.txt
+Dependencies/
