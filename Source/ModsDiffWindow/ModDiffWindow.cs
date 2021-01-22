@@ -314,7 +314,6 @@ namespace ModDiff
             {
                 bg = row.AddElement(new CWidget
                 {
-
                     DoWidgetContent = (_, bounds) => {
                         Widgets.DrawAltRect(bounds);
                         TooltipHandler.TipRegion(bounds, tip);

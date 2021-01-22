@@ -38,45 +38,6 @@ namespace ModDiff
     }
 
 
-    public abstract class CMod : Mod // todo: update local RWLayout lib
-    {
-        public CMod(ModContentPack content) : base(content) { }
-
-        CGuiRoot gui = null;
-        public CGuiRoot Gui
-        {
-            get
-            {
-                if (gui == null)
-                {
-                    gui = new CGuiRoot();
-                    ConstructGui();
-                }
-                return gui;
-            }
-        }
-
-        public override void WriteSettings()
-        {
-            base.WriteSettings();
-
-            gui = null; // this method is called after settings window close
-        }
-
-        public virtual void ConstructGui() { }
-
-        public override void DoSettingsWindowContents(Rect inRect)
-        {
-            base.DoSettingsWindowContents(inRect);
-
-            var settingsGui = Gui;
-            settingsGui.InRect = inRect;
-            settingsGui.UpdateLayoutIfNeeded();
-            settingsGui.DoElementContent();
-        }
-    }
-
-
     public class ModDiff : CMod
     {
         public static string PackageIdOfMine = null;
