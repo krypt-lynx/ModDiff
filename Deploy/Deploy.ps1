@@ -3,6 +3,8 @@ $repo           = '..'
 $packing        = 'packing'
 $outputFormat   = '..\..\ModDiff-{0}.zip'
 $internalPath   = 'ModDiff'
+$solution       = '..\Source\ModDiff.sln'
+$target         = 'ModDiff'
 $pathsToRemove  = '.git', '.gitattributes', '.gitignore', 'Source', 'Deploy', 'Steam', 'Dependencies', '1.1/Assemblies/*.pdb', '1.1/Assemblies/*.xml', '1.2/Assemblies/*.pdb', '1.2/Assemblies/*.xml'
 
 $packageId      = 'name.krypt.rimworld.moddiff'
@@ -16,7 +18,7 @@ $Id                   = 1
 
 # Complex Progress Bar
 $Step                 = 0
-$TotalSteps           = 7 
+$TotalSteps           = 9 
 $StatusText           = '"Step $($Step.ToString().PadLeft($TotalSteps.ToString().Length)) of $TotalSteps | $Task"' # Single quotes need to be on the outside
 $StatusBlock          = [ScriptBlock]::Create($StatusText) # This script block allows the string above to use the current values of embedded values each time it's run
 
@@ -26,8 +28,11 @@ $Step++
 ##Write-Progress -Id $Id -Activity $Activity -Status (& $StatusBlock) -CurrentOperation " " -PercentComplete ($Step / $TotalSteps * 100)
 
 $startupPath = Get-Location
+$vswhere = "$Env:programfiles (x86)\Microsoft Visual Studio\Installer\vswhere.exe"
+$msbuild = & $vswhere -latest -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe | select-object -first 1
 $7z = (GET-ItemProperty 'HKLM:\SOFTWARE\7-Zip').Path + '7z.exe'
 $rw = (GET-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 294100').InstallLocation
+
 $packingMod = $packing + "\" + $internalPath
 
 
@@ -58,6 +63,17 @@ if (Test-Path $packing) { Remove-Item -Recurse -Force $packing }
 if (Test-Path $output) { Remove-Item $output }
 if (Test-Path $mod) { Remove-Item -Recurse -Force $mod }
 
+$Task = "Building 1.1..."
+$Step++
+Write-Progress -Id $Id -Activity $Activity -Status (& $StatusBlock) -CurrentOperation " " -PercentComplete ($Step / $TotalSteps * 100)
+
+& $msbuild $solution /t:$target /p:Configuration="1.1" /p:Platform="Any CPU" /p:BuildProjectReferences=true
+
+$Task = "Building 1.2..."
+$Step++
+Write-Progress -Id $Id -Activity $Activity -Status (& $StatusBlock) -CurrentOperation " " -PercentComplete ($Step / $TotalSteps * 100)
+
+& $msbuild $solution /t:$target /p:Configuration="1.2" /p:Platform="Any CPU" /p:BuildProjectReferences=true
 
 # Prepating data
 $Task = "Copying..."
@@ -134,6 +150,7 @@ $Task = "Cleanup..."
 $Step++
 Write-Progress -Id $Id -Activity $Activity -Status (& $StatusBlock) -CurrentOperation " " -PercentComplete ($Step / $TotalSteps * 100)
 
+if (Test-Path $mod) { Remove-Item -Recurse -Force $mod }
 Move-Item -Path $packingMod -Destination $mod
 if (Test-Path $packing) { Remove-Item -Recurse -Force $packing }
 
