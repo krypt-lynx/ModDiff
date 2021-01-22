@@ -42,8 +42,11 @@ namespace ModDiff
     {
         public static string PackageIdOfMine = null;
         public static Settings Settings { get; private set; }
-        public static string CommitInfo = null;
 
+        private static bool debug = false;
+
+        static string commitInfo = null;
+        public static string CommitInfo => debug ? (commitInfo + "-dev") : commitInfo;
         public static bool CassowaryPackaged = true;
 
         public ModDiff(ModContentPack content) : base(content)
@@ -71,13 +74,15 @@ namespace ModDiff
                         .GetManifestResourceStream(name + ".git.txt"))
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    CommitInfo = reader.ReadToEnd()?.TrimEndNewlines();
+                    commitInfo = reader.ReadToEnd()?.TrimEndNewlines();
                 }
             }
             catch
             {
-                CommitInfo = null;
+                commitInfo = null;
             }
+
+            debug = PackageIdOfMine.EndsWith(".dev");
         }
 
         public override string SettingsCategory()
