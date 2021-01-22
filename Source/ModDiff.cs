@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using RWLayout.alpha2;
 using System;
 using System.Collections.Generic;
@@ -109,15 +109,20 @@ namespace ModDiff
              })
             );
 
-            Gui.StackBottom(StackOptions.Create(intrinsicIfNotSet: true, constrainEnd: false),
-                Gui.AddElement(new CLabel
-                {
-                    Title = $"Mod Diff version: {CommitInfo}",
-                    TextAlignment = TextAnchor.LowerRight,
-                    Color = new Color(1, 1, 1, 0.5f),
-                    Font = GameFont.Tiny
-                })
-            );
+            var footer = Gui.AddElement(new CLabel
+            {
+                Title = $"Version: {CommitInfo}",
+                TextAlignment = TextAnchor.LowerRight,
+                Color = new Color(1, 1, 1, 0.5f),
+                Font = GameFont.Tiny
+            });
+
+            Gui.AddConstraints(
+                footer.top ^ Gui.bottom + 3,
+                footer.width ^ footer.intrinsicWidth,
+                footer.right ^ Gui.right,
+                footer.height ^ footer.intrinsicHeight);
+
         }
         /*
         public override void DoSettingsWindowContents(Rect inRect)
