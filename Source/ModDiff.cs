@@ -40,7 +40,6 @@ namespace ModDiff
 
     public class ModDiff : CMod
     {
-        public static string PackageIdOfMine = null;
         public static Settings Settings { get; private set; }
 
         private static bool debug = false;
@@ -58,14 +57,10 @@ namespace ModDiff
 
             harmony.Patch(AccessTools.Method(typeof(ScribeMetaHeaderUtility), "TryCreateDialogsForVersionMismatchWarnings"),
                 prefix: new HarmonyMethod(typeof(HarmonyPatches), "TryCreateDialogsForVersionMismatchWarnings_Prefix"));
-
-            RWLayoutHarmonyPatches.PatchOnce();
         }
 
         private static void ReadModInfo(ModContentPack content)
         {
-            PackageIdOfMine = content.PackageId;
-
             var name = Assembly.GetExecutingAssembly().GetName().Name;
 
             try
