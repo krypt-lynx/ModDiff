@@ -1,14 +1,22 @@
 # Configurable variables
-$repo           = '..'
-$packing        = 'packing'
-$outputFormat   = '..\..\ModDiff-{0}.zip'
-$internalPath   = 'ModDiff'
-$solution       = '..\Source\ModDiff.sln'
-$target         = 'ModDiff'
-$pathsToRemove  = '.git', '.gitattributes', '.gitignore', 'Source', 'Deploy', 'Steam', 'Dependencies', '1.1/Assemblies/*.pdb', '1.1/Assemblies/*.xml', '1.2/Assemblies/*.pdb', '1.2/Assemblies/*.xml'
 
-$packageId      = 'name.krypt.rimworld.moddiff'
-$packageName    = 'ModDiff'
+
+$config = ".\Deploy.xml"
+
+[string]$packageId = (Select-Xml -Path $config -XPath '/config/about/packageId' | Select-Object -ExpandProperty Node).innerText
+[string]$packageName = (Select-Xml -Path $config -XPath '/config/about/packageName' | Select-Object -ExpandProperty Node).innerText
+
+[string]$solution = (Select-Xml -Path $config -XPath '/config/build/solution' | Select-Object -ExpandProperty Node).innerText
+[string]$target = (Select-Xml -Path $config -XPath '/config/build/target' | Select-Object -ExpandProperty Node).innerText
+
+[string]$repo = (Select-Xml -Path $config -XPath '/config/archive/repository' | Select-Object -ExpandProperty Node).innerText
+[string]$packing = (Select-Xml -Path $config -XPath '/config/archive/temp' | Select-Object -ExpandProperty Node).innerText
+[string]$outputFormat = (Select-Xml -Path $config -XPath '/config/archive/outputTemplate' | Select-Object -ExpandProperty Node).innerText
+[string]$internalPath = (Select-Xml -Path $config -XPath '/config/archive/modDirectory' | Select-Object -ExpandProperty Node).innerText
+
+[string[]]$pathsToRemove = Select-Xml -Path $config -XPath '/config/archive/exclude/path/text()' | Foreach-Object {
+	($_ | Select-Object -ExpandProperty Node).Value
+}
 
 [Console]::ResetColor()
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+	<about>
+		<packageId>name.krypt.rimworld.moddiff</packageId>
+		<packageName>ModDiff</packageName>
+	</about>
+	<build>
+		<solution>..\Source\ModDiff.sln</solution>
+		<target>ModDiff</target>
+	</build>
+	<archive>
+		<repository>..</repository>
+		<temp>packing</temp>
+		<outputTemplate>..\..\ModDiff-{0}.zip</outputTemplate>
+		<modDirectory>ModDiff</modDirectory>
+		<exclude>
+			<path>.git</path>
+			<path>.gitattributes</path>
+			<path>.gitignore</path>
+			<path>Source</path>
+			<path>Deploy</path>
+			<path>Steam</path>
+			<path>Dependencies</path>
+			<path>1.*/Assemblies/*.pdb</path>
+			<path>1.*/Assemblies/*.xml</path>
+		</exclude>
+	</archive>
+</config>
