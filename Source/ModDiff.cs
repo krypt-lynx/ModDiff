@@ -29,12 +29,6 @@ namespace ModDiff
 
             ModDiffCell.NeedInitStyles = true;
         }
-
-        //public string[] LockedMods = {
-        //    "dubwise.dubsperformanceanalyzer",
-        //    "automatic.startupimpact",
-        //    "unlimitedhugs.hugslib" 
-        //};
     }
 
 
@@ -48,8 +42,18 @@ namespace ModDiff
         public static string CommitInfo => debug ? (commitInfo + "-dev") : commitInfo;
         public static bool CassowaryPackaged = true;
 
+        public static CMod Instance = null;
+        public static string PackageIdOfMine
+        {
+            get
+            {
+                return Instance.Content?.PackageId;
+            }
+        }
+
         public ModDiff(ModContentPack content) : base(content)
         {
+            Instance = this;
             ReadModInfo(content);
             Settings = GetSettings<Settings>();
 
@@ -124,23 +128,6 @@ namespace ModDiff
                 footer.height ^ footer.intrinsicHeight);
 
         }
-        /*
-        public override void DoSettingsWindowContents(Rect inRect)
-        {
-            base.DoSettingsWindowContents(inRect);
-
-            var options = new Listing_Standard();
-            options.maxOneColumn = true;
-
-            options.Begin(inRect);
-
-            options.CheckboxLabeled("IgnoreSelfTitle".Translate(), ref Settings.ignoreSelf, "IgnoreSelfHint".Translate());
-            options.CheckboxLabeled("KeepSelfLoaded".Translate(), ref Settings.selfPreservation);
-            options.CheckboxLabeled("AlternativePalette".Translate(), ref Settings.alternativePallete);
-
-            options.End();
-        }
-        */
 
     }
 
