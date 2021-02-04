@@ -1,0 +1,25 @@
+1.3.3
+* nothing (a dependency update)
+
+1.3.2
+* some undates and fixes under the hood
+* self-injection location search changed
+
+1.3.1
+* huglibs autostart fix
+
+1.3
++ Mod merge window
+
+1.2
++ Translation support
++ Missing mods highlight
++ Applying list with missing mods confirmation
+* Window height calculation fix
+
+1.1
++ Alternative Colors option
+* Glitching mouse wheel scroll fixed
+
+1.0
++ release
