@@ -69,7 +69,12 @@ if ($version -eq "") {
 }
 
 $output = $outputFormat -f $version
-$mod = $rw + '\Mods\' + $internalPath
+
+# $mod = $rw + '\Mods\' + $internalPath 
+# I have patched mod search, different from vanilla. to avoid clutter in /Mods directory
+#todo: authomatic redirect to keep compatibility with vanilla mod search
+$mod = $rw + '\Mods\Dev\' + $internalPath 
+
 
 Pop-Location
 
