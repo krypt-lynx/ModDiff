@@ -2,8 +2,8 @@
 <Project>
 	<PropertyGroup>
 		<ReferencePath>
-			C:\I\RWModBuild\1.3\Managed;
-			C:\I\games\RimWorld\Mods\Dev\ModDiff_dev\Dependencies\1.3\;
+			C:\I\RWModBuild\1.4\Managed;
+			C:\I\games\RimWorld\Mods\Dev\ModDiff_dev\Dependencies\1.4\;
 			$(ReferencePath)
 		</ReferencePath>
 		

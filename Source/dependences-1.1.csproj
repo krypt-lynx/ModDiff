@@ -2,9 +2,8 @@
 <Project>
 	<PropertyGroup>
 		<ReferencePath>
-			F:\RWModBuild\1.1\Managed;
-			D:\Program Files (x86)\Steam\steamapps\workshop\content\294100\2009463077\Current\Assemblies\;
-			F:\games\RimWorld\Mods\Dev\ModDiff_dev\Dependencies\1.1\Assemblies\;
+			C:\I\RWModBuild\1.1\Managed;
+			C:\I\games\RimWorld\Mods\Dev\ModDiff_dev\Dependencies\1.1\;
 			$(ReferencePath)
 		</ReferencePath>
 

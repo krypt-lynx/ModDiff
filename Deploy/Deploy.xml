@@ -10,6 +10,7 @@
 			<configuration>1.1</configuration>
 			<configuration>1.2</configuration>
 			<configuration>1.3</configuration>
+			<configuration>1.4</configuration>
 		</configurations>
 	</build>
 	<archive>
