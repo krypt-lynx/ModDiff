@@ -40,7 +40,7 @@ namespace ModDiff
 
         public override int GetHashCode()
         {
-            return PackageId.GetHashCode();
+            return KeyForCompare.GetHashCode();
         }
 
         public override string ToString()
