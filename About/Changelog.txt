@@ -1,5 +1,6 @@
 1.4.2
 * Excessive logging removed
+* Moved mods detection fix
 
 1.4.1
 + Japanese translation (thanks to @Proxyer)
