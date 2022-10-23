@@ -143,7 +143,6 @@ namespace ModDiff
                 if (right.TryGetValue(kvp.Key, out var rVal))
                 {
                     moved.Add((kvp.Value, rVal));
-                    Log.Message($"found moved {kvp.Value} to {rVal}");
                 }
             }
 
@@ -199,12 +198,7 @@ namespace ModDiff
                 modsList[indices.left].ModModel.IsMoved = true;
                 modsList[indices.right].ModModel.IsMoved = true;
                 modsList[indices.left].ModModel.RightIndex = indices.right;
-                modsList[indices.right].ModModel.RightIndex = indices.left;
-            }
-
-            for (int i = 0; i < diff.changeSet.Count; i++)
-            {
-                Log.Message($"PackageId: {modsList[i].ModModel.PackageId}; leftIndex: {modsList[i].ModModel.LeftIndex}; rightIndex: {modsList[i].ModModel.RightIndex}");
+                modsList[indices.right].ModModel.LeftIndex = indices.left;
             }
         }
 
@@ -310,12 +304,10 @@ namespace ModDiff
                 {
                     if (row.Model.IsMoved)
                     {
-                        Log.Message($"remove left {left}");
                         if (left != -1)
                         {
                             modsList[left].TrySetSelected(false, true);
                         }
-                        Log.Message($"remove right {left}");
                         if (right != -1)
                         {
                             modsList[right].TrySetSelected(false, true);
