@@ -5,7 +5,9 @@
   <RunningMods>Running mods:</RunningMods>
   <IgnoreSelfTitle>Ignore self in modlist matching check</IgnoreSelfTitle>
   <IgnoreSelfHint>What could go wrong?</IgnoreSelfHint>
+  <SteamSameAsLocal>Treat Steam and local mods as matching</SteamSameAsLocal>
   <KeepSelfLoaded>Keep self loaded after modlist change</KeepSelfLoaded>
+  <Use_1_4_Style>Use RimWorld 1.4 style</Use_1_4_Style>
   <AlternativePalette>Alternative palette</AlternativePalette>  
   
   <MissingModsWarningTitle>Missing mods</MissingModsWarningTitle>
@@ -15,7 +17,7 @@
   <EditModListText>You can select mods you want to keep from savegame list and remove mods from currently loaded. Hold and drag to fast select/deselect.</EditModListText>
   <LeftMods>Left</LeftMods>
   <RightMods>Right</RightMods>
-  <LoadModList>Load this list</LoadModList>
+  <MD_LoadModList>Load this list</MD_LoadModList>
   
   <ModDiffWillBeDisabledTitle>ModDiff will be unloaded</ModDiffWillBeDisabledTitle>
   <ModDiffWillBeDisabledText>You removed ModDiff or it dependencies from list of active mods. It will disable this mod. Do you want to continue?</ModDiffWillBeDisabledText>

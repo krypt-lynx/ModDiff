@@ -13,33 +13,6 @@ using System.Diagnostics;
 
 namespace ModDiff
 {
-    public class ModInfo
-    {
-        public string packageId;
-        public string name;
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is ModInfo))
-            {
-                return false;
-            }
-            var modInfo = (ModInfo)obj;
-
-            return packageId == modInfo.packageId;
-        }
-
-        public override int GetHashCode()
-        {
-            return packageId.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return name ?? "<none>";
-        }
-    }
-
     public static class ModInfoToStyle
     {
         public static CellStyle LeftCellStyle(this DiffListItem info)
@@ -161,10 +134,10 @@ namespace ModDiff
 
             var cellSize = new Vector2(
                 model.modsList.Max(x => Mathf.Max(
-                    x.ModModel.Left != null ? Text.CalcSize(x.ModModel.Left.name).x : 0, 
-                    x.ModModel.Right != null ? Text.CalcSize(x.ModModel.Right.name).x : 0
-                    ) + ModDiffCell.MarkerWidth + 7 + 8),
-                Text.LineHeight);
+                    x.ModModel.Left != null ? Text.CalcSize(x.ModModel.Left.Name).x : 0, 
+                    x.ModModel.Right != null ? Text.CalcSize(x.ModModel.Right.Name).x : 0
+                    ) + 5 + 3 + ModDiffCell.MarkerWidth + 1 + 16 + 2),
+                ModDiffCell.DefaultHeight);
 
             InnerSize = new Vector2(Math.Max(460, cellSize.x * 2 + 16), 800);
         }
@@ -211,10 +184,7 @@ namespace ModDiff
                 DoWidgetContent = (_, bounds) => GuiTools.UsingColor(new Color(1f, 1f, 1f, 0.2f), () => Widgets.DrawLineHorizontal(bounds.x, bounds.y, bounds.width - (diffList.IsScrollBarVisible() ? 16 : 0)))
             });
 
-            diffList = Gui.AddElement(new CListView_vNext
-            {
-              
-            });
+            diffList = Gui.AddElement(new CListView_vNext());
 
             var buttonPanel = Gui.AddElement(new CElement());
             var backButton = buttonPanel.AddElement(new CButtonText
@@ -229,8 +199,7 @@ namespace ModDiff
             });
             var editButton = buttonPanel.AddElement(new CIconButton
             {
-                //Icon = EditIcon,
-                Icon = ContentFinder<Texture2D>.Get("UI/Icons/DiffEdit", true),
+                Icon = ContentFinder<Texture2D>.Get("UI/Icons/DiffEdit"),
                 IconTint = new Color(1, 1, 1, 0.83f),
                 Action = (_) => MergeMods(),
             });
@@ -271,6 +240,7 @@ namespace ModDiff
 
             Gui.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8); // TODO: LayoutGuide
             Gui.AddConstraint(Gui.width ^ InnerSize.x, ClStrength.Medium);
+            Gui.AddConstraint(Gui.width <= Gui.AdjustedScreenSize.width * 0.9);
 
         }
 
@@ -308,51 +278,55 @@ namespace ModDiff
 
             var row = new CListingRow();
 
-            string tip = "packadeId:\n" + line.ModModel.PackageId;
+            bool isEven = index % 2 == 0;
             CElement bg = null;
-            if (index % 2 == 1)
-            {
-                bg = row.AddElement(new CWidget
-                {
-                    DoWidgetContent = (_, bounds) => {
-                        Widgets.DrawAltRect(bounds);
-                        TooltipHandler.TipRegion(bounds, tip);
-                    }
-                });
+            
+            bg = row.AddElement(new CElement());
 
-            }
-            else
-            {
-                bg = row.AddElement(new CWidget
-                {
-                    DoWidgetContent = (_, bounds) => {
-                        TooltipHandler.TipRegion(bounds, tip);
-                    }
-                });
-            }
             row.Embed(bg);
 
             // left
             CElement lCell;
             if (line.Change != ChangeType.Added)
             {
-                lCell = row.AddElement(new ModDiffCell(line.LeftCellStyle(), line.ModModel.Left.name));
+                var c = new ModDiffCell(
+                    line.LeftCellStyle(),
+                    line.ModModel.Left.Name,
+                    isEven,
+                    false,
+                    "packadeId:\n" + line.ModModel.Left.PackageId);
+                if (line.ModModel.Left.Source != ContentSource.Undefined)
+                {
+                    c.infoIcon = line.ModModel.Left.Source.GetIcon();
+                    c.showWarning = !line.ModModel.Left.Compatible;
+                }
+                lCell = row.AddElement(c);
             }
             else
             {
-                lCell = row.AddElement(new CElement());
+                lCell = row.AddElement(new BgElement(isEven, false));
             }
 
             // right
             CElement rCell;
             if (line.Change != ChangeType.Removed)
             {
-
-                rCell = row.AddElement(new ModDiffCell(line.RightCellStyle(), line.ModModel.Right.name));
+                var c = new ModDiffCell(
+                    line.RightCellStyle(),
+                    line.ModModel.Right.Name,
+                    isEven,
+                    false,
+                    "packadeId:\n" + line.ModModel.Right.PackageId);
+                if (line.ModModel.Right.Source != ContentSource.Undefined)
+                {
+                    c.infoIcon = line.ModModel.Right.Source.GetIcon();
+                    c.showWarning = !line.ModModel.Right.Compatible;
+                }
+                rCell = row.AddElement(c);
             }
             else
             {
-                rCell = row.AddElement(new CElement());
+                rCell = row.AddElement(new BgElement(isEven, false));
             }
 
             row.StackLeft(lCell, (rCell, lCell.width));

@@ -86,7 +86,12 @@ namespace ModDiff
         {
             var mod = missingMods[index];
             var row = new CListingRow();
-            var cell = row.AddElement(new ModDiffCell(CellStyle.Missing, mod.Name));
+            var cell = row.AddElement(new ModDiffCell(
+                CellStyle.Missing, 
+                mod.Name,
+                index % 2 == 0,
+                false,
+                "packadeId:\n" + mod.PackageId));
             row.Embed(cell);
 
             return row;

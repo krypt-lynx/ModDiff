@@ -10,66 +10,58 @@
     <RootNamespace>ModDiff</RootNamespace>
     <AssemblyName>ModDiff</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\1.4\Assemblies\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;rw_1_3;rw_1_1_or_later;rw_1_2_or_later;rw_1_3_or_later;rw_1_3_or_earlier;rw_1_4_or_earlier</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;rw_1_4;rw_1_1_or_later;rw_1_2_or_later;rw_1_3_or_later;rw_1_4_or_later;rw_1_4_or_earlier</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>portable</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\1.4\Assemblies\</OutputPath>
-    <DefineConstants>TRACE;rw_1_3;rw_1_1_or_later;rw_1_2_or_later;rw_1_3_or_later;rw_1_3_or_earlier;rw_1_4_or_earlier</DefineConstants>
+    <DefineConstants>TRACE;rw_1_4;rw_1_1_or_later;rw_1_2_or_later;rw_1_3_or_later;rw_1_4_or_later;rw_1_4_or_earlier</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '1.1|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\1.1\Assemblies\</OutputPath>
     <DefineConstants>TRACE;rw_1_1;rw_1_1_or_later;rw_1_1_or_earlier;rw_1_2_or_earlier;rw_1_3_or_earlier;rw_1_4_or_earlier</DefineConstants>
     <Optimize>true</Optimize>
-    <DebugType>portable</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '1.2|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\1.2\Assemblies\</OutputPath>
     <DefineConstants>TRACE;rw_1_2;rw_1_1_or_later;rw_1_2_or_later;rw_1_2_or_earlier;rw_1_3_or_earlier;rw_1_4_or_earlier</DefineConstants>
     <Optimize>true</Optimize>
-    <DebugType>portable</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '1.3|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\1.3\Assemblies\</OutputPath>
     <DefineConstants>TRACE;rw_1_3;rw_1_1_or_later;rw_1_2_or_later;rw_1_3_or_later;rw_1_3_or_earlier;rw_1_4_or_earlier</DefineConstants>
     <Optimize>true</Optimize>
-    <DebugType>portable</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == '1.4|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\1.4\Assemblies\</OutputPath>
     <DefineConstants>TRACE;rw_1_4;rw_1_1_or_later;rw_1_2_or_later;rw_1_3_or_later;rw_1_4_or_later;rw_1_4_or_earlier</DefineConstants>
     <Optimize>true</Optimize>
-    <DebugType>portable</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
@@ -128,12 +120,16 @@
     <Compile Include="MergeWindow\MergeModsWindow.cs" />
     <Compile Include="MergeWindow\MergeListDataSource.cs" />
     <Compile Include="MissingModsDialog.cs" />
+    <Compile Include="ModsDiffWindow\CellStyles.cs" />
+    <Compile Include="ModsDiffWindow\ModInfo.cs" />
+    <Compile Include="ModsDiffWindow\BgElement.cs" />
     <Compile Include="ModsDiffWindow\ModDiffCell.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="linq.cs" />
     <Compile Include="ModDiff.cs" />
     <Compile Include="ModsDiffWindow\ModDiffModel.cs" />
     <Compile Include="ModsDiffWindow\ModDiffWindow.cs" />
+    <Compile Include="ModsDiffWindow\ModModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -153,7 +149,7 @@ del /Q *.*</PreBuildEvent>
   <PropertyGroup>
     <PostBuildEvent>
 cd "$(TargetDir)"
-for %%i in (*.*) do if not "%%i"=="ModDiff.dll" if not "%%i"=="0Cassowary.dll" if not "%%i"=="0RWLayout.dll" del /q "%%i"
+for %%i in (*.dll) do if not "%%i"=="ModDiff.dll" if not "%%i"=="0Cassowary.dll" if not "%%i"=="0RWLayout.dll" del /q "%%i"
     </PostBuildEvent>
   </PropertyGroup>
 </Project>

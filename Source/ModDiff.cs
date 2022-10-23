@@ -18,16 +18,26 @@ namespace ModDiff
         public bool ignoreSelf = false;
         public bool selfPreservation = true;
         public bool alternativePallete = false;
+        public bool steamSameAsLocal = false;
+#if rw_1_3_or_later
+        const bool use_1_4_style_default = true;
+#else
+        const bool use_1_4_style_default = false;
+#endif
+        public bool use_1_4_style = use_1_4_style_default;
+
 
         public override void ExposeData()
         {
             Scribe_Values.Look(ref ignoreSelf, "ignoreSelf", false);
             Scribe_Values.Look(ref selfPreservation, "selfPreservation", true);
             Scribe_Values.Look(ref alternativePallete, "alternativePallete", false);
+            Scribe_Values.Look(ref steamSameAsLocal, "steamSameAsLocal", false);
+            Scribe_Values.Look(ref use_1_4_style, "use_1_4_style", use_1_4_style_default);
 
             base.ExposeData();
 
-            ModDiffCell.NeedInitStyles = true;
+            CellStyles.setNeedToReinitStyles();
         }
     }
 
@@ -58,9 +68,21 @@ namespace ModDiff
             Settings = GetSettings<Settings>();
 
             Harmony harmony = new Harmony(PackageIdOfMine);
-
-            harmony.Patch(AccessTools.Method(typeof(ScribeMetaHeaderUtility), "TryCreateDialogsForVersionMismatchWarnings"),
-                prefix: new HarmonyMethod(typeof(HarmonyPatches), "TryCreateDialogsForVersionMismatchWarnings_Prefix"));
+                        
+            harmony.Patch(
+                AccessTools.Method(typeof(ScribeMetaHeaderUtility), 
+                    nameof(ScribeMetaHeaderUtility.TryCreateDialogsForVersionMismatchWarnings)),             
+                prefix: new HarmonyMethod(typeof(HarmonyPatches), 
+                    nameof(HarmonyPatches.TryCreateDialogsForVersionMismatchWarnings_Prefix)));
+            
+            
+            /*
+            harmony.Patch(
+                AccessTools.Method(typeof(ScribeMetaHeaderUtility),
+                    nameof(ScribeMetaHeaderUtility.TryCreateDialogsForVersionMismatchWarnings)),
+                transpiler: new HarmonyMethod(typeof(HarmonyPatches),
+                    nameof(HarmonyPatches.TryCreateDialogsForVersionMismatchWarnings_transpiler)));
+            */
         }
 
         private static void ReadModInfo(ModContentPack content)
@@ -96,15 +118,28 @@ namespace ModDiff
              Gui.AddElement(new CCheckboxLabeled
              {
                  Title = "IgnoreSelfTitle".Translate(),
+                 Tip = "IgnoreSelfHint".Translate(),
                  Checked = Settings.ignoreSelf,
                  Changed = (_, value) => Settings.ignoreSelf = value,
+             }), 2,
+             Gui.AddElement(new CCheckboxLabeled
+             {
+                 Title = "SteamSameAsLocal".Translate(),
+                 Checked = Settings.steamSameAsLocal,
+                 Changed = (_, value) => Settings.steamSameAsLocal = value,
              }), 2,
              Gui.AddElement(new CCheckboxLabeled
              {
                  Title = "KeepSelfLoaded".Translate(),
                  Checked = Settings.selfPreservation,
                  Changed = (_, value) => Settings.selfPreservation = value,
-             }), 2,
+             }), 10,
+             Gui.AddElement(new CCheckboxLabeled
+             {
+                 Title = "Use_1_4_Style".Translate(),
+                 Checked = Settings.use_1_4_style,
+                 Changed = (_, value) => Settings.use_1_4_style = value,
+             }), 2,             
              Gui.AddElement(new CCheckboxLabeled
              {
                  Title = "AlternativePalette".Translate(),

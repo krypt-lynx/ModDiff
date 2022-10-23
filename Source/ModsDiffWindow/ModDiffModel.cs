@@ -11,65 +11,6 @@ using Verse;
 
 namespace ModDiff
 {
-    public class ModModel
-    {
-        /// <summary>
-        /// mod's package id
-        /// </summary>
-        public string PackageId;
-
-        /// <summary>
-        /// mod info stored if the save
-        /// </summary>
-        public ModInfo Left = null;
-        /// <summary>
-        /// mod info loaded by game
-        /// </summary>
-        public ModInfo Right = null;
-
-        /// <summary>
-        /// index of left entry in merged list
-        /// </summary>
-        public int LeftIndex = -1;
-        /// <summary>
-        /// index of right entry in merged list
-        /// </summary>
-        public int RightIndex = -1;
-
-        /// <summary>
-        /// mod was moved
-        /// </summary>
-        public bool IsMoved = false;
-        /// <summary>
-        /// mod is no available
-        /// </summary>
-        public bool IsMissing = false;
-
-        public bool IsRequired = false;
-
-        /// <summary>
-        /// Name for item in merged list
-        /// </summary>
-        public string Name { get => Right?.name ?? Left?.name; }
-
-        public override int GetHashCode()
-        {
-            return PackageId.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is ModModel other)
-            {
-                return PackageId.Equals(other.PackageId);
-            }
-            else
-            {
-                return false;
-            }
-        }
-    }
-
     public class DiffListItem
     {
         /// <summary>
@@ -114,6 +55,18 @@ namespace ModDiff
         public Action<bool> OnSelectedChanged;
     }
 
+    class IdentityComparer : EqualityComparer<ModInfo>
+    {
+        public override bool Equals(ModInfo x, ModInfo y) => x.PackageId == y.PackageId;
+        public override int GetHashCode(ModInfo obj) => obj.PackageId.GetHashCode();
+    }
+
+    class NormalizedComparer : EqualityComparer<ModInfo>
+    {
+        public override bool Equals(ModInfo x, ModInfo y) => x.NormalizedId == y.NormalizedId;
+        public override int GetHashCode(ModInfo obj) => obj.NormalizedId.GetHashCode();
+    }
+
     public class ModDiffModel
     {
         /// <summary>
@@ -151,37 +104,13 @@ namespace ModDiff
 
         private void CalculateDiff(ModInfo[] saveMods, ModInfo[] runningMods)
         {
-            // merging/calculeting diffs lists 
-            var diff = new Myers<string>(saveMods.Select(x => x.packageId).ToArray(), runningMods.Select(x => x.packageId).ToArray());
+            var diff = new Myers<ModInfo>(saveMods, runningMods);
 
             diff.Compute();
 
-            // mod info by packageId for fast access
-            var modModelByPackageId = saveMods.Select(mod => new ModModel
-            {
-                PackageId = mod.packageId,
-                Left = mod
-            }).ToDictionary(x => x.PackageId);
-
-            foreach (var mod in runningMods)
-            {
-                if (modModelByPackageId.ContainsKey(mod.packageId))
-                {
-                    modModelByPackageId[mod.packageId].Right = mod;
-                }
-                else
-                {
-                    modModelByPackageId[mod.packageId] = new ModModel
-                    {
-                        PackageId = mod.packageId,
-                        Right = mod
-                    };                    
-                }
-            }
-
             HashSet<string> requiredIds = new HashSet<string>();
             requiredIds.Add(coreMod);
-            //requiredIds.AddRange(ModDiff.Settings.LockedMods);
+
             if (ModDiff.Settings.selfPreservation)
             {
                 requiredIds.AddRange(requiredMods);
@@ -189,58 +118,104 @@ namespace ModDiff
             }
 
             // searching moved mods
-            var movedIds = diff.changeSet.Where(x => x.change == ChangeType.Removed).Select(x => x.value).ToHashSet();
-            movedIds.IntersectWith(diff.changeSet.Where(x => x.change == ChangeType.Added).Select(x => x.value));
+            // dictionary of Mod -> old position
+            var left = new Dictionary<ModInfo, int>();
+            // dictionary of Mod -> new position
+            var right = new Dictionary<ModInfo, int>();
+            
+            for (int i = 0; i < diff.changeSet.Count; i++)
+            {
+                var entry = diff.changeSet[i];
+                if (entry.change == ChangeType.Removed)
+                {
+                    left[entry.left] = i;
+                }
+                if (entry.change == ChangeType.Added)
+                {
+                    right[entry.right] = i;
+                }
+            }
+
+            // pairs old position -> new position
+            List<(int left, int right)> moved = new List<(int left, int right)>();
+            foreach (var kvp in left)
+            {
+                if (right.TryGetValue(kvp.Key, out var rVal))
+                {
+                    moved.Add((kvp.Value, rVal));
+                    Log.Message($"found moved {kvp.Value} to {rVal}");
+                }
+            }
 
             modsList = new DiffListItem[diff.changeSet.Count];
 
             // bulding item models
             for (int i = 0; i < diff.changeSet.Count; i++)
             {
-                var packageIdChange = diff.changeSet[i];
-                var packageId = packageIdChange.value;
-                var modModel = modModelByPackageId[packageId];
-                modModel.IsRequired = requiredIds.Contains(packageId);
+                var modChange = diff.changeSet[i];
+                var modInfo = modChange.value;
+
+
+                var modModel = new ModModel
+                {
+                    PackageId = modChange.value.PackageId,
+                    NormalizedId = modChange.value.NormalizedId,
+                    Left = modChange.left,
+                    Right = modChange.right,
+                };
+
+                modModel.IsRequired = requiredIds.Contains(modModel.NormalizedId);
 
                 var change = new DiffListItem
                 {
                     ModModel = modModel,
-                    Change = packageIdChange.change,
+                    Change = modChange.change,
                 };
                 
                 modsList[i] = change;
-                change.TrySetSelected(packageIdChange.change != ChangeType.Removed, true);
+                change.TrySetSelected(modChange.change != ChangeType.Removed, true);
 
-                if (packageIdChange.change != ChangeType.Added)
+                if (modChange.change != ChangeType.Added)
                 {
                     modModel.LeftIndex = i;
                 }
-                if (packageIdChange.change != ChangeType.Removed)
+                if (modChange.change != ChangeType.Removed)
                 {
                     modModel.RightIndex = i;
                 }
 
-                if (movedIds.Contains(packageId))
-                {
-                    modModel.IsMoved = true;
-                }
-
-                if (ModLister.GetModWithIdentifier(packageId, false) == null)
+                if (ModLister.GetModWithIdentifier(modInfo.PackageId, false) == null)
                 {
                     modModel.IsMissing = true;
                     HaveMissingMods = true;
                 }
+
+
+            }
+
+            // linking mods moved inside the list
+            foreach (var indices in moved)
+            {
+                modsList[indices.left].ModModel.IsMoved = true;
+                modsList[indices.right].ModModel.IsMoved = true;
+                modsList[indices.left].ModModel.RightIndex = indices.right;
+                modsList[indices.right].ModModel.RightIndex = indices.left;
+            }
+
+            for (int i = 0; i < diff.changeSet.Count; i++)
+            {
+                Log.Message($"PackageId: {modsList[i].ModModel.PackageId}; leftIndex: {modsList[i].ModModel.LeftIndex}; rightIndex: {modsList[i].ModModel.RightIndex}");
             }
         }
 
 
         internal bool MergedListIsValid()
         {
-            var selectedMods = modsList.Where(mod => mod.Selected).Select(mod => mod.ModModel.PackageId).ToHashSet();
+            var selectedMods = modsList.Where(mod => mod.Selected).Select(mod => mod.ModModel.NormalizedId).ToHashSet();
 
             return
                 requiredMods.All(x => selectedMods.Contains(x)) &&
-                selectedMods.Contains(ModDiff.PackageIdOfMine);
+                modsList.Select(mod => mod.ModModel.PackageId).Contains(ModDiff.PackageIdOfMine);
         }
 
 
@@ -335,10 +310,12 @@ namespace ModDiff
                 {
                     if (row.Model.IsMoved)
                     {
+                        Log.Message($"remove left {left}");
                         if (left != -1)
                         {
                             modsList[left].TrySetSelected(false, true);
                         }
+                        Log.Message($"remove right {left}");
                         if (right != -1)
                         {
                             modsList[right].TrySetSelected(false, true);

@@ -12,244 +12,91 @@ using Verse;
 
 namespace ModDiff
 {
-    public struct CellStyleData
-    {
-        public bool drawBg;
-        public string marker;
-        public Color bgColor;
-        public Color outlineColor;
-        public Color textColor;
-        public EdgeInsets insets;
-    }
-
-    public enum CellStyle
-    {
-        Default,
-        Missing,
-        Removed,
-        Added,
-        Moved,
-
-        Unavailable,
-        EditAdded,
-        EditRemoved,
-        EditMoved,
-    }
-
     //[StaticConstructorOnStartup]
     public class ModDiffCell : CElement
     {
-        static Resource<Texture2D> lockIcon = new Resource<Texture2D>("UI/Icons/Lock");
-
-        static Dictionary<CellStyle, CellStyleData> styles = null;
-
-        static public bool NeedInitStyles = true;
-        static void InitStyles()
-        {
-            if (!NeedInitStyles)
-            {
-                return;
-            }
-
-            NeedInitStyles = false;
-
-            CellStyleData defaultModStyle;
-            CellStyleData missingModStyle;
-            CellStyleData removedModCellStyle;
-            CellStyleData editRemovedModCellStyle;
-            CellStyleData addedModCellStyle;
-            CellStyleData editAddedModCellStyle;
-            CellStyleData movedModCellStyle;
-            CellStyleData editMovedModCellStyle;
-            CellStyleData unavaliableModStyle;
-
-            defaultModStyle = new CellStyleData
-            {
-                textColor = Color.white,
-            };
-
-            unavaliableModStyle = new CellStyleData
-            {
-                textColor = new Color(1, 1, 1, 0.5f),
-            };
-
-            if (!ModDiff.Settings.alternativePallete)
-            {
-                removedModCellStyle = new CellStyleData()
-                {
-                    marker = "-",
-                    drawBg = true,
-                    bgColor = new Color(0.5f, 0.17f, 0.17f, 0.70f),
-                    outlineColor = new Color(0.5f, 0.17f, 0.17f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                editRemovedModCellStyle = new CellStyleData()
-                {
-                    drawBg = true,
-                    bgColor = new Color(0.5f, 0.17f, 0.17f, 0.30f),
-                    outlineColor = new Color(0.5f, 0.17f, 0.17f, 0.30f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                addedModCellStyle = new CellStyleData()
-                {
-                    marker = "+",
-                    drawBg = true,
-                    bgColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
-                    outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                editAddedModCellStyle = new CellStyleData()
-                {
-                    drawBg = true,
-                    bgColor = new Color(0.17f, 0.45f, 0.17f, 0.30f),
-                    outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.30f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                movedModCellStyle = new CellStyleData()
-                {
-                    marker = "*",
-                    drawBg = true,
-                    bgColor = new Color(0.38f, 0.36f, 0.15f, 0.70f),
-                    outlineColor = new Color(0.38f, 0.36f, 0.15f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                editMovedModCellStyle = new CellStyleData()
-                {
-                    drawBg = true,
-                    bgColor = new Color(0.38f, 0.36f, 0.15f, 0.30f),
-                    outlineColor = new Color(0.38f, 0.36f, 0.15f, 0.30f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                missingModStyle = new CellStyleData()
-                {
-                    marker = "!",
-                    drawBg = true,
-                    bgColor = new Color(0.2f, 0.05f, 0.05f, 0.70f),
-                    outlineColor = new Color(0.4f, 0.10f, 0.10f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-            }
-            else
-            {
-                removedModCellStyle = new CellStyleData()
-                {
-                    marker = "-",
-                    drawBg = true,
-                    bgColor = new Color(0.45f, 0.10f, 0.45f, 0.70f),
-                    outlineColor = new Color(0.45f, 0.10f, 0.45f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                editRemovedModCellStyle = new CellStyleData()
-                {
-                    drawBg = true,
-                    bgColor = new Color(0.45f, 0.10f, 0.45f, 0.30f),
-                    outlineColor = new Color(0.45f, 0.10f, 0.45f, 0.30f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                addedModCellStyle = new CellStyleData()
-                {
-                    marker = "+",
-                    drawBg = true,
-                    bgColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
-                    outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                editAddedModCellStyle = new CellStyleData()
-                {
-                    drawBg = true,
-                    bgColor = new Color(0.17f, 0.45f, 0.17f, 0.30f),
-                    outlineColor = new Color(0.17f, 0.45f, 0.17f, 0.30f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                movedModCellStyle = new CellStyleData()
-                {
-                    marker = "*",
-                    drawBg = true,
-                    bgColor = new Color(0.40f, 0.40f, 0.40f, 0.70f),
-                    outlineColor = new Color(0.40f, 0.40f, 0.40f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                editMovedModCellStyle = new CellStyleData()
-                {
-                    drawBg = true,
-                    bgColor = new Color(0.40f, 0.40f, 0.40f, 0.30f),
-                    outlineColor = new Color(0.40f, 0.40f, 0.40f, 0.30f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-                missingModStyle = new CellStyleData()
-                {
-                    marker = "!",
-                    drawBg = true,
-                    bgColor = new Color(0.2f, 0.05f, 0.2f, 0.70f),
-                    outlineColor = new Color(0.4f, 0.10f, 0.4f, 0.70f),
-                    insets = new EdgeInsets(2, 2, 2, 5),
-                    textColor = Color.white,
-                };
-            }
-
-            styles = new Dictionary<CellStyle, CellStyleData>
-            {
-                { CellStyle.Default, defaultModStyle },
-                { CellStyle.Missing, missingModStyle },
-                { CellStyle.Removed, removedModCellStyle },
-                { CellStyle.Added, addedModCellStyle },
-                { CellStyle.Moved, movedModCellStyle },
-                { CellStyle.Unavailable, unavaliableModStyle },
-                { CellStyle.EditRemoved, editRemovedModCellStyle },
-                { CellStyle.EditAdded, editAddedModCellStyle },
-                { CellStyle.EditMoved, editMovedModCellStyle }, 
-            };
-        }
+        static Resource<Texture2D> lockIcon = new Resource<Texture2D>("UI/Icons/Diff_Lock");
+        static Resource<Texture2D> warningOverlay = new Resource<Texture2D>("UI/Icons/Diff_Warning");
 
         public const int MarkerWidth = 16;
-
         private CellStyle style;
+        private bool isEven;
+        private readonly bool interactive;
         private string title;
         private bool drawLock;
+
+        public Resource<Texture2D> infoIcon = null;// new Resource<Texture2D>("UI/Icons/ContentSources/OfficialModsFolder");
+        public bool showWarning = false;
+        static float minReasonableHeight = 0;
+        public static float MinReasonableHeight
+        {
+            get
+            {
+                if (minReasonableHeight == 0)
+                {
+                    GuiTools.PushFont(GameFont.Small);
+                    minReasonableHeight = Text.CalcHeight(" ", 100);
+                    GuiTools.PopFont();
+                }                    
+                return minReasonableHeight;
+            }
+        }
 
         static float defaultHeight = 0;
         public static float DefaultHeight { 
             get
             {
-                if (defaultHeight == 0)
+                if (ModDiff.Settings.use_1_4_style)
                 {
-                    GuiTools.PushFont(GameFont.Small);
-                    defaultHeight = Text.CalcHeight(" ", 100);
-                    GuiTools.PopFont();
+                    return 20;
                 }
-                return defaultHeight;
+                else
+                {
+                    if (defaultHeight == 0)
+                    {
+                        GuiTools.PushFont(GameFont.Small);
+                        defaultHeight = Text.CalcHeight(" ", 100);
+                        GuiTools.PopFont();
+                    }
+                    return defaultHeight;
+                }
             }
         }
 
         CellStyleData styleData;
         Rect outlineRect;
-        Rect iconRect;
+        Rect diffIconRect;
         Rect titleRect;
         Rect lockRect;
+        Rect infoIconRect;
+        Rect warningOverlayRect;
 
         public override void PostLayoutUpdate()
         {
             base.PostLayoutUpdate();
 
             outlineRect = BoundsRounded;
-            iconRect = new Rect(BoundsRounded.xMin + 5, BoundsRounded.yMin, 16, BoundsRounded.height);
-            titleRect = new Rect(BoundsRounded.xMin + 5 + 16, BoundsRounded.yMin, BoundsRounded.width - 5 - 16 - 2, BoundsRounded.height);
+            var innerRect = BoundsRounded.ContractedBy(styleData.insets);
+            var textFix = Math.Max(0, MinReasonableHeight - innerRect.height);
+
+            diffIconRect = new Rect(innerRect.xMin + 3, innerRect.yMin - (textFix / 2), MarkerWidth + 1, innerRect.height + textFix);
+
+            var infoIconOriginRect = new Rect(diffIconRect.xMax, innerRect.yMin, 16, innerRect.height);
+            infoIconRect = GuiTools.SizeCenteredIn(
+                infoIconOriginRect,
+                new EdgeInsets(-1, 1, 1, 0),
+                new Vector2(16, 16));
+
+            if (showWarning)
+            {
+                warningOverlayRect = new Rect(infoIconRect.xMax - 11, infoIconRect.yMin - 3, 13, 13);
+            }
+
+            titleRect = new Rect(infoIconOriginRect.xMax, innerRect.yMin - (textFix / 2), innerRect.xMax - infoIconOriginRect.xMax, innerRect.height + textFix);
+
             if (drawLock)
             {
-                lockRect = GuiTools.SizeCenteredIn(iconRect, new EdgeInsets(-1, 0, 1, 0), lockIcon.Value.Size());
+                lockRect = GuiTools.SizeCenteredIn(diffIconRect, new EdgeInsets(-1, 0, 1, 0), lockIcon.Value.Size());
             }
         }
 
@@ -259,11 +106,29 @@ namespace ModDiff
 
             if (Event.current.type == EventType.Repaint)
             {
-                if (styleData.drawBg)
+                if (styleData.bgColorFar.HasValue)
                 {
-                    Widgets.DrawBoxSolid(outlineRect, styleData.bgColor);
-                    GuiTools.UsingColor(styleData.outlineColor, () => GuiTools.Box(outlineRect, styleData.insets));
+                    Widgets.DrawBoxSolid(outlineRect, styleData.bgColorFar.Value);
                 }
+                GuiTools.UsingColor(styleData.outlineColor, () => GuiTools.Box(outlineRect, styleData.insets));
+                if (styleData.bgColorNear.HasValue)
+                {
+                    Widgets.DrawBoxSolid(outlineRect, styleData.bgColorNear.Value);
+                }
+
+                if (!isEven)
+                {
+                    Widgets.DrawAltRect(outlineRect);
+                }
+
+                if (interactive)
+                {
+                    if (Mouse.IsOver(Parent.BoundsRounded))
+                    {
+                        Widgets.DrawHighlight(BoundsRounded);
+                    }
+                }
+
                 GuiTools.PushFont(GameFont.Small);
 
 
@@ -274,9 +139,19 @@ namespace ModDiff
                 else
                 {
                     GuiTools.PushTextAnchor(TextAnchor.UpperCenter);
-                    GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(iconRect, styleData.marker));
+                    GuiTools.UsingColor(styleData.textColor, () => Widgets.Label(diffIconRect, styleData.marker));
                     GuiTools.PopTextAnchor();
 
+                }
+
+                if (infoIcon != null)
+                {
+                    GUI.DrawTexture(infoIconRect, infoIcon.Value);
+                }
+
+                if (showWarning)
+                {
+                    GUI.DrawTexture(warningOverlayRect, warningOverlay.Value);
                 }
 
                 GuiTools.PushTextAnchor(TextAnchor.UpperLeft);
@@ -286,15 +161,17 @@ namespace ModDiff
             }
         }
 
-        public ModDiffCell(CellStyle style, string title, string altIcon = null) : base()
+        public ModDiffCell(CellStyle style, string title, bool isEven, bool interactive = false, string tip = null, bool altIcon = false, Texture2D infoIcon = null) : base()
         {
-            InitStyles();
-
             this.style = style;
+            this.isEven = isEven;
+            this.interactive = interactive;
             this.title = title;
-            this.drawLock = altIcon != null;
+            this.drawLock = altIcon;
+            this.infoIcon = infoIcon == null ? null : new Resource<Texture2D>(infoIcon);
+            this.Tip = tip;
 
-            styleData = styles[style];
+            styleData = CellStyles.GetCellStyleData(style);
 
             this.AddConstraint(this.height ^ DefaultHeight);
         }

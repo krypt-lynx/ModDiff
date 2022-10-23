@@ -16,12 +16,16 @@ namespace Diff
 
     public class Change<T>
     {
-        public T value { get; private set; }
-        public ChangeType change { get; private set; }
+        public T value => EqualityComparer<T>.Default.Equals(right, default(T)) ? left : right;
 
-        public Change(T value, ChangeType change)
+        public ChangeType change { get; private set; }
+        public T left { get; private set; }
+        public T right { get; private set; }
+
+        public Change(T left, T right, ChangeType change)
         {
-            this.value = value;
+            this.left = left;
+            this.right = right;
             this.change = change;
         }
 
@@ -57,7 +61,7 @@ namespace Diff
         {
             this.left = left;
             this.right = right;
-            this.comparer = comparer != null ? comparer : EqualityComparer<T>.Default;
+            this.comparer = comparer ?? EqualityComparer<T>.Default;
         }
 
         public void Compute()
@@ -174,17 +178,17 @@ namespace Diff
 
                 if (cX != nX && cY != nY)
                 {
-                    changeSet.Add(new Change<T>(left[pX], ChangeType.Unmodified));
+                    changeSet.Add(new Change<T>(left[pX], right[pY], ChangeType.Unmodified));
                     pX++; pY++;
                 }
                 else if (cX != nX)
                 {
-                    changeSet.Add(new Change<T>(left[pX], ChangeType.Removed));
+                    changeSet.Add(new Change<T>(left[pX], default(T), ChangeType.Removed));
                     pX++;
                 }
                 else if (cY != nY)
                 {
-                    changeSet.Add(new Change<T>(right[pY], ChangeType.Added));
+                    changeSet.Add(new Change<T>(default(T), right[pY], ChangeType.Added));
                     pY++;
                 }
             }

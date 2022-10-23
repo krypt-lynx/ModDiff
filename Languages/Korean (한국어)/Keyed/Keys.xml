@@ -5,6 +5,8 @@
 	<RunningMods>사용 중인 모드:</RunningMods>
 	<IgnoreSelfTitle>자기 자신을 모드 목록 일치 검사에서 무시</IgnoreSelfTitle>
 	<IgnoreSelfHint>별 일 있겠어요?</IgnoreSelfHint>
+	<SteamSameAsLocal>Treat Steam and local mods as matching</SteamSameAsLocal>
+	<Use_1_4_Style>Use RimWorld 1.4 style</Use_1_4_Style>
 	<KeepSelfLoaded>모드 변경 후 자기 자신을 불러오기</KeepSelfLoaded>
 	<AlternativePalette>다른 색상</AlternativePalette>
 
@@ -15,7 +17,7 @@
 	<EditModListText>세이브 파일의 모드 목록에서 원하는 모드를 가져오고 현재 불러온 모드 목록에서 모드를 제거할 수 있습니다. 빠르게 선택/해제하려면 붙잡아서 드래그하세요.</EditModListText>
 	<LeftMods>왼쪽</LeftMods>
 	<RightMods>오른쪽</RightMods>
-	<LoadModList>이 목록 불러오기</LoadModList>
+	<MD_LoadModList>이 목록 불러오기</MD_LoadModList>
 
 	<ModDiffWillBeDisabledTitle>ModDiff가 비활성화될 것입니다</ModDiffWillBeDisabledTitle>
 	<ModDiffWillBeDisabledText>ModDiff나 선행 모드를 사용 모드 목록에서 제거했습니다. 이 모드를 비활성화시킬 것입니다. 계속하시겠습니까?</ModDiffWillBeDisabledText>

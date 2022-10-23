@@ -27,13 +27,14 @@ namespace ModDiff
             this.model = model;
             clickTracker = new DragTracker(Gui);
 
-
             var cellSize = new Vector2(
                 model.modsList.Max(x => Mathf.Max(
-                    x.ModModel.Left != null ? Text.CalcSize(x.ModModel.Left.name).x : 0,
-                    x.ModModel.Right != null ? Text.CalcSize(x.ModModel.Right.name).x : 0
-                    ) + ModDiffCell.MarkerWidth + 7 + 8),
+                    x.ModModel.Left != null ? Text.CalcSize(x.ModModel.Left.Name).x : 0,
+                    x.ModModel.Right != null ? Text.CalcSize(x.ModModel.Right.Name).x : 0
+                    ) + 5 + 3 + ModDiffCell.MarkerWidth + 1 + 16 + 2),
                 Text.LineHeight);
+
+            
 
             InnerSize = new Vector2(Math.Max(460, cellSize.x * 3 + 4 + 16), 800);
         }
@@ -127,7 +128,7 @@ namespace ModDiff
 
             var continueButton = buttonPanel.AddElement(new CButtonText
             {
-                Title = "LoadModList".Translate(),
+                Title = "MD_LoadModList".Translate(),
                 Action = (_) =>
                 {
                     if (model.MergedListIsValid())
@@ -171,6 +172,7 @@ namespace ModDiff
 
             Gui.AddConstraint(Gui.width ^ InnerSize.x, ClStrength.Medium);
             Gui.AddConstraint(Gui.height <= Gui.AdjustedScreenSize.height * 0.8);
+            Gui.AddConstraint(Gui.width <= Gui.AdjustedScreenSize.width * 0.9);
 
 
             Gui.StackTop((titleLabel, 42), (disclaimerLabel, disclaimerLabel.intrinsicHeight), 2, headerPanel, (headerLine, 1), 4, modsList, 12, (buttonPanel, 40));

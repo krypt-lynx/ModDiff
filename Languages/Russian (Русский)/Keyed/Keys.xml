@@ -5,6 +5,8 @@
   <RunningMods>Загруженные моды:</RunningMods>
   <IgnoreSelfTitle>Пропускать себя при проверке совпадения списков модов</IgnoreSelfTitle>
   <IgnoreSelfHint>Что может пойти не так?</IgnoreSelfHint>
+  <SteamSameAsLocal>Считать Steam и локальную версии мода идентичными</SteamSameAsLocal>
+  <Use_1_4_Style>Use RimWorld 1.4 style</Use_1_4_Style>
   <KeepSelfLoaded>Оставлять себя в списке модов при его изменении</KeepSelfLoaded>
   <AlternativePalette>Альтернативная палитра</AlternativePalette>  
   
@@ -15,7 +17,7 @@
   <EditModListText>Вы можете выбрать моды, которые вы хотите сохранить из старого списка и удалить загруженные сейчас моды. Держите кнопку мыши и перетаскивайте для быстрого изменения выбора.</EditModListText>
   <LeftMods>Выбрать только левые</LeftMods>
   <RightMods>Выбрать только правые</RightMods>
-  <LoadModList>Загрузить список</LoadModList>
+  <MD_LoadModList>Загрузить список</MD_LoadModList>
   
   <ModDiffWillBeDisabledTitle>ModDiff будет отключён</ModDiffWillBeDisabledTitle>
   <ModDiffWillBeDisabledText>Вы удалили ModDiff или его зависимости из списка активных модов. Хотите продолжить?</ModDiffWillBeDisabledText>

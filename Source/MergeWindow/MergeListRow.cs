@@ -24,7 +24,7 @@ namespace ModDiff
                 cCell.Hidden = !selected;
                 if (cCellDeselected != null)
                 {
-                    cCellDeselected.Hidden = value || Model.IsMoved;
+                    cCellDeselected.Hidden = value;
                 }
             }
             get => selected;
@@ -54,59 +54,75 @@ namespace ModDiff
 
         private void Construct()
         {
-            string tip = "packadeId:\n" + Item.ModModel.PackageId;
-            CElement bg = null;
-            if (Index % 2 == 1)
-            {
-                bg = AddElement(new CWidget
-                {
-
-                    DoWidgetContent = (_, bounds) =>
-                    {
-                        Widgets.DrawAltRect(bounds);
-                        TooltipHandler.TipRegion(bounds, tip);
-                    }
-                });
-            }
-            else
-            {
-                bg = AddElement(new CWidget
-                {
-                    DoWidgetContent = (_, bounds) =>
-                    {
-                        TooltipHandler.TipRegion(bounds, tip);
-                    }
-                });
-            }
-            bg.userInteractionEnabled = false;
-            this.Embed(bg);
+            bool isEven = Index % 2 == 0;
 
 
             // left
             CElement lCell;
             if (Item.Change != ChangeType.Added)
             {
-                lCell = bg.AddElement(new ModDiffCell(Item.LeftCellStyle(), Item.ModModel.Left.name));
+                var c = new ModDiffCell(
+                    Item.LeftCellStyle(),
+                    Item.ModModel.Left.Name,
+                    isEven,
+                    true,
+                    "packadeId:\n" + Item.ModModel.Left.PackageId);
+                if (Item.ModModel.Left.Source != ContentSource.Undefined)
+                {
+                    c.infoIcon = Item.ModModel.Left.Source.GetIcon();
+                    c.showWarning = !Item.ModModel.Left.Compatible;
+                }
+
+                lCell = AddElement(c);
+
             }
             else
             {
-                lCell = bg.AddElement(new CElement());
+                lCell = AddElement(new BgElement(isEven, true));
             }
 
             // center
             if (Model.IsMoved)
             {
-                cCell = bg.AddElement(new ModDiffCell(Item.MiddleCellStyle(), Item.ModModel.Name, Item.ModModel.IsRequired ? "/" : null));
-            } 
+                var c = new ModDiffCell(
+                    Item.MiddleCellStyle(),
+                    Item.ModModel.Name,
+                    isEven,
+                    true,
+                    "packadeId:\n" + Item.ModModel.PackageId,
+                    Item.ModModel.IsRequired);
+                if (Item.ModModel.Any.Source != ContentSource.Undefined)
+                {
+                    c.infoIcon = Item.ModModel.Any.Source.GetIcon();
+                    c.showWarning = !Item.ModModel.Any.Compatible;
+                }
+
+                cCell = AddElement(c);
+                cCellDeselected = AddElement(new ModDiffCell(CellStyle.EditRemoved, "", isEven, true));
+            }
             else if (!Model.IsMissing)
             {
-                cCell = bg.AddElement(new ModDiffCell(Item.MiddleCellStyle(), Item.ModModel.Name, Item.ModModel.IsRequired ? "/" : null));
-                cCellDeselected = bg.AddElement(new ModDiffCell(CellStyle.EditRemoved, ""));
+                var c = new ModDiffCell(
+                    Item.MiddleCellStyle(),
+                    Item.ModModel.Name,
+                    isEven,
+                    true,
+                    "packadeId:\n" + Item.ModModel.PackageId,
+                    Item.ModModel.IsRequired);
+                if (Item.ModModel.Any.Source != ContentSource.Undefined)
+                {
+                    c.infoIcon = Item.ModModel.Any.Source.GetIcon();
+                    c.showWarning = !Item.ModModel.Any.Compatible;
+                }
+
+                cCell = AddElement(c);
+
+                cCellDeselected = AddElement(new ModDiffCell(CellStyle.EditRemoved, "", isEven, true));
             }
             else
             { 
-                cCell = bg.AddElement(new CElement());
-                cCellDeselected = bg.AddElement(new ModDiffCell(CellStyle.Unavailable, "(unavailable)"));
+                cCell = AddElement(new BgElement(isEven, true));
+                cCellDeselected = AddElement(new ModDiffCell(CellStyle.Unavailable, "(unavailable)", isEven, true));
             }
 
             cCell.Hidden = !Selected;
@@ -120,23 +136,36 @@ namespace ModDiff
             CElement rCell;
             if (Item.Change != ChangeType.Removed)
             {
+                var c = new ModDiffCell(
+                    Item.RightCellStyle(),
+                    Item.ModModel.Right.Name,
+                    isEven,
+                    true,
+                    "packadeId:\n" + Item.ModModel.Right.PackageId);
+                if (Item.ModModel.Right.Source != ContentSource.Undefined)
+                {
+                    c.infoIcon = Item.ModModel.Right.Source.GetIcon();
+                    c.showWarning = !Item.ModModel.Right.Compatible;
+                }
 
-                rCell = bg.AddElement(new ModDiffCell(Item.RightCellStyle(), Item.ModModel.Right.name));
+                rCell = AddElement(c);
             }
             else
             {
-                rCell = bg.AddElement(new CElement());
+                rCell = AddElement(new BgElement(isEven, true));
             }
+
+            lCell.userInteractionEnabled = false;
+            cCell.userInteractionEnabled = false;
+            cCellDeselected.userInteractionEnabled = false;
+            rCell.userInteractionEnabled = false;
 
             this.StackLeft(lCell, 2, (cCell, lCell.width), 2, (rCell, lCell.width));
         }
 
         public override void DoContent()
         {
-            Widgets.DrawHighlightIfMouseover(BoundsRounded);
-
             base.DoContent();
-
         }
     }
 

@@ -55,8 +55,6 @@ namespace ModDiff
 
             if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && !Mouse.IsInputBlockedNow)
             {
-                //Log.Message($"MouseDown start");
-
                 StartDrag(observedElement.hitTest(Event.current.mousePosition));
                 Event.current.Use();
             }
@@ -64,7 +62,6 @@ namespace ModDiff
             {
                 if (!Input.GetMouseButton(0))
                 {
-                    //Log.Message($"Mouse up outside");
                     EndDrag();
                     return;
                 }
@@ -76,8 +73,6 @@ namespace ModDiff
 
                 if (Event.current.type == EventType.MouseDrag)
                 {
-                    //Log.Message($"MouseDrag");
-
                     var newDrag = observedElement.hitTest(Event.current.mousePosition);
                     Event.current.Use();
                     if (newDrag != null && Element != newDrag)
@@ -88,8 +83,6 @@ namespace ModDiff
                 }
                 else if (postScroll)
                 {
-                    //Log.Message($"Scroll");
-
                     var newDrag = observedElement.hitTest(Event.current.mousePosition);
                     if (newDrag != null && Element != newDrag)
                     {
@@ -100,19 +93,16 @@ namespace ModDiff
                 }
                 else if (Event.current.type == EventType.MouseDown && (Event.current.button != 0 || Mouse.IsInputBlockedNow))
                 {
-                    //Log.Message($"MouseUp canceled");
                     EndDrag();
                 }
                 else if (Event.current.type == EventType.MouseUp)
                 {
-                    Log.Message($"MouseUp");
-                    //Event.current.Use();
+                    //Event.current.Use(); // TODO: why use is commented (there way uncommented log nearby, it was supposed to be commented
 
                     EndDrag();
                 }
                 else if (Event.current.type == EventType.MouseMove)
                 {
-                    //Log.Message($"MouseMove");
                     EndDrag();
                 }
 
