@@ -1,5 +1,6 @@
 1.4.1
 + Japanese translation (thanks to @Proxyer)
++ Korean translation (thanks to alattalatta)
 * Warning icon updated to be more clear
 
 1.4.0
