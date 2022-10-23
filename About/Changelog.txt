@@ -1,3 +1,7 @@
+1.4.1
++ Japanese translation (thanks to @Proxyer)
+* Warning icon updated to be more clear
+
 1.4.0
 + RimWorld 1.4 style
 + Switch to treat Steam and local mods as matching

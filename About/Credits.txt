@@ -1,3 +1,5 @@
+Credits:
 Halno : UI icons
 inbae: Korean translation
 N/A: warning icon
+Proxyer: Japanese translation
