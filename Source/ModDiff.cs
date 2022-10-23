@@ -19,7 +19,7 @@ namespace ModDiff
         public bool selfPreservation = true;
         public bool alternativePallete = false;
         public bool steamSameAsLocal = false;
-#if rw_1_3_or_later
+#if rw_1_4_or_later
         const bool use_1_4_style_default = true;
 #else
         const bool use_1_4_style_default = false;
