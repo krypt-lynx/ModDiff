@@ -4,6 +4,7 @@
 + Mods source icons
 + Mods unsupported version indicator
 * Screen overflow fix 
+* 1.4 translation key collision fix
 ! Newly added strings missing Korean translation for now
 
 1.3.8
