@@ -1,0 +1,3 @@
+Halno : UI icons
+inbae: Korean translation
+N/A: warning icon
