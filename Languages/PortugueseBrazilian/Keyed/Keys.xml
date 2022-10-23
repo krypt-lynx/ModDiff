@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <SaveGameMods>Mods do jogo salvo:</SaveGameMods>
+  <MergedMods>Lista mesclada:</MergedMods>
+  <RunningMods>Mods carregados:</RunningMods>
+  <IgnoreSelfTitle>Ignorar verificação de correspondência</IgnoreSelfTitle>
+  <IgnoreSelfHint>O que poderia dar errado?</IgnoreSelfHint>
+  <KeepSelfLoaded>Manter-se carregado após a mudança da lista de mods</KeepSelfLoaded>
+  <AlternativePalette>Paleta alternativa</AlternativePalette>  
+  <MissingModsWarningTitle>Mods faltando</MissingModsWarningTitle>
+  <MissingModsWarningText>Alguns mods usados neste jogo salvo não estão disponíveis.</MissingModsWarningText>
+  <EditModListTitle>Mesclagem</EditModListTitle>
+  <EditModListText>Você pode selecionar os mods que deseja manter na lista de jogos salvos e remover os mods carregados no momento. Segure e arraste para selecionar/desmarcar rapidamente.</EditModListText>
+  <LeftMods>Esquerda</LeftMods>
+  <RightMods>Direita</RightMods>
+  <LoadModList>Carregar esta lista</LoadModList>
+  <ModDiffWillBeDisabledTitle>O diff será descarregado</ModDiffWillBeDisabledTitle>
+  <ModDiffWillBeDisabledText>Você removeu o ModDiff da lista de mods ativos. Isso irá desativar esta função. Você quer continuar?</ModDiffWillBeDisabledText>
+  
+  </LanguageData>
