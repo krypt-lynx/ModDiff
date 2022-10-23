@@ -5,8 +5,8 @@
 	<RunningMods>사용 중인 모드:</RunningMods>
 	<IgnoreSelfTitle>자기 자신을 모드 목록 일치 검사에서 무시</IgnoreSelfTitle>
 	<IgnoreSelfHint>별 일 있겠어요?</IgnoreSelfHint>
-	<SteamSameAsLocal>Treat Steam and local mods as matching</SteamSameAsLocal>
-	<Use_1_4_Style>Use RimWorld 1.4 style</Use_1_4_Style>
+	<SteamSameAsLocal>창작마당 모드와 로컬 모드를 동일하게 취급</SteamSameAsLocal>
+	<Use_1_4_Style>림월드 1.4버전 스타일 사용</Use_1_4_Style>
 	<KeepSelfLoaded>모드 변경 후 자기 자신을 불러오기</KeepSelfLoaded>
 	<AlternativePalette>다른 색상</AlternativePalette>
 
