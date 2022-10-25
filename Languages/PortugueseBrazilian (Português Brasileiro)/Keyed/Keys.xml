@@ -34,7 +34,7 @@
   <!-- EN: Right -->
   <RightMods>Direita</RightMods>
   <!-- EN: Load this list -->
-  <LoadModList>Carregar esta lista</LoadModList>
+  <MD_LoadModList>Carregar esta lista</MD_LoadModList>
   
   <!-- EN: ModDiff will be unloaded -->
   <ModDiffWillBeDisabledTitle>O "ModDiff" não será carregado</ModDiffWillBeDisabledTitle>
